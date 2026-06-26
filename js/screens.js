@@ -389,6 +389,7 @@ function StudioLaunchpad({
   const s = D.STUDIOS.find(x => x.key === studioKey) || D.STUDIOS[0];
   const [tab, setTab] = React.useState('create');
   const [flow, setFlow] = React.useState(false);
+  const [briefing, setBriefing] = React.useState(false);
   const [toast, setToast] = React.useState(null);
   const [extra, setExtra] = React.useState([]); // pieces published this session
 
@@ -529,7 +530,7 @@ function StudioLaunchpad({
     }
   }, /*#__PURE__*/React.createElement(Button, {
     accent: s.accent,
-    onClick: () => setFlow(true)
+    onClick: () => setBriefing(true)
   }, "Start creating \u2192")), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 14,
@@ -626,7 +627,10 @@ function StudioLaunchpad({
     modality: s.key
   }), /*#__PURE__*/React.createElement(StatusBadge, {
     status: i === 0 ? 'published' : i === 1 ? 'scheduled' : 'draft'
-  })))))), flow && window.StudioFlow && React.createElement(window.StudioFlow, {
+  })))))), briefing && window.ClaraBriefing && React.createElement(window.ClaraBriefing, {
+    studioKey: studioKey,
+    onReady: function() { setBriefing(false); setFlow(true); }
+  }), flow && window.StudioFlow && React.createElement(window.StudioFlow, {
     studio: s,
     intelDone: intelDone,
     onExit: () => setFlow(false),

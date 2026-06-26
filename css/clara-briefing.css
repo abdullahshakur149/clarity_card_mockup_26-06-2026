@@ -1,0 +1,133 @@
+/* Clara Mission Briefing — animations and layout */
+@keyframes cb-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes cb-card-in {
+  from { opacity: 0; transform: translateY(60px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes cb-avatar-pulse {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.03); }
+}
+@keyframes cb-ring-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes cb-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+@keyframes cb-exit-card {
+  to { opacity: 0; transform: translateY(-20px); }
+}
+@keyframes cb-exit-backdrop {
+  to { opacity: 0; }
+}
+
+/* Backdrop — full screen dim */
+.cb-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(11, 15, 14, 0.72);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 16px 48px;
+  animation: cb-backdrop-in 200ms ease forwards;
+}
+.cb-backdrop.cb-exiting {
+  animation: cb-exit-backdrop 220ms ease forwards;
+}
+.cb-backdrop.cb-exiting .cb-card {
+  animation: cb-exit-card 220ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Slide-up card */
+.cb-card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--clr-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--clr-border);
+  padding: 36px 32px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  animation: cb-card-in 380ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Avatar wrapper — idle pulse */
+.cb-avatar-wrap {
+  animation: cb-avatar-pulse 2.4s ease-in-out infinite;
+}
+
+/* Glow ring on avatar SVG */
+.cb-avatar-svg .cb-ring {
+  transform-origin: 48px 48px;
+  animation: cb-ring-spin 4s linear infinite;
+}
+
+/* Dialogue text */
+.cb-dialogue {
+  font-size: 17px;
+  line-height: 1.6;
+  text-align: center;
+  color: var(--clr-text);
+  min-height: 56px;
+  font-family: var(--font-body);
+}
+
+/* Blinking typewriter cursor */
+.cb-cursor {
+  display: inline-block;
+  margin-left: 1px;
+  color: var(--clr-primary);
+  animation: cb-cursor-blink 0.8s step-end infinite;
+}
+
+/* Button row */
+.cb-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.cb-btn-primary {
+  width: 100%;
+  padding: 14px 0;
+  border: none;
+  border-radius: var(--radius-md);
+  color: #0b0f0e;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: opacity 150ms ease;
+  letter-spacing: 0.01em;
+}
+.cb-btn-primary:hover { opacity: 0.88; }
+
+.cb-btn-skip {
+  background: none;
+  border: none;
+  color: var(--clr-muted);
+  font-size: 12px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  transition: color 120ms ease;
+}
+.cb-btn-skip:hover { color: var(--clr-text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cb-avatar-wrap,
+  .cb-avatar-svg .cb-ring,
+  .cb-cursor { animation: none !important; }
+  .cb-backdrop, .cb-card { animation: none !important; }
+}
