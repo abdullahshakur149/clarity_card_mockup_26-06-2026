@@ -161,16 +161,16 @@
 }
 
 .cc-bubble {
-  max-width: 210px;
+  max-width: 260px;
   background: var(--clr-card);
   border: 1px solid var(--clr-border-strong);
-  border-radius: 14px 14px 4px 14px;
-  padding: 11px 15px;
-  font-size: 13px;
-  line-height: 1.55;
+  border-radius: 16px 16px 4px 16px;
+  padding: 13px 17px;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--clr-text);
   font-family: var(--font-body);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   animation: cc-bubble-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   pointer-events: auto;
 }
@@ -179,18 +179,25 @@
 }
 
 .cc-avatar-wrap {
-  width: 56px;
-  height: 56px;
+  width: 76px;
+  height: 76px;
   flex-shrink: 0;
   animation: cc-bob 3.2s ease-in-out infinite;
   pointer-events: auto;
   cursor: default;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
 }
 
 .cc-avatar-svg .cc-ring {
-  transform-origin: 28px 28px;
+  transform-origin: 38px 38px;
   animation: cc-ring-spin 5s linear infinite;
+}
+
+/* Micro celebration particles */
+@keyframes cc-particle {
+  0%   { transform: translate(0, 0);                            opacity: 1;   }
+  60%  { opacity: 1; }
+  100% { transform: translate(var(--cc-dx), var(--cc-dy));     opacity: 0;   }
 }
 
 @media (prefers-reduced-motion: reduce) {
