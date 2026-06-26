@@ -1,0 +1,41 @@
+/* Clarity — Typography tokens
+   Display: Cormorant Garamond (serif, elegant editorial headings)
+   Body / UI: DM Sans
+   Mono / data: DM Mono (counts, durations, KPI numbers, codes) */
+
+:root {
+  /* ---- Families ---- */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* ---- Display scale (Cormorant) ---- */
+  --type-display-xl: 700 44px/1.05 var(--font-display);   /* hero / home title */
+  --type-display-lg: 700 34px/1.0 var(--font-display);    /* big KPI value */
+  --type-display-md: 600 30px/1.1 var(--font-display);    /* screen title / hero h2 */
+  --type-display-sm: 600 24px/1.15 var(--font-display);   /* card heading */
+  --type-display-xs: 600 20px/1.2 var(--font-display);    /* type-card name */
+
+  /* ---- Body scale (DM Sans) ---- */
+  --type-body-lg: 400 15px/1.6 var(--font-body);          /* lead paragraph */
+  --type-body: 400 13px/1.5 var(--font-body);             /* default body */
+  --type-body-sm: 400 12px/1.5 var(--font-body);          /* secondary / captions */
+  --type-strong: 600 13px/1.4 var(--font-body);           /* emphasis */
+
+  /* ---- Label (uppercase tracked) ---- */
+  --type-label: 600 11px/1.2 var(--font-body);
+  --type-label-xs: 600 10px/1.2 var(--font-body);
+  --label-tracking: 0.08em;
+  --label-tracking-wide: 0.14em;
+
+  /* ---- Mono ---- */
+  --type-mono: 500 11px/1.3 var(--font-mono);
+  --type-mono-lg: 500 20px/1.1 var(--font-mono);          /* stat numbers */
+
+  /* ---- Weights ---- */
+  --fw-light: 300;       /* @kind font */
+  --fw-regular: 400;     /* @kind font */
+  --fw-medium: 500;      /* @kind font */
+  --fw-semibold: 600;    /* @kind font */
+  --fw-bold: 700;        /* @kind font */
+}
