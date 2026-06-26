@@ -150,13 +150,12 @@
 }
 
 .cc-widget {
+  /* position (left/top) set by JS; bottom/right overridden inline */
   position: fixed;
-  bottom: 28px;
-  right: 28px;
   z-index: 8500;
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 12px;
   pointer-events: none;
 }
 
@@ -179,17 +178,31 @@
 }
 
 .cc-avatar-wrap {
-  width: 76px;
-  height: 76px;
+  width: 100px;
+  height: 100px;
   flex-shrink: 0;
   animation: cc-bob 3.2s ease-in-out infinite;
   pointer-events: auto;
-  cursor: default;
-  filter: drop-shadow(0 6px 18px rgba(0, 0, 0, 0.45));
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.5));
+  transition: filter 150ms ease, transform 150ms ease;
+}
+.cc-avatar-wrap:hover {
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.6));
+  transform: scale(1.04);
+}
+.cc-avatar-wrap.cc-dragging {
+  cursor: grabbing;
+  animation: none;           /* pause bob while dragging */
+  filter: drop-shadow(0 14px 36px rgba(0, 0, 0, 0.65));
+  transform: scale(1.08);
+  transition: none;
 }
 
 .cc-avatar-svg .cc-ring {
-  transform-origin: 38px 38px;
+  transform-origin: 50px 50px;
   animation: cc-ring-spin 5s linear infinite;
 }
 

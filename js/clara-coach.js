@@ -1,7 +1,7 @@
-/* clara-coach.js — persistent corner companion during studio flow (Approach B) */
+/* clara-coach.js — persistent draggable corner companion during studio flow */
 (function () {
 
-  /* ── Step-contextual hints (keyed by SFHead h2 title) ─────────────── */
+  /* ── Step-contextual hints ─────────────────────────────────────────── */
   var STEP_HINTS = {
     video: {
       'Format & platform':  "Pick where your audience lives first — format follows platform.",
@@ -46,7 +46,6 @@
     "That's the energy right there.",
     "Instinct over algorithm — respect."
   ];
-
   var CHIP_PICKS = [
     "Great tone. Added to the mix.",
     "That vibe fits perfectly.",
@@ -55,7 +54,6 @@
     "Nice combination building here.",
     "The Artisan Loyalist will feel that."
   ];
-
   var DROPDOWN_PICKS = [
     "Dialled in.",
     "Noted. Good call.",
@@ -63,14 +61,11 @@
     "Adjusted. Nice.",
     "Clara approves."
   ];
-
   var TOGGLE_PICKS = [
     "Got it — adjusted.",
     "Switched. Noted.",
     "Done. Keeping it tight."
   ];
-
-  /* When user overrides an AI-recommended card */
   var OVERRIDE_LINES = [
     "Heads up — the AI pick scored higher for The Artisan Loyalist. But your call.",
     "Clara's recommendation was tuned to your persona. Worth a second look?",
@@ -79,43 +74,56 @@
     "Overriding the AI pick. Bold. Just flag it in review if results differ."
   ];
 
-  /* Celebration particle colours */
   var CONFETTI_COLORS = ['#ffc24b', '#ff6f4d', '#2bd4bb', '#34d39e', '#a78bfa', '#56b6e8'];
 
-  function pickRandom(arr) {
-    return arr[Math.floor(Math.random() * arr.length)];
+  function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  /* ── Position helpers ──────────────────────────────────────────────── */
+  var POS_KEY = 'clarity_coach_pos';
+
+  function loadPos() {
+    try { var s = localStorage.getItem(POS_KEY); if (s) return JSON.parse(s); } catch (e) {}
+    return null;
+  }
+  function savePos(p) {
+    try { localStorage.setItem(POS_KEY, JSON.stringify(p)); } catch (e) {}
+  }
+  function defaultPos() {
+    return { x: window.innerWidth - 132, y: window.innerHeight - 148 };
+  }
+  function clampPos(p) {
+    var W = window.innerWidth, H = window.innerHeight;
+    return { x: Math.max(8, Math.min(W - 108, p.x)), y: Math.max(8, Math.min(H - 108, p.y)) };
   }
 
-  /* ── Micro celebration — particle burst at click position ──────────── */
+  /* ── Micro celebration particles ───────────────────────────────────── */
   function celebrate(x, y) {
     var host = document.createElement('div');
     host.style.cssText = 'position:fixed;left:0;top:0;width:0;height:0;pointer-events:none;z-index:9998;overflow:visible;';
     document.body.appendChild(host);
-    var count = 12;
+    var count = 14;
     for (var i = 0; i < count; i++) {
       var angle = (Math.PI * 2 * i / count) - Math.PI / 2;
-      var dist = 32 + Math.random() * 26;
+      var dist = 36 + Math.random() * 30;
       var dx = Math.cos(angle) * dist;
-      var dy = Math.sin(angle) * dist - 14;
-      var size = 5 + Math.random() * 5;
+      var dy = Math.sin(angle) * dist - 16;
+      var size = 6 + Math.random() * 6;
       var color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
-      var isRound = Math.random() > 0.4;
       var p = document.createElement('div');
       p.style.cssText = [
         'position:absolute',
         'left:' + x + 'px', 'top:' + y + 'px',
         'width:' + size + 'px', 'height:' + size + 'px',
-        'border-radius:' + (isRound ? '50%' : '2px'),
+        'border-radius:' + (Math.random() > 0.4 ? '50%' : '3px'),
         'background:' + color,
-        'animation:cc-particle 0.7s cubic-bezier(.2,.6,.35,1) ' + (i * 0.018) + 's forwards',
+        'animation:cc-particle 0.75s cubic-bezier(.2,.6,.35,1) ' + (i * 0.018) + 's forwards',
         '--cc-dx:' + dx + 'px', '--cc-dy:' + dy + 'px'
       ].join(';');
       host.appendChild(p);
     }
-    setTimeout(function () { if (host.parentNode) host.parentNode.removeChild(host); }, 900);
+    setTimeout(function () { if (host.parentNode) host.parentNode.removeChild(host); }, 1000);
   }
 
-  /* ── Detect if clicking a card that overrides an AI recommendation ── */
   function isAIOverride(cardEl) {
     var parent = cardEl.parentElement;
     if (!parent) return false;
@@ -124,50 +132,63 @@
     });
   }
 
-  /* ── Small Clara SVG (now 76 × 76) ────────────────────────────────── */
+  /* ── Clara avatar SVG (100 × 100) ─────────────────────────────────── */
   function ClaraAvatarSmall(props) {
     var accent = props.accent;
     return React.createElement('svg', {
-      width: 76, height: 76, viewBox: '0 0 76 76',
+      width: 100, height: 100, viewBox: '0 0 100 100',
       className: 'cc-avatar-svg', 'aria-hidden': 'true'
     },
       React.createElement('circle', {
-        cx: 38, cy: 38, r: 34, fill: 'none',
-        stroke: accent, strokeWidth: 1.4, strokeDasharray: '8 5',
+        cx: 50, cy: 50, r: 46, fill: 'none',
+        stroke: accent, strokeWidth: 1.6, strokeDasharray: '10 6',
         className: 'cc-ring'
       }),
       React.createElement('circle', {
-        cx: 38, cy: 38, r: 26,
+        cx: 50, cy: 50, r: 35,
         fill: 'color-mix(in srgb, ' + accent + ' 14%, var(--clr-card-2))',
-        stroke: accent, strokeWidth: 1
+        stroke: accent, strokeWidth: 1.2
       }),
-      React.createElement('circle', { cx: 30, cy: 35, r: 3, fill: accent }),
-      React.createElement('circle', { cx: 46, cy: 35, r: 3, fill: accent }),
+      React.createElement('circle', { cx: 39, cy: 47, r: 4, fill: accent }),
+      React.createElement('circle', { cx: 61, cy: 47, r: 4, fill: accent }),
       React.createElement('path', {
-        d: 'M 30 45 Q 38 52 46 45',
-        fill: 'none', stroke: accent, strokeWidth: 1.8, strokeLinecap: 'round'
+        d: 'M 39 60 Q 50 70 61 60',
+        fill: 'none', stroke: accent, strokeWidth: 2.2, strokeLinecap: 'round'
       })
     );
   }
 
-  /* ── ClaraCoach component ──────────────────────────────────────────── */
+  /* ── ClaraCoach ────────────────────────────────────────────────────── */
   function ClaraCoach(props) {
     var studioKey = props.studioKey;
     var accent    = props.accent || 'var(--clr-primary)';
 
-    var _hintS      = React.useState('');
-    var hint        = _hintS[0]; var setHint = _hintS[1];
+    /* Position state */
+    var _posS     = React.useState(function () { return loadPos() || defaultPos(); });
+    var pos       = _posS[0]; var setPos = _posS[1];
 
-    var _visS       = React.useState(false);
-    var bubbleVis   = _visS[0]; var setBubbleVis = _visS[1];
+    /* Drag refs (no re-render on drag move) */
+    var isDragging  = React.useRef(false);
+    var dragOffset  = React.useRef({ x: 0, y: 0 });
+    var currentPos  = React.useRef(pos);
+    currentPos.current = pos;
 
-    var _hidingS    = React.useState(false);
-    var hiding      = _hidingS[0]; var setHiding = _hidingS[1];
+    var _draggingS  = React.useState(false); /* only for cursor CSS */
+    var dragging    = _draggingS[0]; var setDragging = _draggingS[1];
 
-    var hideTimer   = React.useRef(null);
-    var cooldown    = React.useRef(false); /* debounce rapid clicks */
+    /* Hint state */
+    var _hintS    = React.useState('');
+    var hint      = _hintS[0]; var setHint = _hintS[1];
 
-    /* Show a hint in the bubble, auto-hide after `duration` ms */
+    var _visS     = React.useState(false);
+    var bubbleVis = _visS[0]; var setBubbleVis = _visS[1];
+
+    var _hidingS  = React.useState(false);
+    var hiding    = _hidingS[0]; var setHiding = _hidingS[1];
+
+    var hideTimer = React.useRef(null);
+    var cooldown  = React.useRef(false);
+
     function showHint(text, duration) {
       if (hideTimer.current) clearTimeout(hideTimer.current);
       setHiding(false);
@@ -180,16 +201,41 @@
       }, ms);
     }
 
+    /* ── Drag handlers ── */
+    function startDrag(clientX, clientY) {
+      isDragging.current = true;
+      setDragging(true);
+      dragOffset.current = {
+        x: clientX - currentPos.current.x,
+        y: clientY - currentPos.current.y
+      };
+    }
+    function moveDrag(clientX, clientY) {
+      if (!isDragging.current) return;
+      var newPos = clampPos({
+        x: clientX - dragOffset.current.x,
+        y: clientY - dragOffset.current.y
+      });
+      currentPos.current = newPos;
+      setPos(newPos);
+    }
+    function endDrag() {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      setDragging(false);
+      savePos(currentPos.current);
+    }
+
+    /* ── Effects ── */
     React.useEffect(function () {
-      var modHints    = STEP_HINTS[studioKey] || {};
+      var modHints = STEP_HINTS[studioKey] || {};
       var lastHeading = '';
 
-      /* Greet on mount */
       var initTimer = setTimeout(function () {
         showHint(modHints['_default'] || "Let's make something great.", 5000);
       }, 500);
 
-      /* ── Step heading watcher ── */
+      /* Step heading watcher */
       var stepObs = new MutationObserver(function () {
         var el = document.querySelector('.sf-step h2');
         if (!el) return;
@@ -201,85 +247,109 @@
       });
       stepObs.observe(document.body, { childList: true, subtree: true });
 
-      /* ── Selection event listeners ── */
-
-      /* CARD picks */
+      /* Selection listeners */
       function onCardClick(e) {
         if (cooldown.current) return;
-        /* Exclude button elements */
         if (e.target.closest('button')) return;
-        /* Exclude the exit/cancel/back/next footer buttons */
         if (e.target.closest('[style*="justify-content: space-between"]')) return;
-
         var card = e.target.closest('div[style*="cursor: pointer"]');
         if (!card) return;
-        /* Must have a visible title child (SFPickCard pattern) */
         if (!card.querySelector('div[style*="fontWeight: 600"], div[style*="font-weight: 600"]')) return;
-
         var override = isAIOverride(card);
-        var line = override ? pickRandom(OVERRIDE_LINES) : pickRandom(CARD_PICKS);
-        showHint(line, 3800);
+        showHint(override ? pickRandom(OVERRIDE_LINES) : pickRandom(CARD_PICKS), 3800);
         if (!override) celebrate(e.clientX, e.clientY);
-
         cooldown.current = true;
         setTimeout(function () { cooldown.current = false; }, 600);
       }
-
-      /* CHIP picks */
       function onChipClick(e) {
         if (cooldown.current) return;
         var chip = e.target.closest('span[style*="cursor: pointer"]');
         if (!chip) return;
-        /* Must look like a pill chip */
-        if (!chip.style.borderRadius && !(chip.getAttribute('style') || '').includes('radius-pill')) return;
+        if (!chip.style.borderRadius) return;
         showHint(pickRandom(CHIP_PICKS), 3200);
         celebrate(e.clientX, e.clientY);
         cooldown.current = true;
         setTimeout(function () { cooldown.current = false; }, 400);
       }
-
-      /* SWITCH / TOGGLE clicks */
       function onToggleClick(e) {
         if (cooldown.current) return;
-        /* SFSwitch is a div with border-radius:11 */
         var sw = e.target.closest('div[style*="border-radius: 11"]');
         if (!sw) return;
         showHint(pickRandom(TOGGLE_PICKS), 2800);
         cooldown.current = true;
         setTimeout(function () { cooldown.current = false; }, 400);
       }
-
-      /* DROPDOWN changes */
       function onSelectChange(e) {
         if (e.target.tagName !== 'SELECT') return;
         showHint(pickRandom(DROPDOWN_PICKS), 2600);
-        celebrate(
-          e.target.getBoundingClientRect().left + e.target.offsetWidth / 2,
-          e.target.getBoundingClientRect().top
-        );
+        var r = e.target.getBoundingClientRect();
+        celebrate(r.left + r.width / 2, r.top);
       }
 
-      document.addEventListener('click', onCardClick, true);
-      document.addEventListener('click', onChipClick, true);
-      document.addEventListener('click', onToggleClick, true);
-      document.addEventListener('change', onSelectChange, true);
+      /* Global drag listeners */
+      function onMouseMove(e) { moveDrag(e.clientX, e.clientY); }
+      function onMouseUp()    { endDrag(); }
+      function onTouchMove(e) {
+        if (!isDragging.current) return;
+        e.preventDefault();
+        moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+      }
+      function onTouchEnd()   { endDrag(); }
+
+      document.addEventListener('click',      onCardClick,   true);
+      document.addEventListener('click',      onChipClick,   true);
+      document.addEventListener('click',      onToggleClick, true);
+      document.addEventListener('change',     onSelectChange, true);
+      document.addEventListener('mousemove',  onMouseMove);
+      document.addEventListener('mouseup',    onMouseUp);
+      document.addEventListener('touchmove',  onTouchMove, { passive: false });
+      document.addEventListener('touchend',   onTouchEnd);
 
       return function () {
         clearTimeout(initTimer);
         if (hideTimer.current) clearTimeout(hideTimer.current);
         stepObs.disconnect();
-        document.removeEventListener('click', onCardClick, true);
-        document.removeEventListener('click', onChipClick, true);
-        document.removeEventListener('click', onToggleClick, true);
-        document.removeEventListener('change', onSelectChange, true);
+        document.removeEventListener('click',      onCardClick,   true);
+        document.removeEventListener('click',      onChipClick,   true);
+        document.removeEventListener('click',      onToggleClick, true);
+        document.removeEventListener('change',     onSelectChange, true);
+        document.removeEventListener('mousemove',  onMouseMove);
+        document.removeEventListener('mouseup',    onMouseUp);
+        document.removeEventListener('touchmove',  onTouchMove);
+        document.removeEventListener('touchend',   onTouchEnd);
       };
     }, [studioKey]);
 
-    return React.createElement('div', { className: 'cc-widget' },
+    /* Bubble appears on the side closer to screen centre */
+    var onRight   = pos.x > window.innerWidth * 0.5;
+    var bubbleRadius = onRight ? '16px 16px 4px 16px' : '16px 16px 16px 4px';
+
+    return React.createElement('div', {
+      className: 'cc-widget',
+      style: {
+        position: 'fixed',
+        left: pos.x + 'px',
+        top:  pos.y + 'px',
+        bottom: 'auto', right: 'auto',
+        flexDirection: onRight ? 'row' : 'row-reverse'
+      }
+    },
+      /* speech bubble */
       bubbleVis && React.createElement('div', {
-        className: 'cc-bubble' + (hiding ? ' cc-hiding' : '')
+        className: 'cc-bubble' + (hiding ? ' cc-hiding' : ''),
+        style: { borderRadius: bubbleRadius }
       }, hint),
-      React.createElement('div', { className: 'cc-avatar-wrap' },
+      /* avatar — drag handle */
+      React.createElement('div', {
+        className: 'cc-avatar-wrap' + (dragging ? ' cc-dragging' : ''),
+        onMouseDown: function (e) {
+          e.preventDefault();
+          startDrag(e.clientX, e.clientY);
+        },
+        onTouchStart: function (e) {
+          startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      },
         React.createElement(ClaraAvatarSmall, { accent: accent })
       )
     );
