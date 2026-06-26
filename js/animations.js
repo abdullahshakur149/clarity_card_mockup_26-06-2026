@@ -87,7 +87,7 @@
         });
     }
 
-    // Animate current content OUT when a sidebar nav item is clicked
+    // Animate current content out when a sidebar nav item is clicked
     document.addEventListener('click', function (e) {
       var sb = document.querySelector('[style*="width: 240px"]');
       if (!sb) return;
