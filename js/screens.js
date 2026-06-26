@@ -635,6 +635,9 @@ function StudioLaunchpad({
     intelDone: intelDone,
     onExit: () => setFlow(false),
     onPublish: publish
+  }), flow && window.ClaraCoach && React.createElement(window.ClaraCoach, {
+    studioKey: studioKey,
+    accent: s.accent
   }), toast && /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'fixed',

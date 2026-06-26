@@ -131,3 +131,70 @@
   .cb-cursor { animation: none !important; }
   .cb-backdrop, .cb-card { animation: none !important; }
 }
+
+/* ── ClaraCoach — persistent corner widget (Approach B) ─────────────── */
+@keyframes cc-bubble-in {
+  from { opacity: 0; transform: translateX(10px) scale(0.95); }
+  to   { opacity: 1; transform: translateX(0)    scale(1); }
+}
+@keyframes cc-bubble-out {
+  from { opacity: 1; transform: translateX(0)    scale(1); }
+  to   { opacity: 0; transform: translateX(10px) scale(0.95); }
+}
+@keyframes cc-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+@keyframes cc-ring-spin {
+  to { transform: rotate(360deg); }
+}
+
+.cc-widget {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 8500;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.cc-bubble {
+  max-width: 210px;
+  background: var(--clr-card);
+  border: 1px solid var(--clr-border-strong);
+  border-radius: 14px 14px 4px 14px;
+  padding: 11px 15px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--clr-text);
+  font-family: var(--font-body);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  animation: cc-bubble-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  pointer-events: auto;
+}
+.cc-bubble.cc-hiding {
+  animation: cc-bubble-out 220ms ease forwards;
+}
+
+.cc-avatar-wrap {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  animation: cc-bob 3.2s ease-in-out infinite;
+  pointer-events: auto;
+  cursor: default;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+.cc-avatar-svg .cc-ring {
+  transform-origin: 28px 28px;
+  animation: cc-ring-spin 5s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc-avatar-wrap,
+  .cc-avatar-svg .cc-ring { animation: none !important; }
+  .cc-bubble, .cc-bubble.cc-hiding { animation: none !important; }
+}
