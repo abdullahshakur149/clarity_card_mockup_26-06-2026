@@ -540,6 +540,7 @@ function ClarityApp() {
   const [nudge, setNudge] = React.useState(null); // { clicked, prereq } recommendation
   const [acknowledged, setAcknowledged] = React.useState({}); // pillar ids the user chose to enter early
   const [view, setView] = React.useState('engine'); // engine | studio | campaigns | campaign-detail
+  const [directorSeen, setDirectorSeen] = React.useState(() => window.ariaDirectorSeen ? window.ariaDirectorSeen() : false);
   const [studioKey, setStudioKey] = React.useState('text');
   const [campaignId, setCampaignId] = React.useState('c1');
   const [campFlow, setCampFlow] = React.useState(false);
@@ -608,7 +609,15 @@ function ClarityApp() {
   const claraPct = Math.round((congrats ? congrats.earned : earned) / SData.CLARA_GOAL * 100);
   let main;
   if (active === 'content') {
-    if (view === 'studio') main = /*#__PURE__*/React.createElement(StudioLaunchpad, {
+    const strategyDone = !!(completed.intelligence && completed.audience && completed.tasks);
+    if (strategyDone && !directorSeen && window.DirectorsCall) {
+      main = /*#__PURE__*/React.createElement(window.DirectorsCall, {
+        earned: earned,
+        goal: SData.CLARA_GOAL,
+        strategyCards: SData.ENGINE_STRATEGY.cards,
+        onStart: () => { setDirectorSeen(true); setView('engine'); }
+      });
+    } else if (view === 'studio') main = /*#__PURE__*/React.createElement(StudioLaunchpad, {
       studioKey: studioKey,
       intelDone: !!completed.intelligence,
       onBack: () => setView('engine')

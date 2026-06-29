@@ -483,7 +483,118 @@
     );
   }
 
-  window.AriaBriefing = AriaBriefing;
-  window.AriaWidget   = AriaWidget;
+  /* ═══════════════════════════════════════════════════════════════════
+     DIRECTOR'S CALL — one-time cinematic moment on first Content Engine entry
+     after all three strategy pillars (Intelligence / Audience / Tasks) are done.
+     Props: { earned, goal, strategyCards, onStart }
+  ═══════════════════════════════════════════════════════════════════ */
+  var DC_LINE = "Strategy locked and loaded. You know exactly who you’re talking to, why they care, and what you need to say. Time to make something they won’t forget.";
+  var DC_LS   = 'clarity_director_seen';
+
+  function DirectorsCall(props) {
+    var earned         = props.earned || 0;
+    var goal           = props.goal   || 650;
+    var strategyCards  = props.strategyCards || [];
+    var onStart        = props.onStart;
+
+    var _tS = React.useState('');    var typed    = _tS[0];    var setTyped    = _tS[1];
+    var _dS = React.useState(false); var typeDone = _dS[0];   var setTypeDone = _dS[1];
+    var _eS = React.useState(false); var exiting  = _eS[0];   var setExiting  = _eS[1];
+    var _xS = React.useState('celebrating'); var expr = _xS[0]; var setExpr = _xS[1];
+
+    function dismiss() {
+      try { localStorage.setItem(DC_LS, '1'); } catch(e) {}
+      setExiting(true);
+      setTimeout(onStart, 300);
+    }
+
+    React.useEffect(function () {
+      /* settle from celebrating → excited → idle */
+      var t1 = setTimeout(function(){ setExpr('excited'); }, 1600);
+      var t2 = setTimeout(function(){ setExpr('idle'); },    3200);
+
+      /* typewriter */
+      var i = 0;
+      var iv = setInterval(function () {
+        i++;
+        setTyped(DC_LINE.slice(0, i));
+        if (i >= DC_LINE.length) { clearInterval(iv); setTypeDone(true); }
+      }, 18);
+
+      return function () { clearInterval(iv); clearTimeout(t1); clearTimeout(t2); };
+    }, []);
+
+    var pct = Math.min(100, Math.round(earned / goal * 100));
+
+    return React.createElement('div', {
+      className: 'aria-backdrop aria-dc' + (exiting ? ' aria-exiting' : '')
+    },
+      React.createElement('div', { className: 'aria-dc-row' },
+        /* Character — bigger for this cinematic moment */
+        React.createElement('div', { className: 'aria-' + expr },
+          React.createElement(AriaCharacter, { accent: 'var(--clr-primary)', size: 148 })
+        ),
+        /* Briefing card */
+        React.createElement('div', { className: 'aria-dc-card' },
+          React.createElement('div', { className: 'aria-dc-eyebrow' }, "Director’s Call"),
+          React.createElement('h2', { className: 'aria-dc-title' }, "Strategy locked.", React.createElement('br', null), "Time to create."),
+
+          /* Strategy proof-points */
+          React.createElement('div', { className: 'aria-dc-proof' },
+            strategyCards.map(function(c, idx) {
+              return React.createElement('div', { className: 'aria-dc-proof-row', key: idx },
+                React.createElement('div', { className: 'aria-dc-proof-icon' },
+                  /* inline SVG check mark — no Icon dependency */
+                  React.createElement('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'var(--clr-primary)', strokeWidth: 2.5, strokeLinecap: 'round', strokeLinejoin: 'round' },
+                    React.createElement('polyline', { points: '20 6 9 17 4 12' })
+                  )
+                ),
+                React.createElement('div', { className: 'aria-dc-proof-text' },
+                  React.createElement('span', { className: 'aria-dc-proof-label' }, c.label, ': '),
+                  React.createElement('span', { className: 'aria-dc-proof-val' }, c.title)
+                )
+              );
+            })
+          ),
+
+          /* Aria's typewriter line */
+          React.createElement('div', { className: 'aria-dc-line' },
+            React.createElement('span', { className: 'aria-dc-line-name' }, 'Aria'),
+            React.createElement('div', { className: 'aria-dc-line-text' },
+              typed,
+              !typeDone && React.createElement('span', { className: 'aria-cursor' }, '|')
+            )
+          ),
+
+          /* Points progress strip */
+          React.createElement('div', { className: 'aria-dc-pts' },
+            React.createElement('div', { className: 'aria-dc-pts-row' },
+              React.createElement('span', null, 'Progress to free Aria access'),
+              React.createElement('span', { className: 'aria-dc-pts-num' }, earned, ' / ', goal, ' pts')
+            ),
+            React.createElement('div', { className: 'aria-dc-bar' },
+              React.createElement('div', { className: 'aria-dc-bar-fill', style: { width: pct + '%' } })
+            )
+          ),
+
+          React.createElement('button', {
+            className: 'aria-btn-primary',
+            style: { background: 'var(--clr-primary)', marginTop: 20 },
+            onClick: dismiss
+          }, "Create first piece →")
+        )
+      )
+    );
+  }
+
+  /* Check localStorage so the call never fires twice */
+  function directorSeen() {
+    try { return !!localStorage.getItem(DC_LS); } catch(e) { return false; }
+  }
+
+  window.AriaBriefing    = AriaBriefing;
+  window.AriaWidget      = AriaWidget;
+  window.DirectorsCall   = DirectorsCall;
+  window.ariaDirectorSeen = directorSeen;
 
 })();
