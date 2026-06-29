@@ -16,7 +16,6 @@ const {
   ChannelChip,
   Toggle,
   SidebarItem,
-  SegmentedTabs,
   Dialog,
   ProgressMeter,
   WizardSteps,
@@ -259,125 +258,22 @@ function ContentEngineScreen({
     }
   }, "Start \u2192"))))), /*#__PURE__*/React.createElement("div", {
     style: {
+      marginTop: 36,
       display: 'flex',
       alignItems: 'center',
-      gap: 14,
-      margin: '40px 0 20px'
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      flex: 1,
-      height: 1,
-      background: 'var(--clr-border)'
-    }
-  }), /*#__PURE__*/React.createElement("span", {
-    style: {
-      font: 'var(--type-label)',
-      textTransform: 'uppercase',
-      letterSpacing: 'var(--label-tracking-wide)',
+      justifyContent: 'center',
+      gap: 8,
+      fontSize: 13,
       color: 'var(--clr-muted)'
     }
-  }, "Or plan a coordinated push"), /*#__PURE__*/React.createElement("span", {
+  }, "Planning a multi-piece push?\u00a0", /*#__PURE__*/React.createElement("span", {
     style: {
-      flex: 1,
-      height: 1,
-      background: 'var(--clr-border)'
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(2,1fr)',
-      gap: 14
-    }
-  }, /*#__PURE__*/React.createElement(Card, {
-    interactive: true,
-    accent: "var(--clr-series)",
-    onClick: () => onCampaign('series'),
-    style: {
-      display: 'flex',
-      gap: 16
-    },
-    padding: 20,
-    radius: "var(--radius-lg)"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 46,
-      height: 46,
-      borderRadius: 12,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'var(--clr-primary-dim)',
-      flexShrink: 0,
-      color: 'var(--clr-series)'
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "Layers",
-    size: 22
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      font: 'var(--type-display-xs)',
-      color: 'var(--clr-text)'
-    }
-  }, "Series"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      color: 'var(--clr-muted)',
-      marginTop: 5,
-      lineHeight: 1.5
-    }
-  }, "One idea, told across a coordinated set of posts \u2014 Maker scaffolds every piece in your voice."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: 'var(--clr-primary-hover)',
-      marginTop: 10,
-      fontWeight: 600
-    }
-  }, "Build a series \u2192"))), /*#__PURE__*/React.createElement(Card, {
-    interactive: true,
-    accent: "var(--clr-campaign)",
-    onClick: () => onCampaign('campaign'),
-    style: {
-      display: 'flex',
-      gap: 16
-    },
-    padding: 20,
-    radius: "var(--radius-lg)"
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 46,
-      height: 46,
-      borderRadius: 12,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'rgba(181,132,240,0.16)',
-      flexShrink: 0,
-      color: 'var(--clr-campaign)'
-    }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: "Megaphone",
-    size: 22
-  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      font: 'var(--type-display-xs)',
-      color: 'var(--clr-text)'
-    }
-  }, "Campaign"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12.5,
-      color: 'var(--clr-muted)',
-      marginTop: 5,
-      lineHeight: 1.5
-    }
-  }, "A goal over a time window, wrapping several series and tracked to a KPI."), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
       color: 'var(--clr-campaign)',
-      marginTop: 10,
-      fontWeight: 600
-    }
-  }, "Start a campaign \u2192")))));
+      fontWeight: 600,
+      cursor: 'pointer'
+    },
+    onClick: () => onCampaign('campaign')
+  }, "Go to Campaigns \u2192")));
 }
 
 /* ---------- Studio launchpad (Create | My Library) ---------- */
@@ -420,17 +316,7 @@ function StudioLaunchpad({
       cursor: 'pointer'
     },
     onClick: onBack
-  }, "\u2039 Content Engine"), /*#__PURE__*/React.createElement(SegmentedTabs, {
-    value: tab,
-    onChange: setTab,
-    tabs: [{
-      id: 'create',
-      label: 'Create'
-    }, {
-      id: 'library',
-      label: 'My Library'
-    }]
-  })), tab === 'create' ? /*#__PURE__*/React.createElement(Card, {
+  }, "\u2039 Content Engine")), tab === 'create' ? /*#__PURE__*/React.createElement(Card, {
     style: {
       maxWidth: 540,
       margin: '24px auto',
