@@ -1,0 +1,74 @@
+/* Clarity — Color tokens  (v2 — "Jade & Ember")
+   Dark-first creative-content OS. A confident TEAL/JADE primary signals growth and
+   performance (the content→campaign→analytics loop), warmed by an EMBER coral accent
+   reserved for energy, rewards and gamification. Built on a deep, faintly teal-cool
+   ink so the surface feels premium rather than the previous indigo "rainbow." Color
+   is reserved for meaning — modality, status, progress, reward. Token NAMES are
+   unchanged from v1; only values changed, so the whole system re-themes at once. */
+
+:root {
+  /* ---- Base surfaces (deep teal-cool ink) ---- */
+  --clr-bg: #0b0f0e;          /* app canvas */
+  --clr-card: #121817;        /* primary surface / sidebar */
+  --clr-card-2: #192120;      /* nested surface / inputs */
+  --clr-card-hover: #20302c;  /* row / card hover */
+  --clr-border: #273230;      /* hairline borders */
+  --clr-border-strong: #38483f;/* emphasized borders, dividers on hover */
+
+  /* ---- Text ---- */
+  --clr-text: #edf2f0;        /* primary text */
+  --clr-muted: #8a9794;       /* secondary / labels */
+  --clr-faint: #5c6663;       /* tertiary / disabled */
+
+  /* ---- Primary (jade / teal) ---- */
+  --clr-primary: #15b8a0;
+  --clr-primary-hover: #2bd4bb;
+  --clr-primary-dim: rgba(21, 184, 160, 0.15);
+  --clr-primary-border: rgba(21, 184, 160, 0.32);
+
+  /* ---- Ember accent (energy · rewards · gamification) ---- */
+  --clr-ember: #ff6f4d;
+  --clr-ember-hover: #ff8568;
+  --clr-ember-dim: rgba(255, 111, 77, 0.14);
+  --clr-reward: #ffc24b;      /* gold — points & celebration */
+  --clr-reward-dim: rgba(255, 194, 75, 0.16);
+
+  /* ---- Semantic ---- */
+  --clr-accent: #34d39e;      /* success / on-track (jade-green) */
+  --clr-warning: #f5a623;     /* attention / behind pace (amber) */
+  --clr-danger: #f2685f;      /* error / low fit (coral-red) */
+
+  --clr-accent-dim: rgba(52, 211, 158, 0.13);
+  --clr-warning-dim: rgba(245, 166, 35, 0.13);
+  --clr-danger-dim: rgba(242, 104, 95, 0.13);
+  --clr-muted-dim: rgba(138, 151, 148, 0.12);
+
+  /* ---- Modality identity (content types) — distinct, harmonized ---- */
+  --clr-text-mod: #2bd4bb;    /* Studio Text — teal */
+  --clr-image-mod: #f5a623;   /* Studio Image — amber */
+  --clr-video-mod: #ff6f4d;   /* Studio Video — ember coral */
+  --clr-audio-mod: #a78bfa;   /* Studio Audio — violet (single cool pop) */
+  --clr-text-mod-dim: rgba(43, 212, 187, 0.14);
+  --clr-image-mod-dim: rgba(245, 166, 35, 0.14);
+  --clr-video-mod-dim: rgba(255, 111, 77, 0.14);
+  --clr-audio-mod-dim: rgba(167, 139, 250, 0.14);
+
+  /* ---- Orchestration layer ---- */
+  --clr-series: #2bd4bb;      /* Series — teal (built from content) */
+  --clr-campaign: #ff8a4c;    /* Campaign — warm orange (the energetic push) */
+
+  /* ---- Pillar accents (gamified shell) ---- */
+  --clr-pillar-intelligence: #2bd4bb;  /* teal */
+  --clr-pillar-audience: #56b6e8;      /* sky */
+  --clr-pillar-tasks: #f5a623;         /* amber */
+  --clr-pillar-content: #15b8a0;       /* jade (primary) */
+  --clr-pillar-campaigns: #ff6f4d;     /* ember coral */
+
+  /* ---- Semantic aliases ---- */
+  --surface-app: var(--clr-bg);
+  --surface-card: var(--clr-card);
+  --surface-inset: var(--clr-card-2);
+  --text-body: var(--clr-text);
+  --text-subtle: var(--clr-muted);
+  --border-hairline: var(--clr-border);
+}

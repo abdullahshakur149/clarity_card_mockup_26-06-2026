@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clarity — Gamified Shell</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- First-visit loader (hidden immediately by animations.js if returning visitor) -->
+<div id="clarity-loader">
+  <div class="cl-glow"></div>
+  <div class="cl-sig-wrap">
+    <span class="cl-sig">Clarity</span>
+    <div class="cl-pen"></div>
+    <div class="cl-underline"></div>
+  </div>
+  <div class="cl-tag">AI Powerhouse for Marketing Teams</div>
+  <div class="cl-dots"><span></span><span></span><span></span></div>
+</div>
+
+<div id="root"></div>
+
+<!-- third-party libraries (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.544.0/dist/umd/lucide.js"></script>
+
+<!-- Clarity animations (loader + GSAP transitions) -->
+<script src="js/animations.js"></script>
+
+<!-- Clarity design-system component library -->
+<script src="js/clarity-ui.js"></script>
+<script>
+  /* Fallback Icon shim — no-op once the component library provides ClarityDesignSystem.Icon. */
+  (function () {
+    var NS = window.ClarityDesignSystem_29c088 = window.ClarityDesignSystem_29c088 || {};
+    if (NS.Icon) return;
+    NS.Icon = function Icon(props) {
+      props = props || {};
+      var L = window.lucide;
+      var node = L && (L.icons ? L.icons[props.name] : L[props.name]);
+      if (!node) return null;
+      var R = window.React;
+      var children = node.map(function (e, i) { return R.createElement(e[0], Object.assign({ key: i }, e[1] || {})); });
+      return R.createElement('svg', {
+        width: props.size || 18, height: props.size || 18, viewBox: '0 0 24 24', fill: 'none',
+        stroke: props.color || 'currentColor', strokeWidth: props.strokeWidth || 2,
+        strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+        style: Object.assign({ display: 'block', flexShrink: 0 }, props.style),
+      }, children);
+    };
+  })();
+</script>
+
+<!-- Clarity app modules (plain JS — no build step) -->
+<script src="js/data.js"></script>
+<script src="js/clara-briefing.js"></script>
+<script src="js/clara-coach.js"></script>
+<script src="js/screens.js"></script>
+<script src="js/studioflow.js"></script>
+<script src="js/campaign.js"></script>
+<script src="js/shell.js"></script>
+<script>
+  (function mount() {
+    if (!window.ClarityApp) { setTimeout(mount, 40); return; }
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(window.ClarityApp));
+  })();
+</script>
+</body>
+</html>

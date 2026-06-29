@@ -1,0 +1,5 @@
+/* Clarity — Webfonts
+   All three families are served from Google Fonts. If you need self-hosted
+   binaries, replace this @import with local @font-face rules. */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
