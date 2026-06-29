@@ -627,7 +627,7 @@ function StudioLaunchpad({
     modality: s.key
   }), /*#__PURE__*/React.createElement(StatusBadge, {
     status: i === 0 ? 'published' : i === 1 ? 'scheduled' : 'draft'
-  })))))), briefing && window.ClaraBriefing && React.createElement(window.ClaraBriefing, {
+  })))))), briefing && window.AriaBriefing && React.createElement(window.AriaBriefing, {
     studioKey: studioKey,
     onReady: function() { setBriefing(false); setFlow(true); }
   }), flow && window.StudioFlow && React.createElement(window.StudioFlow, {
@@ -635,7 +635,7 @@ function StudioLaunchpad({
     intelDone: intelDone,
     onExit: () => setFlow(false),
     onPublish: publish
-  }), flow && window.ClaraCoach && React.createElement(window.ClaraCoach, {
+  }), flow && window.AriaWidget && React.createElement(window.AriaWidget, {
     studioKey: studioKey,
     accent: s.accent
   }), toast && /*#__PURE__*/React.createElement("div", {
