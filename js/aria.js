@@ -20,64 +20,72 @@
   /* ── Step-contextual hints (keyed by SFHead h2 title) ───────────── */
   var STEP_HINTS = {
     video: {
-      'Format & platform':  "Pick where your audience lives — format follows platform.",
-      'Presenter & script': "Your presenter is your brand's face. Choose with intention.",
-      'Voiceover':          "The right voice makes people lean in. Trust your gut.",
-      'Generate':           "Three options incoming. Trust the fit scores.",
-      'Variations preview': "Pick the angle that feels most like your brand.",
-      'Preview & edit':     "Almost there. Tweak until it feels exactly right.",
-      '_default':           "You're in the zone. Keep building."
+      'Where does this live?':  "Platform first — everything else follows from where your audience actually watches.",
+      'Script & presenter':     "The script is the skeleton. Your presenter is the face. Get the words right first.",
+      'Production':             "Pacing and hook style matter more than most people think. These set the first 3 seconds.",
+      'Choose a variation':     "Fit score = how closely each angle maps to The Artisan Loyalist. Higher isn't always safer — pick what feels true.",
+      '_default':               "Video is the hardest format to get right. You're doing it anyway. Good."
     },
     audio: {
-      'What are we creating?': "Every great audio piece starts with one clear intention.",
-      'Vibe & voice':          "Voice sets the entire mood. Trust your instincts.",
-      'Script':                "Here's a starting point — make it yours.",
-      'Production':            "These details separate good audio from great audio.",
-      'Generate':              "Mixing it all together. This is where it comes alive.",
-      'Preview & edit':        "Listen back with fresh ears.",
-      '_default':              "Sounding good. Keep building."
+      'What kind of audio?':    "Format defines the frame. Podcast listeners and ad listeners are in completely different headspaces.",
+      'Script':                 "Write it the way you'd say it, not the way you'd type it. People hear the difference.",
+      'Production':             "Voice carries 38% of emotional impact. Pacing carries most of the rest.",
+      'Choose a variation':     "Three angles, all built from your brief. The fit score tells you which one The Artisan Loyalist is most likely to finish.",
+      '_default':               "Audio builds trust faster than any other format. Keep going."
     },
     text: {
-      'Write the brief': "One idea, sharpened until it cuts. That's all a great post needs.",
-      'Generate':        "Generating 3 variations tuned to The Artisan Loyalist...",
-      'Preview & edit':  "Read it out loud — if it flows, it lands.",
-      '_default':        "Sharp copy starts with a clear idea. You've got this."
+      'Write the brief':        "One clear idea beats five clever ones. What's the single thing this post must land?",
+      'Fine-tune the output':   "CTA placement at the end outperforms mid-copy by 2.4x. The default is already set right.",
+      'Choose a variation':     "Scan each angle against your persona — The Artisan Loyalist responds to craft and process, not hype.",
+      '_default':               "Great copy sounds like one person talking to one person. Keep that in mind."
     },
     image: {
-      'Describe the visual': "The best images stop the scroll before anyone reads a word.",
-      'Generate':            "Rendering visuals matched to your brand kit...",
-      'Preview & edit':      "Does it look like your brand at a glance? That's the test.",
-      '_default':            "Make it unmistakable."
+      'Where does this live?':  "Aspect ratio isn't just a format choice — it determines how much of the screen you own.",
+      'Describe the visual':    "Scroll-stopping images have one clear subject. If there are three things to look at, there are zero things to look at.",
+      'Set the specs':          "Brand kit lock means your colours and logo are enforced automatically. Leave it on unless you have a reason not to.",
+      'Choose a variation':     "Trust the persona fit score. The Artisan Loyalist responds to texture, warmth and craft — not stock-photo perfection.",
+      '_default':               "Your brand kit is loaded. Everything generated here stays on-brand automatically."
     }
   };
 
   /* ── Reaction pools ─────────────────────────────────────────────── */
   var CARD_PICKS = [
-    "Bold choice. Let's run with it.",
-    "That's going to resonate.",
-    "Smart move. Locked in.",
-    "Your audience will love this.",
-    "Strong pick.",
-    "That's the energy right there.",
-    "Instinct over algorithm — respect.",
-    "Sharp. Moving forward."
+    "Good call. The Artisan Loyalist responds well to that.",
+    "That platform has the highest dwell time for your persona.",
+    "Solid. That angle has strong historical engagement for this segment.",
+    "That's a deliberate choice. Your audience will notice.",
+    "Matches the brief well. Let's build on it.",
+    "That format outperforms for craft-focused audiences.",
+    "Strong direction. Keep going.",
+    "Your instinct and the data agree on this one."
   ];
   var CHIP_PICKS = [
-    "Great tone. Added to the mix.",
-    "That vibe fits perfectly.",
-    "Sharp instinct.",
-    "Layering it in.",
-    "The Artisan Loyalist will feel that.",
-    "Nice combination building here."
+    "That tone is consistent with what your persona responds to.",
+    "Good combination — warmth and authority work together here.",
+    "The Artisan Loyalist values authenticity over polish. That fits.",
+    "That vibe will land well in the feed.",
+    "Layering that in. It sharpens the brief.",
+    "Intentional tone choice. That's what makes copy feel human."
   ];
-  var DROPDOWN_PICKS = ["Dialled in.", "Noted. Good call.", "Set. Moving forward.", "Adjusted.", "Got it."];
-  var TOGGLE_PICKS   = ["Got it — adjusted.", "Switched. Noted.", "Done. Keeping it tight."];
+  var DROPDOWN_PICKS = [
+    "Updated. That changes how the output is framed.",
+    "Set. I'll apply that across all three variations.",
+    "Got it. That detail matters more than it looks.",
+    "Adjusted. Small setting, real impact on the final output.",
+    "Locked in. Moving forward with that."
+  ];
+  var TOGGLE_PICKS = [
+    "Switched. I'll factor that into the generation.",
+    "Turned that off. Cleaner output as a result.",
+    "That toggle changes the structure of what gets built.",
+    "On. That setting improves consistency across variations."
+  ];
   var OVERRIDE_LINES = [
-    "Heads up — the AI pick scored higher for The Artisan Loyalist. But your call.",
-    "My recommendation was tuned to your persona. Worth a second look?",
-    "Interesting override. You know your audience — go for it.",
-    "That badge was there for a reason. Still yours to decide.",
-    "Overriding the recommendation. Bold. Flag it in review if results differ."
+    "That's not what I recommended — but you know your audience better than I do.",
+    "My pick was based on persona fit. Yours might be based on something I can't see. Fair enough.",
+    "The recommended option scored higher for The Artisan Loyalist. Still yours to override.",
+    "Different instinct from mine. If the results are off, come back to the recommendation first.",
+    "Overriding a data-backed suggestion. Respect — just make sure you have a reason."
   ];
 
   var CONFETTI = ['#ffc24b','#ff6f4d','#2bd4bb','#34d39e','#a78bfa','#56b6e8'];
@@ -92,6 +100,50 @@
   function clampPos(p) {
     return { x: Math.max(8, Math.min(window.innerWidth  - 120, p.x)),
              y: Math.max(8, Math.min(window.innerHeight - 170, p.y)) };
+  }
+
+  /* ── Inject XP float keyframe once ─────────────────────────────── */
+  (function injectXpStyle() {
+    if (document.getElementById('aria-xp-style')) return;
+    var s = document.createElement('style');
+    s.id = 'aria-xp-style';
+    s.textContent = '@keyframes aria-xp-float { 0%{opacity:1;transform:translateY(0) scale(1)} 25%{opacity:1;transform:translateY(-12px) scale(1.25)} 100%{opacity:0;transform:translateY(-52px) scale(0.85)} }';
+    document.head.appendChild(s);
+  })();
+
+  /* ── Floating +XP label ─────────────────────────────────────────── */
+  var XP_VALUES = ['+5 XP', '+8 XP', '+10 XP', '+5 XP', '+7 XP'];
+  function showXp(x, y) {
+    var el = document.createElement('div');
+    el.textContent = XP_VALUES[Math.floor(Math.random() * XP_VALUES.length)];
+    el.style.cssText = [
+      'position:fixed', 'left:'+(x-16)+'px', 'top:'+(y-24)+'px',
+      'font-size:13px', 'font-weight:800', 'letter-spacing:.02em',
+      'color:var(--clr-primary)', 'pointer-events:none', 'z-index:9999',
+      'animation:aria-xp-float 1.1s cubic-bezier(.2,.7,.3,1) forwards',
+      'font-family:var(--font-body)', 'text-shadow:0 1px 8px rgba(0,0,0,.3)'
+    ].join(';');
+    document.body.appendChild(el);
+    setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 1200);
+  }
+
+  /* ── Streak detection ───────────────────────────────────────────── */
+  var pickTimestamps = [];
+  var STREAK_WINDOW  = 9000;
+  var STREAK_LINES   = [
+    "You're on a roll! Three in a row — The Artisan Loyalist is going to feel this.",
+    "On a streak. Strategy is locking in fast.",
+    "Three picks, zero hesitation. That's clarity.",
+    "You clearly know your audience. Keep going."
+  ];
+  function trackStreak(showHint, rand, flashExpr) {
+    var now = Date.now();
+    pickTimestamps = pickTimestamps.filter(function(t){ return now - t < STREAK_WINDOW; });
+    pickTimestamps.push(now);
+    if (pickTimestamps.length === 3) {
+      pickTimestamps = [];
+      setTimeout(function(){ showHint(rand(STREAK_LINES), 4500, 'celebrating'); }, 500);
+    }
   }
 
   /* ── Micro celebration particles ───────────────────────────────── */
@@ -373,6 +425,12 @@
 
     /* ── Effects ── */
     React.useEffect(function () {
+      /* Expose imperative hint API so other modules can trigger Aria */
+      window.ariaShowHint = function(text, ms, expr) { showHint(text, ms, expr); };
+      return function() { window.ariaShowHint = null; };
+    }, []);
+
+    React.useEffect(function () {
       var mh = STEP_HINTS[studioKey] || {};
       var lastH = '';
 
@@ -396,25 +454,36 @@
         if (e.target.closest('[style*="justify-content: space-between"]')) return;
         var card = e.target.closest('div[style*="cursor: pointer"]');
         if (!card) return;
-        if (!card.querySelector('div[style*="fontWeight: 600"], div[style*="font-weight: 600"]')) return;
+        /* must contain some text — avoids triggering on icon-only or drag-handle divs */
+        if (!card.textContent || card.textContent.trim().length < 2) return;
         var ov = isOverride(card);
         showHint(ov ? rand(OVERRIDE_LINES) : rand(CARD_PICKS), 3800, ov ? 'thinking' : 'excited');
-        if (!ov) celebrate(e.clientX, e.clientY);
+        celebrate(e.clientX, e.clientY);
+        showXp(e.clientX, e.clientY - 30);
+        trackStreak(showHint, rand, flashExpr);
+        e._ariaCardFired = true;
         cooldown.current = true; setTimeout(function(){ cooldown.current = false; }, 600);
       }
       function onChip(e) {
         if (cooldown.current) return;
-        var chip = e.target.closest('span[style*="cursor: pointer"]');
-        if (!chip || !chip.style.borderRadius) return;
+        /* catch both span chips and div channel chips (used in CampLayer) */
+        var chip = e.target.closest('span[style*="cursor: pointer"], div[style*="border-radius: 20"]');
+        if (!chip) return;
+        if (!chip.textContent || chip.textContent.trim().length < 2) return;
+        /* avoid re-firing if onCard already handled this click */
+        if (chip.tagName === 'DIV' && e._ariaCardFired) return;
         showHint(rand(CHIP_PICKS), 3200, 'excited');
         celebrate(e.clientX, e.clientY);
+        showXp(e.clientX, e.clientY - 20);
+        trackStreak(showHint, rand, flashExpr);
         cooldown.current = true; setTimeout(function(){ cooldown.current = false; }, 400);
       }
       function onToggle(e) {
         if (cooldown.current) return;
         var sw = e.target.closest('div[style*="border-radius: 11"]');
         if (!sw) return;
-        showHint(rand(TOGGLE_PICKS), 2800, 'idle');
+        showHint(rand(TOGGLE_PICKS), 2800, 'excited');
+        celebrate(e.clientX, e.clientY);
         cooldown.current = true; setTimeout(function(){ cooldown.current = false; }, 400);
       }
       function onSelect(e) {
