@@ -1,0 +1,26 @@
+/* Clarity — base resets + primitives shared by cards and kits.
+   Tokens are defined in colors/typography/spacing; this file applies them. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  color: var(--text-body);
+  background: var(--surface-app);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Utility: uppercase tracked label */
+.clr-label {
+  font: var(--type-label);
+  text-transform: uppercase;
+  letter-spacing: var(--label-tracking);
+  color: var(--text-subtle);
+}
+
+/* Utility: mono data */
+.clr-mono { font-family: var(--font-mono); }
+
+/* Utility: serif display */
+.clr-display { font-family: var(--font-display); }

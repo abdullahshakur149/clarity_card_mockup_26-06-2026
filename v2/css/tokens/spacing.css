@@ -1,0 +1,47 @@
+/* Clarity — Spacing, radius, shadow, layout tokens */
+
+:root {
+  /* ---- Spacing scale (4px base) ---- */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 14px;
+  --space-7: 16px;
+  --space-8: 18px;
+  --space-9: 20px;
+  --space-10: 24px;
+  --space-12: 28px;
+  --space-14: 34px;
+  --space-16: 44px;
+
+  /* ---- Radius ---- */
+  --radius-xs: 4px;       /* tags, small chips */
+  --radius-sm: 6px;       /* buttons, inputs */
+  --radius: 10px;         /* default card */
+  --radius-md: 12px;      /* nested cards */
+  --radius-lg: 14px;      /* feature cards */
+  --radius-xl: 16px;      /* modals, hero */
+  --radius-pill: 20px;    /* pills, chips */
+  --radius-full: 50%;     /* avatars, dots */
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);            /* raised tab/segment */
+  --shadow-card: 0 14px 32px rgba(0, 0, 0, 0.16);        /* card hover lift */
+  --shadow-modal: 0 24px 60px rgba(0, 0, 0, 0.5);        /* dialog */
+  --shadow-toast: 0 8px 32px rgba(0, 0, 0, 0.4);         /* toast */
+  --shadow-focus: 0 0 0 3px var(--clr-primary-dim);      /* focus ring / active dot */
+
+  /* ---- Layout ---- */
+  --sidebar-w: 220px;
+  --content-max: 1040px;
+  --reading-max: 740px;
+
+  /* ---- Motion ---- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);   /* @kind other */
+  --dur-fast: 0.15s;   /* @kind other */
+  --dur: 0.2s;         /* @kind other */
+  --dur-slow: 0.35s;   /* @kind other */
+  --lift: translateY(-2px);   /* @kind other */   /* standard card hover lift */
+}
