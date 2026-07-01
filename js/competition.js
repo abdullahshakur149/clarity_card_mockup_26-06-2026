@@ -13,6 +13,7 @@
   function kit() { return window.ClarityScanKit || {}; }
 
   var XP = 60;
+  var CATEGORY = { name: 'My Competition', eyebrow: 'Competitor report', accent: 'var(--clr-cat-competitor)', accentDim: 'var(--clr-cat-competitor-dim)' };
   var FOCI = [
     { id: 'rivals',      label: 'Top competitors' },
     { id: 'positioning', label: 'Positioning' },
@@ -121,37 +122,69 @@
     var R = kit().REGIONS || [];
     return regions && regions.length ? regions.map(function (id) { return (R.filter(function (r) { return r.id === id; })[0] || {}).label; }).join(', ') : 'Global';
   }
+  /* personalized, plain-voice verdict per sector (the 5-second read) */
+  var VERDICT = {
+    food: 'Based on the scan, the competition is fragmented and beatable — no single bakery owns the category locally, and the strongest player wins on walk-in habit, not story. Your gap is clear: behind-the-craft content plus an owned-audience pre-order loop. Almost nobody nearby does it well, so that is where you take share.',
+    retail: 'Based on the scan, two or three DTC brands dominate search while everyone else fights over the niche. Going head-on is a losing game; your gap is sharp niche positioning plus an email/SMS owned-audience loop and limited drops — the retention play the leaders under-use locally.',
+    creative: 'Based on the scan, the market is barbelled — cheap marketplaces at one end, premium agencies at the other — and the mid-market is wide open. Neither side owns “clear outcome + speed + point of view.” Productised packages with visible case studies are your wedge.',
+    tech: 'Based on the scan, two incumbents own the head term and most of the paid share. You will not win on feature parity; your gap is a sharply-scoped wedge, best-in-class onboarding and “alternative to” content that peels off the users they are too broad to serve well.',
+    trades: 'Based on the scan, the field is fragmented and reputation decides it — and most rivals are slow to respond and weak on reviews. Your gap is a fast-response, review-led local presence with before/after proof. It is the cheapest edge here and almost nobody runs it properly.',
+    other: 'Based on the scan, no competitor owns a clear position — the field is muddled and share is unstable. That is the opening: a consistent, well-told position plus an owned audience differentiates fast in a market where everyone else blends together.'
+  };
   function buildReport(profile, regions) {
     var s = SECTORS[profile.sector] || SECTORS.other;
+    var top = s.competitors.filter(function (c) { return c.threat === 'High'; })[0] || s.competitors[0] || {};
+    var takeaways = ['Top threat — ' + top.name + ' holds ' + top.sov + '% share of voice: ' + top.note]
+      .concat(s.findings.map(function (f) { return f.q + ' — ' + f.text; }));
     return { xp: XP, category: s.category, region: regionNames(regions), dq: s.dq, date: fmtDate(),
       reportType: 'competitive', sources: EVIDENCE.length, depth: 'Standard (3 queries)',
+      verdict: VERDICT[profile.sector] || VERDICT.other, takeaways: takeaways,
       summary: s.summary, competitors: s.competitors, findings: s.findings, evidence: EVIDENCE };
   }
 
   /* ── Real downloadable competitor report ── */
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
-  function reportHtml(r) {
-    var comp = '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;font-size:12px;margin:6px 0"><tr style="background:#f1f5f9"><td><b>Competitor</b></td><td><b>Threat</b></td><td><b>Share of voice</b></td><td><b>Pricing</b></td><td><b>Positioning</b></td></tr>'
-      + r.competitors.map(function (c) { return '<tr><td>' + esc(c.name) + '</td><td>' + esc(c.threat) + '</td><td>' + c.sov + '%</td><td>' + esc(c.price) + '</td><td>' + esc(c.positioning) + '</td></tr>'; }).join('') + '</table>';
-    var find = r.findings.map(function (x) { return '<h3 style="margin:12px 0 2px">' + esc(x.q) + ' <span style="font-weight:normal;color:#777;font-size:11px">(' + esc(x.conf) + ' confidence)</span></h3><p style="margin:2px 0">' + esc(x.text) + '</p><p style="margin:2px 0;color:#888;font-size:11px">Sources: ' + esc(x.refs.join(', ')) + '</p>'; }).join('');
-    var ev = r.evidence.map(function (x) { return '<p style="margin:3px 0;font-size:11px">' + esc(x.id) + ' — <b>' + esc(x.domain) + '</b> — ' + esc(x.topic) + ' — <a href="' + esc(x.url) + '">' + esc(x.url) + '</a></p>'; }).join('');
+  function reportHtml(r, theme) {
+    var dark = theme !== 'light';
+    var P = dark
+      ? { bg: '#0f1614', ink: '#edf2f0', soft: '#93a09c', faint: '#6b7773', hair: '#263230', panel: '#161f1c', accent: '#f2685f' }
+      : { bg: '#f6f4ee', ink: '#1d2321', soft: '#5f6a66', faint: '#8b938f', hair: '#e4dfd4', panel: '#efece3', accent: '#d64a41' };
+    function threatColor(t) { t = String(t).toLowerCase(); if (dark) return t === 'high' ? '#ff8568' : t === 'medium' ? '#f5a623' : '#34d39e'; return t === 'high' ? '#b23a30' : t === 'medium' ? '#a9720f' : '#12876f'; }
+    function conf(c) { c = String(c).toLowerCase(); if (dark) return c === 'high' ? '#34d39e' : c === 'medium' ? '#f5a623' : '#ff8568'; return c === 'high' ? '#12876f' : c === 'medium' ? '#a9720f' : '#a8532c'; }
+    var serif = "Georgia,'Times New Roman',serif"; var sans = "'Segoe UI','Helvetica Neue',Arial,sans-serif";
+    function sec(l) { return '<p style="margin:26px 0 12px;padding-top:15px;border-top:1px solid ' + P.hair + ';font-family:' + sans + ';font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">' + l + '</p>'; }
+    var takes = r.takeaways.map(function (t) { return '<p style="margin:0 0 10px;font-family:' + sans + ';font-size:14px;line-height:1.5;color:' + P.ink + '"><span style="color:' + P.accent + '">&#9670;</span>&nbsp;&nbsp;' + esc(t) + '</p>'; }).join('');
+    var comps = r.competitors.map(function (c) {
+      return '<div style="border:1px solid ' + P.hair + ';border-radius:10px;padding:12px 14px;margin:0 0 10px;background:' + P.panel + '">'
+        + '<p style="margin:0 0 5px;font-family:' + sans + ';font-size:14px;color:' + P.ink + '"><b>' + esc(c.name) + '</b> &nbsp;<span style="font-size:11px;color:' + threatColor(c.threat) + '">' + esc(c.threat) + ' threat</span> &nbsp;<span style="font-size:11px;color:' + P.soft + '">' + esc(c.price) + ' &middot; ' + c.sov + '% share of voice</span></p>'
+        + '<p style="margin:0 0 3px;font-family:' + sans + ';font-size:13px;color:' + P.ink + '">' + esc(c.positioning) + '</p>'
+        + '<p style="margin:0;font-family:' + sans + ';font-size:12.5px;color:' + P.soft + '">' + esc(c.note) + '</p></div>';
+    }).join('');
+    var find = r.findings.map(function (x) { return '<p style="margin:14px 0 3px;font-family:' + sans + ';font-size:14px;font-weight:600;color:' + P.ink + '">' + esc(x.q) + ' &nbsp;<span style="font-weight:normal;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:' + conf(x.conf) + '">' + esc(x.conf) + ' confidence</span></p><p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '">' + esc(x.text) + '</p>'; }).join('');
+    var srcs = r.evidence.map(function (x) { return '<p style="margin:0 0 6px;font-family:' + sans + ';font-size:12px;color:' + P.soft + '"><span style="font-family:Consolas,monospace;color:' + P.accent + '">' + esc(x.domain) + '</span> &mdash; ' + esc(x.topic) + ' &mdash; <a href="' + esc(x.url) + '" style="color:' + P.accent + '">' + esc(x.url) + '</a></p>'; }).join('');
     return '<html xmlns:o="urn:schemas-microsoft-office:office" xmlns:w="urn:schemas-microsoft-office:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
-      + '<head><meta charset="utf-8"><title>Competitor scan — ' + esc(r.category) + '</title></head>'
-      + '<body style="font-family:Calibri,Arial,sans-serif;color:#111;max-width:720px">'
-      + '<h1 style="margin-bottom:2px">Competitor scan — ' + esc(r.category) + '</h1>'
-      + '<p style="color:#666;margin:0">Generated by the Clarity agent platform · ' + esc(r.date) + '</p>'
-      + '<p style="color:#666;margin:2px 0 10px">Report type: ' + esc(r.reportType) + ' · Overall DQ: ' + r.dq + '% · Territory: ' + esc(r.region) + '</p>'
-      + '<h2>Executive summary</h2><p>' + esc(r.summary) + '</p>'
-      + '<h2>Threat board</h2>' + comp
-      + '<h2>Key findings</h2>' + find
-      + '<h2>Evidence appendix</h2>' + ev + '</body></html>';
+      + '<head><meta charset="utf-8"><title>Competitor report — ' + esc(r.category) + '</title></head>'
+      + '<body style="margin:0;background:' + P.bg + '">'
+      + '<div style="background:' + P.bg + ';color:' + P.ink + ';padding:42px 48px;max-width:700px;font-family:' + sans + '">'
+      + '<p style="margin:0 0 8px;font-family:Consolas,monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:' + P.accent + '">Competitor report</p>'
+      + '<h1 style="margin:0 0 8px;font-family:' + serif + ';font-size:34px;font-weight:normal;color:' + P.ink + '">' + esc(r.category) + '</h1>'
+      + '<p style="margin:0;font-family:' + sans + ';font-size:12px;color:' + P.faint + '">' + esc(r.date) + ' &nbsp;&middot;&nbsp; ' + esc(r.region) + ' &nbsp;&middot;&nbsp; ' + r.competitors.length + ' competitors mapped &nbsp;&middot;&nbsp; Prepared by Clarity</p>'
+      + '<div style="height:3px;background:' + P.accent + ';margin:20px 0 24px"></div>'
+      + '<p style="margin:0 0 10px;font-family:Consolas,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">The verdict</p>'
+      + '<p style="margin:0;font-family:' + serif + ';font-size:20px;line-height:1.45;color:' + P.ink + '">' + esc(r.verdict) + '</p>'
+      + sec('What we found') + takes
+      + sec('Threat board') + comps
+      + sec('Key findings') + find
+      + sec('How solid is this?') + '<p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '"><b style="color:' + P.ink + '">Solid read — ' + r.dq + '% data quality.</b> Built from ' + r.evidence.length + ' independent sources across category structure, share of voice and pricing.</p>'
+      + sec('Sources') + srcs
+      + '</div></body></html>';
   }
-  function downloadReport(r) {
+  function downloadReport(r, theme) {
     try {
-      var blob = new Blob(['﻿', reportHtml(r)], { type: 'application/msword' });
+      var blob = new Blob(['﻿', reportHtml(r, theme)], { type: 'application/msword' });
       var url = URL.createObjectURL(blob); var a = document.createElement('a');
-      a.href = url; a.download = 'Competitor_scan_' + slug(r.category) + '.doc';
+      a.href = url; a.download = 'Competitor_report_' + slug(r.category) + '.doc';
       document.body.appendChild(a); a.click();
       setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(url); }, 200);
     } catch (err) {}
@@ -167,6 +200,7 @@
     var fo = React.useState(['rivals', 'positioning', 'sov']); var foci = fo[0], setFoci = fo[1];
     var rs = React.useState(props.result || null); var result = rs[0], setResult = rs[1];
     var rv = React.useState(0);   var revealed = rv[0], setRevealed = rv[1];
+    var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
     var soldWhat = (profile.desc || 'your product').trim();
     function toggleRegion(id) { setRegions(function (a) { return a.indexOf(id) >= 0 ? a.filter(function (x) { return x !== id; }) : a.concat([id]); }); }
@@ -249,56 +283,62 @@
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
-    /* ── RESULT — threat board + competitor report ── */
+    /* ── RESULT — clean-document competitor report (verdict-first) ── */
     var r = result || buildReport(profile, regions);
-    function metaTag(l, v) { return e('span', { className: 'mm-rtag' }, e('b', null, l), v); }
-    function sec(t) { return e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), t); }
-    var topThreat = (r.competitors.filter(function (c) { return c.threat === 'High'; })[0] || r.competitors[0] || {}).name;
+    function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
       e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Intel Acquired'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
-      e('h1', { className: 'mm-title' }, 'Competitive intel'),
-      capcom('Scout complete. Here is the threat board — who you are up against and where the gaps are.'),
+      capcom('Scout complete — the plain read is up top, the full threat board sits underneath.'),
 
-      e('div', { className: 'mm-rephead' },
-        e('div', { className: 'mm-dq', style: { background: 'conic-gradient(var(--clr-primary-hover) ' + (r.dq * 3.6) + 'deg, var(--clr-border) 0)' } },
-          e('div', { className: 'mm-dq-in' }, e('span', { className: 'mm-dq-num' }, r.dq + '%'), e('span', { className: 'mm-dq-l' }, 'Data quality'))),
-        e('div', { className: 'mm-repmeta' },
-          e('div', { className: 'mm-repmeta-title' }, 'Competitor scan — ' + r.category),
-          e('div', { className: 'mm-repmeta-sub' }, 'Top threat: ' + topThreat + ' · ' + r.competitors.length + ' competitors mapped'),
-          e('div', { className: 'mm-rtags' }, metaTag('Report ', 'competitive'), metaTag('Sources ', r.sources), metaTag('Depth ', 'Standard'), metaTag('Territory ', r.region))),
-        e('button', { className: 'pf-cta mm-cta mm-dl', onClick: function () { downloadReport(r); } }, e(Icon, { name: 'Download', size: 15 }), ' Download report')),
+      e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
+        e('div', { className: 'rc-bar' },
+          e('div', { className: 'rc-bar-cat' }, e('span', { className: 'rc-dot' }), CATEGORY.name),
+          e('div', { className: 'rc-bar-tools' },
+            e('button', { className: 'rc-tool', onClick: toggleTheme, title: 'Toggle reading mode' }, e(Icon, { name: theme === 'light' ? 'Moon' : 'Sun', size: 14 }), theme === 'light' ? 'Night' : 'Day'),
+            e('button', { className: 'rc-tool rc-tool-dl', onClick: function () { downloadReport(r, theme); } }, e(Icon, { name: 'Download', size: 14 }), 'Download'))),
 
-      sec('The gap'), e('p', { className: 'mm-summary-box' }, r.summary),
+        e('div', { className: 'rc-mast' },
+          e('div', { className: 'rc-eyebrow' }, CATEGORY.eyebrow),
+          e('h1', { className: 'rc-h1' }, r.category),
+          e('div', { className: 'rc-mast-meta' }, r.date + '  ·  ' + r.region + '  ·  ' + r.competitors.length + ' competitors mapped')),
+        e('div', { className: 'rc-rule' }),
 
-      sec('Threat board'),
-      e('div', { className: 'co-board' }, r.competitors.map(function (c, i) {
-        return e('div', { key: i, className: 'co-comp' },
-          e('div', { className: 'co-comp-head' },
-            e('span', { className: 'co-name' }, c.name),
-            e('span', { className: 'co-threat ' + c.threat.toLowerCase() }, c.threat + ' threat'),
-            e('span', { className: 'co-price' }, c.price)),
-          e('div', { className: 'co-sov' },
-            e('span', { className: 'co-sov-l' }, 'Share of voice'),
-            e('div', { className: 'co-sov-bar' }, e('i', { style: { width: c.sov + '%' } })),
-            e('span', { className: 'co-sov-p' }, c.sov + '%')),
-          e('div', { className: 'co-pos' }, c.positioning),
-          e('div', { className: 'co-note' }, c.note));
-      })),
+        e('div', { className: 'rc-kicker' }, 'The verdict'),
+        e('p', { className: 'rc-verdict' }, r.verdict),
 
-      sec('Key findings'),
-      e('div', { className: 'mm-findings' }, r.findings.map(function (f, i) {
-        return e('div', { key: i, className: 'mm-finding', style: { animationDelay: (0.06 * i + 0.05) + 's' } },
-          e('div', { className: 'mm-finding-top' }, e('span', { className: 'mm-finding-q' }, f.q), e('span', { className: 'mm-conf ' + f.conf.toLowerCase() }, f.conf + ' confidence')),
-          e('p', { className: 'mm-finding-text' }, f.text),
-          e('div', { className: 'mm-finding-refs' }, 'Sources: ' + f.refs.join(', ')));
-      })),
+        e('div', { className: 'rc-sec' }, 'What we found'),
+        e('ul', { className: 'rc-takeaways' }, r.takeaways.map(function (t, i) {
+          return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
+        })),
 
-      sec('Evidence appendix · ' + r.evidence.length + ' sources'),
-      e('div', { className: 'mm-evidence' }, r.evidence.map(function (ev, i) {
-        return e('a', { key: i, className: 'mm-evrow', href: ev.url, target: '_blank', rel: 'noreferrer' },
-          e('span', { className: 'mm-ev-id' }, ev.id), e('span', { className: 'mm-ev-domain' }, ev.domain), e('span', { className: 'mm-ev-topic' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
-      })),
+        e('div', { className: 'rc-sec' }, 'The detail'),
+        e('div', { className: 'rc-block' },
+          e('div', { className: 'rc-subhead' }, 'Threat board'),
+          r.competitors.map(function (c, i) {
+            return e('div', { key: i, className: 'rc-comp' },
+              e('div', { className: 'rc-comp-head' },
+                e('span', { className: 'rc-comp-name' }, c.name),
+                e('span', { className: 'rc-threat ' + c.threat.toLowerCase() }, c.threat + ' threat'),
+                e('span', { className: 'rc-comp-price' }, c.price)),
+              e('div', { className: 'rc-bar-row' },
+                e('span', { className: 'rc-bar-l' }, 'Share of voice'),
+                e('div', { className: 'rc-bar-track' }, e('i', { style: { width: c.sov + '%' } })),
+                e('span', { className: 'rc-bar-v' }, c.sov + '%')),
+              e('div', { className: 'rc-comp-pos' }, c.positioning),
+              e('div', { className: 'rc-comp-note' }, c.note));
+          })),
+
+        e('div', { className: 'rc-sec' }, 'How solid is this?'),
+        e('div', { className: 'rc-trust' },
+          e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } }, e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
+          e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'), ' Built from ' + r.evidence.length + ' independent sources across category structure, share of voice and pricing.')),
+
+        e('div', { className: 'rc-sec' }, 'Sources'),
+        e('div', { className: 'rc-sources' }, r.evidence.map(function (ev, i) {
+          return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' }, e('span', { className: 'rc-source-d' }, ev.domain), e('span', { className: 'rc-source-t' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
+        }))
+      ),
 
       e('div', { className: 'mm-row' },
         e('button', { className: 'id-back', onClick: function () { setResult(null); setView('scan'); setStep(0); } }, '↻ Re-scan'),

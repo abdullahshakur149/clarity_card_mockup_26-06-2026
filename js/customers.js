@@ -13,6 +13,7 @@
   function Icon(props) { var NS = window.ClarityDesignSystem_29c088 || {}; return NS.Icon ? e(NS.Icon, props) : null; }
 
   var XP = 50;
+  var CATEGORY = { name: 'My Customers', eyebrow: 'Customer report', accent: 'var(--clr-cat-customer)', accentDim: 'var(--clr-cat-customer-dim)' };
   var ARCHETYPES = [
     { id: 'risk',        label: 'Risk-reducer',       tag: 'RISK-REDUCER', icon: 'ShieldCheck', age: 42, fit: 88,
       blurb: 'Wants safety, proof and guarantees before committing.', demo: '40s · settled · reputation over novelty',
@@ -159,6 +160,15 @@
       findings: [{ q: 'What moves them', conf: 'High', refs: ['e_01', 'e_05'], text: 'Belonging, shared values and a genuine story; community drives loyalty.' }, { q: 'Willingness to pay', conf: 'Medium', refs: ['e_02'], text: 'Loyalty lowers price sensitivity; members pay for authenticity over time.' }, { q: 'Best channels', conf: 'High', refs: ['e_05', 'e_03'], text: 'Community groups, events and Instagram; founder/people-led content.' }, { q: 'How to convert', conf: 'High', refs: ['e_01'], text: 'Tell the story, involve the community, reward advocacy and referrals.' }] }
   };
 
+  /* personalized, plain-voice verdict per archetype (the 5-second read) */
+  var VERDICT = {
+    risk: 'Based on the research, your core buyer is {name} — a cautious, proof-led decision-maker. They want to see it works before committing, so lead with reviews, guarantees and a visible track record. Remove the downside and the sale follows; discount-led tactics read as risky and can backfire.',
+    performance: 'Based on the research, your core buyer is {name} — outcome-obsessed and happy to pay for the best result. Win them with proof: specs, benchmarks and head-to-head comparisons. Lifestyle messaging bounces off them; demonstrable performance converts and justifies a premium.',
+    cost: 'Based on the research, your core buyer is {name} — price-led and quick to compare. Loyalty lasts only as long as the deal, so compete on clear, obvious value: bundles, transparent pricing and a little urgency beat straight discounting.',
+    status: 'Based on the research, your core buyer is {name} — buying for identity and to be seen. Sell the look and the belonging: creator-led proof, aesthetics and limited editions drive desire far more than specs or price.',
+    convenience: 'Based on the research, your core buyer is {name} — time-poor and allergic to friction. The easiest option wins, not the cheapest. Make it fast, mobile-first and one-tap and you take the sale before price is even a question.',
+    community: 'Based on the research, your core buyer is {name} — buying into belonging, values and the story. Build the community and tell the story, and an engaged core compounds through referrals and repeat purchases; loyalty lowers their price sensitivity over time.'
+  };
   function buildAudience(profile, name, archId) {
     var p = buildPersona(profile, name, archId);
     var rep = REP[archId] || REP.risk;
@@ -169,39 +179,54 @@
       profile: name + ' is your core ' + ctx.name + ' buyer — ' + p.summary.charAt(0).toLowerCase() + p.summary.slice(1) + ' ' + rep.profileExtra,
       table: rep.table, demographics: rep.demographics, psychographics: rep.psychographics,
       wtp: { band: rep.wtp.band, note: interp(rep.wtp.note, ctx, name) },
+      verdict: interp(VERDICT[archId] || VERDICT.risk, ctx, name),
       recommendation: interp(rep.recommendation, ctx, name),
       findings: rep.findings.map(function (f) { return { q: f.q, conf: f.conf, refs: f.refs, text: interp(f.text, ctx, name) }; }),
       evidence: AUDIENCE_EVIDENCE, sources: AUDIENCE_EVIDENCE.length, depth: 'Standard (3 queries)'
     };
+    p.report.takeaways = p.report.findings.map(function (f) { return f.q + ' — ' + f.text; });
     return p;
   }
 
-  function audienceHtml(p, profile) {
+  function audienceHtml(p, profile, theme) {
     var r = p.report;
-    var demo = r.demographics.map(function (g) { return '<h3 style="margin:12px 0 4px">' + esc(g.label) + '</h3><table border="1" cellspacing="0" cellpadding="5" style="border-collapse:collapse;font-size:12px">' + g.rows.map(function (x) { return '<tr><td>' + esc(x.label) + '</td><td>' + x.pct + '%</td></tr>'; }).join('') + '</table>'; }).join('');
-    var psy = '<ul>' + r.psychographics.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
-    var find = r.findings.map(function (x) { return '<h3 style="margin:12px 0 2px">' + esc(x.q) + ' <span style="font-weight:normal;color:#777;font-size:11px">(' + esc(x.conf) + ' confidence)</span></h3><p style="margin:2px 0">' + esc(x.text) + '</p><p style="margin:2px 0;color:#888;font-size:11px">Sources: ' + esc(x.refs.join(', ')) + '</p>'; }).join('');
-    var ev = r.evidence.map(function (x) { return '<p style="margin:3px 0;font-size:11px">' + esc(x.id) + ' — <b>' + esc(x.domain) + '</b> — ' + esc(x.topic) + ' — <a href="' + esc(x.url) + '">' + esc(x.url) + '</a></p>'; }).join('');
+    var dark = theme !== 'light';
+    var P = dark
+      ? { bg: '#0f1614', ink: '#edf2f0', soft: '#93a09c', faint: '#6b7773', hair: '#263230', accent: '#34d39e' }
+      : { bg: '#f6f4ee', ink: '#1d2321', soft: '#5f6a66', faint: '#8b938f', hair: '#e4dfd4', accent: '#1f9e78' };
+    function conf(c) { c = String(c).toLowerCase(); if (dark) return c === 'high' ? '#34d39e' : c === 'medium' ? '#f5a623' : '#ff8568'; return c === 'high' ? '#12876f' : c === 'medium' ? '#a9720f' : '#a8532c'; }
+    var serif = "Georgia,'Times New Roman',serif"; var sans = "'Segoe UI','Helvetica Neue',Arial,sans-serif";
+    function sec(l) { return '<p style="margin:26px 0 12px;padding-top:15px;border-top:1px solid ' + P.hair + ';font-family:' + sans + ';font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">' + l + '</p>'; }
+    var takes = r.takeaways.map(function (t) { return '<p style="margin:0 0 10px;font-family:' + sans + ';font-size:14px;line-height:1.5;color:' + P.ink + '"><span style="color:' + P.accent + '">&#9670;</span>&nbsp;&nbsp;' + esc(t) + '</p>'; }).join('');
+    var demo = r.demographics.map(function (g) { return '<p style="margin:10px 0 4px;font-family:' + sans + ';font-size:12px;font-weight:600;color:' + P.ink + '">' + esc(g.label) + '</p>' + g.rows.map(function (x) { return '<p style="margin:0 0 3px;font-family:' + sans + ';font-size:13px;color:' + P.soft + '">' + esc(x.label) + ' &mdash; <b style="color:' + P.ink + '">' + x.pct + '%</b></p>'; }).join(''); }).join('');
+    var psy = '<ul style="margin:0;padding-left:18px;color:' + P.soft + ';font-family:' + sans + ';font-size:13px;line-height:1.6">' + r.psychographics.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    var find = r.findings.map(function (x) { return '<p style="margin:14px 0 3px;font-family:' + sans + ';font-size:14px;font-weight:600;color:' + P.ink + '">' + esc(x.q) + ' &nbsp;<span style="font-weight:normal;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:' + conf(x.conf) + '">' + esc(x.conf) + ' confidence</span></p><p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '">' + esc(x.text) + '</p>'; }).join('');
+    var srcs = r.evidence.map(function (x) { return '<p style="margin:0 0 6px;font-family:' + sans + ';font-size:12px;color:' + P.soft + '"><span style="font-family:Consolas,monospace;color:' + P.accent + '">' + esc(x.domain) + '</span> &mdash; ' + esc(x.topic) + ' &mdash; <a href="' + esc(x.url) + '" style="color:' + P.accent + '">' + esc(x.url) + '</a></p>'; }).join('');
     return '<html xmlns:o="urn:schemas-microsoft-office:office" xmlns:w="urn:schemas-microsoft-office:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
-      + '<head><meta charset="utf-8"><title>Audience — ' + esc(p.name) + '</title></head>'
-      + '<body style="font-family:Calibri,Arial,sans-serif;color:#111;max-width:720px">'
-      + '<h1 style="margin-bottom:2px">' + esc(p.name) + ', ' + p.age + ' — ' + esc(p.archetype) + ' — Audience & WTP</h1>'
-      + '<p style="color:#666;margin:0">' + esc(r.subtitle) + '</p>'
-      + '<p style="color:#666;margin:2px 0 10px">Generated by the Clarity agent platform · ' + esc(r.date) + ' · Report type: ' + esc(r.reportType) + ' · Overall DQ: ' + r.dq + '%</p>'
-      + '<h2>Audience Profile</h2><p>' + esc(r.profile) + '</p>'
-      + '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;font-size:12px;margin:6px 0"><tr style="background:#f1f5f9"><td><b>Audience size</b></td><td><b>Primary roles</b></td><td><b>Procurement cadence</b></td></tr><tr><td>' + esc(r.table.size) + '</td><td>' + esc(r.table.roles) + '</td><td>' + esc(r.table.cadence) + '</td></tr></table>'
-      + '<h3>Demographics</h3>' + demo
-      + '<h3>Psychographics</h3>' + psy
-      + '<h2>Executive Summary</h2><p>' + esc(r.recommendation) + '</p><p><b>Willingness to pay:</b> ' + esc(r.wtp.band) + ' — ' + esc(r.wtp.note) + '</p>'
-      + '<h2>Key findings</h2>' + find
-      + '<h2>Evidence appendix</h2>' + ev
-      + '</body></html>';
+      + '<head><meta charset="utf-8"><title>Customer report — ' + esc(p.name) + '</title></head>'
+      + '<body style="margin:0;background:' + P.bg + '">'
+      + '<div style="background:' + P.bg + ';color:' + P.ink + ';padding:42px 48px;max-width:700px;font-family:' + sans + '">'
+      + '<p style="margin:0 0 8px;font-family:Consolas,monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:' + P.accent + '">Customer report</p>'
+      + '<h1 style="margin:0 0 8px;font-family:' + serif + ';font-size:34px;font-weight:normal;color:' + P.ink + '">' + esc(p.name) + ', ' + p.age + '</h1>'
+      + '<p style="margin:0;font-family:' + sans + ';font-size:12px;color:' + P.faint + '">' + esc(p.archetype) + ' &nbsp;&middot;&nbsp; ' + p.fit + '% fit &nbsp;&middot;&nbsp; ' + esc(r.date) + ' &nbsp;&middot;&nbsp; Prepared by Clarity</p>'
+      + '<div style="height:3px;background:' + P.accent + ';margin:20px 0 24px"></div>'
+      + '<p style="margin:0 0 10px;font-family:Consolas,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">The verdict</p>'
+      + '<p style="margin:0;font-family:' + serif + ';font-size:20px;line-height:1.45;color:' + P.ink + '">' + esc(r.verdict) + '</p>'
+      + sec('What we found') + takes
+      + sec('Who they are') + demo
+      + sec('What they’ll pay') + '<p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '"><b style="color:' + P.ink + '">' + esc(r.wtp.band) + '.</b> ' + esc(r.wtp.note) + '</p>'
+      + sec('Where to find them') + '<p style="margin:0;font-family:' + sans + ';font-size:13px;color:' + P.soft + '">' + esc(p.channels.join('  ·  ')) + '</p>'
+      + sec('Mindset') + psy
+      + sec('Key findings') + find
+      + sec('How solid is this?') + '<p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '"><b style="color:' + P.ink + '">Solid read — ' + r.dq + '% data quality.</b> Built from ' + r.evidence.length + ' independent sources across behaviour, willingness-to-pay and channel reach.</p>'
+      + sec('Sources') + srcs
+      + '</div></body></html>';
   }
-  function downloadAudience(p, profile) {
+  function downloadAudience(p, profile, theme) {
     try {
-      var blob = new Blob(['﻿', audienceHtml(p, profile)], { type: 'application/msword' });
+      var blob = new Blob(['﻿', audienceHtml(p, profile, theme)], { type: 'application/msword' });
       var url = URL.createObjectURL(blob); var a = document.createElement('a');
-      a.href = url; a.download = 'Audience_' + slug(p.name) + '.doc';
+      a.href = url; a.download = 'Customer_report_' + slug(p.name) + '.doc';
       document.body.appendChild(a); a.click();
       setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(url); }, 200);
     } catch (err) {}
@@ -220,6 +245,7 @@
     var cur = React.useState(null);    var current = cur[0], setCurrent = cur[1];  // persona being viewed
     var rv = React.useState(0);        var revealed = rv[0], setRevealed = rv[1];
     var sg = React.useState(function () { return genCallsigns(profile); }); var suggestions = sg[0], setSuggestions = sg[1];
+    var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
     function startSketch() { setName(''); setArch(null); setStep(0); setSuggestions(genCallsigns(profile)); setView('sketch'); }
 
@@ -353,56 +379,67 @@
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
-    /* ── RESULT (dossier) ── */
+    /* ── RESULT — clean-document audience report (verdict-first) ── */
     var p = current || sketches[0];
     if (!p) { return shell(e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster')); }
     var r = p.report;
-    function metaTag(l, v) { return e('span', { className: 'mm-rtag' }, e('b', null, l), v); }
-    function sec(t) { return e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), t); }
+    function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster'),
       e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Target Profiled'), e('span', { className: 'mm-acq-xp' }, '+ ', XP, ' XP')),
-      e('h1', { className: 'mm-title' }, 'Customer dossier'),
-      capcom('Dossier complete — and a full audience report to match. Download it or build another.'),
-      DossierCard(p, false),
+      capcom('Dossier complete — the plain read is up top, the full profile sits underneath. Download it or build another.'),
 
-      r && e(React.Fragment, null,
-        e('div', { className: 'mm-rephead', style: { marginTop: 18 } },
-          e('div', { className: 'mm-dq', style: { background: 'conic-gradient(var(--clr-primary-hover) ' + (r.dq * 3.6) + 'deg, var(--clr-border) 0)' } },
-            e('div', { className: 'mm-dq-in' }, e('span', { className: 'mm-dq-num' }, r.dq + '%'), e('span', { className: 'mm-dq-l' }, 'Data quality'))),
-          e('div', { className: 'mm-repmeta' },
-            e('div', { className: 'mm-repmeta-title' }, 'Audience report — ' + p.name),
-            e('div', { className: 'mm-repmeta-sub' }, r.subtitle),
-            e('div', { className: 'mm-rtags' }, metaTag('Report ', r.reportType), metaTag('Sources ', r.sources), metaTag('Depth ', 'Standard'), metaTag('WTP ', r.wtp.band))),
-          e('button', { className: 'pf-cta mm-cta mm-dl', onClick: function () { downloadAudience(p, profile); } }, e(Icon, { name: 'Download', size: 15 }), ' Download report')),
+      r && e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
+        e('div', { className: 'rc-bar' },
+          e('div', { className: 'rc-bar-cat' }, e('span', { className: 'rc-dot' }), CATEGORY.name),
+          e('div', { className: 'rc-bar-tools' },
+            e('button', { className: 'rc-tool', onClick: toggleTheme, title: 'Toggle reading mode' }, e(Icon, { name: theme === 'light' ? 'Moon' : 'Sun', size: 14 }), theme === 'light' ? 'Night' : 'Day'),
+            e('button', { className: 'rc-tool rc-tool-dl', onClick: function () { downloadAudience(p, profile, theme); } }, e(Icon, { name: 'Download', size: 14 }), 'Download'))),
 
-        sec('Recommendation'), e('p', { className: 'mm-summary-box' }, r.recommendation),
-        sec('Audience profile'), e('p', { className: 'cu-profile' }, r.profile),
-        sec('Demographics'),
-        e('div', { className: 'cu-demo' }, r.demographics.map(function (g, gi) {
-          return e('div', { key: gi, className: 'cu-demo-group' },
-            e('div', { className: 'cu-demo-title' }, g.label),
-            g.rows.map(function (row, ri) {
-              return e('div', { key: ri, className: 'cu-demo-row' },
-                e('span', { className: 'cu-demo-l' }, row.label),
-                e('div', { className: 'cu-demo-bar' }, e('i', { style: { width: row.pct + '%' } })),
-                e('span', { className: 'cu-demo-p' }, row.pct + '%'));
-            }));
+        e('div', { className: 'rc-mast' },
+          e('div', { className: 'rc-eyebrow' }, CATEGORY.eyebrow),
+          e('h1', { className: 'rc-h1' }, p.name + ', ' + p.age),
+          e('div', { className: 'rc-mast-meta' }, p.archetype + '  ·  ' + p.fit + '% fit  ·  ' + r.date)),
+        e('div', { className: 'rc-rule' }),
+
+        e('div', { className: 'rc-kicker' }, 'The verdict'),
+        e('p', { className: 'rc-verdict' }, r.verdict),
+
+        e('div', { className: 'rc-sec' }, 'What we found'),
+        e('ul', { className: 'rc-takeaways' }, r.takeaways.map(function (t, i) {
+          return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
         })),
-        e('div', { className: 'cu-twocol' },
-          e('div', null, sec('Psychographics'), e('ul', { className: 'cu-psy' }, r.psychographics.map(function (x, i) { return e('li', { key: i }, x); }))),
-          e('div', null, sec('Willingness to pay'), e('div', { className: 'cu-wtp' }, e('div', { className: 'cu-wtp-band' }, r.wtp.band), e('div', { className: 'cu-wtp-note' }, r.wtp.note)))),
-        sec('Key findings'),
-        e('div', { className: 'mm-findings' }, r.findings.map(function (f, i) {
-          return e('div', { key: i, className: 'mm-finding', style: { animationDelay: (0.06 * i + 0.05) + 's' } },
-            e('div', { className: 'mm-finding-top' }, e('span', { className: 'mm-finding-q' }, f.q), e('span', { className: 'mm-conf ' + f.conf.toLowerCase() }, f.conf + ' confidence')),
-            e('p', { className: 'mm-finding-text' }, f.text),
-            e('div', { className: 'mm-finding-refs' }, 'Sources: ' + f.refs.join(', ')));
-        })),
-        sec('Evidence appendix · ' + r.evidence.length + ' sources'),
-        e('div', { className: 'mm-evidence' }, r.evidence.map(function (ev, i) {
-          return e('a', { key: i, className: 'mm-evrow', href: ev.url, target: '_blank', rel: 'noreferrer' },
-            e('span', { className: 'mm-ev-id' }, ev.id), e('span', { className: 'mm-ev-domain' }, ev.domain), e('span', { className: 'mm-ev-topic' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
+
+        e('div', { className: 'rc-sec' }, 'The detail'),
+        e('div', { className: 'rc-block' },
+          e('div', { className: 'rc-subhead' }, 'What drives them'),
+          e('div', { className: 'rc-bars' }, Object.keys(p.traits).map(function (k) {
+            return e('div', { key: k, className: 'rc-bar-row' }, e('span', { className: 'rc-bar-l' }, k), e('div', { className: 'rc-bar-track' }, e('i', { style: { width: p.traits[k] + '%' } })), e('span', { className: 'rc-bar-v' }, p.traits[k]));
+          }))),
+        e('div', { className: 'rc-block' },
+          e('div', { className: 'rc-subhead' }, 'Who they are'),
+          r.demographics.map(function (g, gi) {
+            return e('div', { key: gi, style: { marginBottom: 12 } },
+              e('div', { className: 'rc-kv-k' }, g.label),
+              e('div', { className: 'rc-bars' }, g.rows.map(function (row, ri) {
+                return e('div', { key: ri, className: 'rc-bar-row' }, e('span', { className: 'rc-bar-l' }, row.label), e('div', { className: 'rc-bar-track' }, e('i', { style: { width: row.pct + '%' } })), e('span', { className: 'rc-bar-v' }, row.pct + '%'));
+              })));
+          })),
+        e('div', { className: 'rc-twocol' },
+          e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'Where to find them'), e('div', { className: 'rc-taglist' }, p.channels.map(function (c, i) { return e('span', { key: i, className: 'rc-tag' }, c); }))),
+          e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'What they care about'), e('div', { className: 'rc-taglist' }, p.cares.map(function (c, i) { return e('span', { key: i, className: 'rc-tag' }, c); })))),
+        e('div', { className: 'rc-twocol' },
+          e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'What they’ll pay'), e('div', { className: 'rc-kv-k' }, r.wtp.band), e('div', { className: 'rc-kv-v' }, r.wtp.note)),
+          e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'Mindset'), e('ul', { className: 'rc-list' }, r.psychographics.map(function (x, i) { return e('li', { key: i }, x); })))),
+
+        e('div', { className: 'rc-sec' }, 'How solid is this?'),
+        e('div', { className: 'rc-trust' },
+          e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } }, e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
+          e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'), ' Built from ' + r.evidence.length + ' independent sources across behaviour, willingness-to-pay and channel reach — the “High confidence” items are the ones to act on first.')),
+
+        e('div', { className: 'rc-sec' }, 'Sources'),
+        e('div', { className: 'rc-sources' }, r.evidence.map(function (ev, i) {
+          return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' }, e('span', { className: 'rc-source-d' }, ev.domain), e('span', { className: 'rc-source-t' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
         }))
       ),
 

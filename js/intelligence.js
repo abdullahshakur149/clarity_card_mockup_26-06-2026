@@ -22,15 +22,12 @@
     { id: 'customers',   icon: 'Users',     title: 'My Customers',   mission: 'Sketch your customers',  cta: 'Sketch',
       desc: 'Build sharp sketches of exactly who you are selling to.' },
     { id: 'competition', icon: 'Crosshair', title: 'Competition',    mission: 'Scout the competition', cta: 'Scout',
-      desc: 'Size up who you are up against — and where the gaps are.' },
-    { id: 'idea',        icon: 'Lightbulb', title: 'Try a New Idea', mission: 'Pressure-test a concept', cta: 'Test',
-      desc: 'Stress-test an idea with your audience before you build it.' }
+      desc: 'Size up who you are up against — and where the gaps are.' }
   ];
   var STATS = [
     { id: 'market',      icon: 'Radar',     label: 'Market scans' },
     { id: 'customers',   icon: 'Users',     label: 'Customer sketches' },
-    { id: 'competition', icon: 'Crosshair', label: 'Competitors' },
-    { id: 'idea',        icon: 'Lightbulb', label: 'Ideas tested' }
+    { id: 'competition', icon: 'Crosshair', label: 'Competitors' }
   ];
 
   /* CAPCOM comms strip with a typewriter line (reuses .capcom styles) */
@@ -72,25 +69,56 @@
     );
   }
 
+  /* Level-up milestone — fires once when all three recon missions are complete */
+  function LevelUpOverlay(props) {
+    return e('div', { className: 'sp-lu', onClick: props.onClose },
+      e('div', { className: 'sp-lu-card', onClick: function (ev) { ev.stopPropagation(); } },
+        e('div', { className: 'sp-lu-glow' }),
+        [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { return e('span', { key: i, className: 'sp-lu-spark s' + i }); }),
+        e('div', { className: 'sp-lu-eyebrow' }, 'Milestone'),
+        e('div', { className: 'sp-lu-badge' }, e(Icon, { name: 'Trophy', size: 32 })),
+        e('div', { className: 'sp-lu-title' }, 'Level up'),
+        e('div', { className: 'sp-lu-sub' }, 'All recon complete, operator. Your ', e('b', null, 'Strategic Plan'), ' is unlocked.'),
+        e('div', { className: 'sp-lu-rank' }, e(Icon, { name: 'Shield', size: 13 }), 'Rank · ', props.rankLabel),
+        e('div', { className: 'sp-lu-actions' },
+          e('button', { className: 'pf-cta', onClick: props.onAssemble }, 'Assemble my plan →'),
+          e('button', { className: 'sp-lu-later', onClick: props.onClose }, 'Later'))));
+  }
+
   function ClarityIntel(props) {
     var profile = props.profile || {};
     var op = (profile.name || '').trim();
     var goal = (profile.goal || '').trim();
 
-    var xs = React.useState(90); var xp = xs[0], setXp = xs[1];       /* seeded from onboarding (40+50) */
-    var ds = React.useState({}); var done = ds[0], setDone = ds[1];   /* completed missions → result */
-    var js = React.useState([]); var jobs = js[0], setJobs = js[1];  /* recent ops feed */
+    var savedIdea = props.idea || {};
+    var xs = React.useState(savedIdea.xp != null ? savedIdea.xp : 90); var xp = xs[0], setXp = xs[1];   /* per-idea */
+    var ds = React.useState(savedIdea.missions || {}); var done = ds[0], setDone = ds[1];   /* completed missions → result */
+    var js = React.useState(savedIdea.jobs || []); var jobs = js[0], setJobs = js[1];  /* recent ops feed */
     var as = React.useState(null); var sel = as[0], setSel = as[1];   /* selected mission */
+    var lu = React.useState(false); var levelUp = lu[0], setLevelUp = lu[1];   /* recon-complete celebration */
+    var reconRef = React.useRef(!!(savedIdea.missions && savedIdea.missions.market && savedIdea.missions.customers && savedIdea.missions.competition));
 
     var rank = rankFor(xp);
     function cnt(id) { return done[id] ? (done[id].count || 1) : 0; }
-    var counts = { market: cnt('market'), customers: cnt('customers'), competition: cnt('competition'), idea: cnt('idea') };
+    var counts = { market: cnt('market'), customers: cnt('customers'), competition: cnt('competition') };
 
     function missionDone(id, title, result) {
       setDone(function (d) { var o = {}; o[id] = result; return Object.assign({}, d, o); });
       setJobs(function (j) { return [{ id: id, title: title }].concat(j); });
       setXp(function (x) { return x + ((result && result.xp) || 0); });
     }
+
+    /* Strategic Plan is locked until all three recon missions are complete */
+    var reconComplete = !!(done.market && done.customers && done.competition);
+    React.useEffect(function () {
+      if (reconComplete && !reconRef.current) setLevelUp(true);
+      reconRef.current = reconComplete;
+    }, [reconComplete]);
+
+    /* persist this idea's mission state up to the router */
+    React.useEffect(function () {
+      if (props.onChange) props.onChange({ missions: done, xp: xp, jobs: jobs });
+    }, [done, xp, jobs]);
 
     /* ── My Market recon mission ── */
     if (sel === 'market' && window.ClarityMarketMission) {
@@ -122,6 +150,15 @@
       });
     }
 
+    /* ── Strategic Plan capstone (six-category synthesis) — gated on recon complete ── */
+    if (sel === 'plan' && (reconComplete || done.plan) && window.ClarityStrategicPlan) {
+      return e(window.ClarityStrategicPlan, {
+        profile: profile, missions: done, result: done.plan || null,
+        onComplete: function (r) { missionDone('plan', 'Strategic Plan', r); },
+        onBack: function () { setSel(null); }
+      });
+    }
+
     /* ── Mission briefing placeholder (until the other recon flows are built) ── */
     if (sel) {
       var m = MISSIONS.filter(function (x) { return x.id === sel; })[0] || {};
@@ -143,6 +180,7 @@
     var greet = (op ? op + ' is on the board. ' : '') + 'Strategy first, operator — run recon and gather intel before we build.';
     return e('div', { className: 'id-root' }, deckBg(), deckTopbar(rank, xp),
       e('div', { className: 'id-main' },
+        props.onExit && e('button', { className: 'id-back', onClick: props.onExit }, '‹ Hub'),
         e('div', { className: 'id-head' },
           e('div', { className: 'id-eyebrow' }, 'Mission Control // Command Deck'),
           e('h1', { className: 'id-title' }, 'Command Deck'),
@@ -194,6 +232,23 @@
           })
         ),
 
+        /* capstone — the synthesis (locked until all three recon missions are done) */
+        e('div', { className: 'id-section-label' }, 'Capstone'),
+        (function () {
+          var unlocked = reconComplete || done.plan;
+          var n = (done.market ? 1 : 0) + (done.customers ? 1 : 0) + (done.competition ? 1 : 0);
+          return e('button', { className: 'id-mission id-capstone' + (unlocked ? '' : ' locked'), onClick: unlocked ? function () { setSel('plan'); } : undefined },
+            e('div', { className: 'id-mission-top' },
+              e('div', { className: 'id-mission-ic' }, e(Icon, { name: unlocked ? 'FileText' : 'Lock', size: 20 })),
+              e('span', { className: 'id-mission-chip' + (done.plan ? ' ok' : unlocked ? ' rec' : '') }, done.plan ? 'Done ✓' : unlocked ? 'Unlocked' : 'Locked · ' + n + '/3')),
+            e('div', { className: 'id-mission-title' }, 'Strategic Plan'),
+            e('div', { className: 'id-mission-sub' }, unlocked ? 'Your one combined report' : 'Complete all three recon missions to unlock'),
+            e('div', { className: 'id-mission-desc' }, unlocked
+              ? 'Feeds Market, Customer and Competitor intel into one colour-coded plan you can read in a minute.'
+              : 'Run My Market, My Customers and My Competition — then synthesise them into a single strategic plan.'),
+            e('div', { className: 'id-mission-cta' }, unlocked ? ((done.plan ? 'Review' : 'Assemble') + ' →') : (n + ' of 3 complete')));
+        })(),
+
         /* recent ops */
         e('div', { className: 'id-section-label' }, 'Recent ops'),
         jobs.length === 0
@@ -206,7 +261,8 @@
                   e('span', { className: 'id-ops-status' }, 'Complete'));
               })
             )
-      )
+      ),
+      levelUp && e(LevelUpOverlay, { rankLabel: rank.label, onAssemble: function () { setLevelUp(false); setSel('plan'); }, onClose: function () { setLevelUp(false); } })
     );
   }
 

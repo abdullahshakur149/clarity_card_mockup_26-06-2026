@@ -58,7 +58,7 @@
 .id-phase.active .id-phase-label { color: var(--clr-text); }
 
 /* intel readouts */
-.id-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+.id-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
 .id-stat { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; }
 .id-stat-top { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); }
 .id-stat-top svg { color: var(--clr-primary-hover); flex-shrink: 0; }

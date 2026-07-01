@@ -35,11 +35,20 @@
     '> COMPILING INTEL DOSSIER…'
   ];
   var XP = 60;
+  /* per-report category identity (signature accent for quick visual scanning) */
+  var CATEGORY = { name: 'My Market', eyebrow: 'Market report', accent: 'var(--clr-cat-market)', accentDim: 'var(--clr-cat-market-dim)' };
 
   /* sector-flavoured report bank (mocked, findings-first, honest DQ) */
   var SECTORS = {
     food: { category: 'Artisan food & bakery', dq: 84, stats: { competitors: 7, avg: '$6.40', signals: 4 },
       summary: 'A growing premium niche within a mature category: independents are winning share from mass-produced incumbents on provenance, craft and story. Demand is healthy and local — the constraint is differentiation and capacity, not interest.',
+      verdict: 'Based on the research we ran, your artisan bakery has a real shot. Locally, people genuinely want proper, hand-crafted bread — and they’ll pay a premium for it — yet almost nobody nearby tells a convincing craft story. The demand is already there; your only real job is to stand out. Lead with your craft and the people behind it, and this works.',
+      takeaways: [
+        'People want it — interest in local, artisan and sourdough baking is up ~18% this year, and it peaks on weekends.',
+        'The gap is wide open — 5–8 bakeries sit within ~5km, but hardly any tell a real story about how they bake.',
+        'They’ll pay more — premium loaves comfortably hold $6–8 when the craft is visible.',
+        'Your edge — “behind-the-craft” content (the people, the 4am bake) beats plain product photos every time.'
+      ],
       findings: [
         { q: 'Market size & growth', conf: 'Medium', refs: ['e_01', 'e_02'], text: 'The premium/artisan baked-goods segment is mature but steadily expanding (mid-single-digit % CAGR), with independents outpacing the broader category as consumers trade up on quality and provenance.' },
         { q: 'Demand signals', conf: 'High', refs: ['e_03', 'e_04'], text: 'Search and social interest in “local bakery”, “sourdough” and “artisan” is up ~18% YoY, concentrated on weekends and around holidays — strong, repeatable local intent.' },
@@ -49,6 +58,13 @@
       ] },
     retail: { category: 'Independent retail & products', dq: 82, stats: { competitors: 11, avg: '$28', signals: 4 },
       summary: 'A crowded but navigable market where discovery and retention beat raw reach. DTC-savvy independents win with limited drops, bundles and a sharp owned-audience strategy.',
+      verdict: 'Based on what we found, your product idea can absolutely work — but winning here is about being discovered and keeping people, not shouting the loudest. Demand is steady and shoppers are actively looking; the brands that win build a small, loyal audience and give them reasons to come back. Do that and you don’t need the biggest budget in the room.',
+      takeaways: [
+        'People are looking — online discovery is driving ~22% more qualified visits, mostly on mobile.',
+        'Crowded but beatable — a couple of big names dominate search; everyone else competes on niche and service.',
+        'Bundles lift spend — typical orders sit around $25–35, and bundles or limited drops raise that without discounting.',
+        'Your edge — an email/SMS audience you own converts far better than chasing paid reach.'
+      ],
       findings: [
         { q: 'Market size & growth', conf: 'Medium', refs: ['e_01', 'e_02'], text: 'Independent/DTC retail continues to grow modestly overall, with category winners concentrating share through brand and community rather than price.' },
         { q: 'Demand signals', conf: 'High', refs: ['e_03'], text: 'Online discovery is driving ~22% more qualified visits; “near me” and brand-name search intent is rising, especially on mobile.' },
@@ -58,6 +74,13 @@
       ] },
     creative: { category: 'Creative & services', dq: 79, stats: { competitors: 9, avg: '$850/project', signals: 3 },
       summary: 'A trust-led services market where portfolio and proof win work. Demand for combined brand+content packages is rising; price pressure comes from marketplaces, not local peers.',
+      verdict: 'Based on the research, your services idea is viable and the trend is moving your way — clients increasingly want a combined brand-and-content package rather than one-off jobs. Price pressure comes from cheap marketplaces, not the studios next door, so you win on proof and point of view, not on being the cheapest. Show real results and this holds up.',
+      takeaways: [
+        'Demand is shifting to bundles — clients want “brand + content” together, not one-off deliverables.',
+        'Referrals and portfolio win the work — not the lowest price.',
+        'Marketplaces undercut on price but rarely on outcomes — that is your opening.',
+        'Your edge — productised packages plus visible case studies cut sales friction and lift your rate.'
+      ],
       findings: [
         { q: 'Market size & growth', conf: 'Low', refs: ['e_02'], text: 'Hard to size precisely (fragmented, project-based), but demand for outcome-oriented brand+content packages is clearly expanding among SMBs.' },
         { q: 'Demand signals', conf: 'Medium', refs: ['e_03', 'e_04'], text: 'Inbound intent skews to “brand + content” bundles over one-off deliverables; referrals and portfolio discovery drive most qualified leads.' },
@@ -67,6 +90,13 @@
       ] },
     tech: { category: 'SaaS / software', dq: 80, stats: { competitors: 14, avg: '$29/mo', signals: 4 },
       summary: 'A competitive but expandable category where niche tooling and founder-led distribution beat head-on feature wars. Content and community drive efficient signups.',
+      verdict: 'Based on what we found, your software idea has genuine room — the specific need you solve is growing fast (~30% a year), even though the broader category is busy. You will not win a head-on feature war with the incumbents, but a sharply-focused wedge and genuinely better onboarding gets you in the door. Pick your niche and this works.',
+      takeaways: [
+        'The need is growing — search for your specific use-case is up ~31% this year.',
+        'Two incumbents own the main search term — so go around them with a sharp, narrow wedge.',
+        'Pricing is proven — entry tiers sit ~$15–39/mo, and annual plans lift lifetime value a lot.',
+        'Your edge — founder-led content and “alternative to” pages drive the cheapest signups.'
+      ],
       findings: [
         { q: 'Market size & growth', conf: 'Medium', refs: ['e_01', 'e_02'], text: 'The broader category is large and growing; the addressable niche is smaller but expanding ~30% YoY as workflows specialise.' },
         { q: 'Demand signals', conf: 'High', refs: ['e_03', 'e_04'], text: 'Search demand for the specific use-case is up ~31% YoY; intent clusters around integrations, pricing and “alternative to” queries.' },
@@ -76,6 +106,13 @@
       ] },
     trades: { category: 'Local trades & services', dq: 81, stats: { competitors: 6, avg: '$120/job', signals: 3 },
       summary: 'A high-intent local market won on trust and proximity. “Near me” demand is rising; reviews, response time and visible workmanship beat advertising spend.',
+      verdict: 'Based on the research, your idea is on solid ground — local demand is high-intent and rising, and it is won on trust and speed, not on advertising. Most competitors still lean on word-of-mouth and do not run a tight reviews-and-photos engine, which is exactly where you can pull ahead. Respond fast, show your work, and this wins.',
+      takeaways: [
+        '“Near me” intent is rising — and it is overwhelmingly same-week and on mobile.',
+        'Speed wins — how fast you reply strongly predicts whether you land the job.',
+        'The gap — few rivals run a steady reviews + before/after content engine.',
+        'Your edge — a reviews flywheel and a strong Google Business profile beat ad spend.'
+      ],
       findings: [
         { q: 'Market size & growth', conf: 'Medium', refs: ['e_02', 'e_05'], text: 'Steady local demand tied to housing activity and seasonality; little category disruption, so share is won on reputation and reliability.' },
         { q: 'Demand signals', conf: 'High', refs: ['e_03'], text: '“Near me” search intent is climbing and is overwhelmingly mobile and same-week; speed-to-respond strongly predicts win rate.' },
@@ -85,6 +122,13 @@
       ] },
     other: { category: 'General market', dq: 74, stats: { competitors: 8, avg: '$—', signals: 3 },
       summary: 'A fragmented market with steady, seasonally-peaking demand. With limited category-specific data, the safest edge is an owned audience and a clear, repeatable offer.',
+      verdict: 'Based on what we found, your idea is workable — demand is steady with seasonal peaks, and the field is fragmented with no dominant player, which leaves clear room for a consistent, well-positioned brand. There is less category data to lean on here, so the safest path is to build an audience you own and lead with one simple, repeatable offer. Do that and you have a real foothold.',
+      takeaways: [
+        'Demand is steady with seasonal spikes — time your launches to those peaks.',
+        'No one dominates — the field is fragmented, so a clearly-positioned brand can stand out.',
+        'Less data to lean on — test 2–3 price points with your own audience before committing.',
+        'Your edge — an owned email/social audience outperforms paid in fragmented markets.'
+      ],
       findings: [
         { q: 'Market size & growth', conf: 'Low', refs: ['e_02'], text: 'Category is broad and hard to size precisely; expect steady demand with seasonal peaks rather than rapid structural growth.' },
         { q: 'Demand signals', conf: 'Medium', refs: ['e_03'], text: 'Search interest is stable with periodic spikes; align launches and promotions to those peaks for outsized return.' },
@@ -119,41 +163,66 @@
     var evidence = buildEvidence(s.category);
     return { xp: XP, category: s.category, region: region, dq: s.dq, date: fmtDate(),
       sources: evidence.length, depth: 'Standard (3 queries)', sections: s.findings.length,
-      summary: s.summary, stats: s.stats, findings: s.findings, evidence: evidence };
+      summary: s.summary, verdict: s.verdict, takeaways: s.takeaways, stats: s.stats, findings: s.findings, evidence: evidence };
   }
 
   /* ── Real downloadable Word file ── */
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
   function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); }
-  function buildWordHtml(r) {
-    var f = r.findings.map(function (x) {
-      return '<h3 style="margin:14px 0 2px">' + esc(x.q) + ' <span style="font-weight:normal;color:#777;font-size:11px">(' + esc(x.conf) + ' confidence)</span></h3>'
-        + '<p style="margin:2px 0">' + esc(x.text) + '</p>'
-        + '<p style="margin:2px 0;color:#888;font-size:11px">Sources: ' + esc(x.refs.join(', ')) + '</p>';
+  function buildWordHtml(r, theme) {
+    var dark = theme !== 'light';                       /* dark by default, matches the screen */
+    var P = dark
+      ? { bg: '#0f1614', ink: '#edf2f0', soft: '#93a09c', faint: '#6b7773', hair: '#263230', accent: '#2bd4bb' }
+      : { bg: '#f6f4ee', ink: '#1d2321', soft: '#5f6a66', faint: '#8b938f', hair: '#e4dfd4', accent: '#0f9e88' };
+    function conf(c) { c = String(c).toLowerCase();
+      if (dark) return c === 'high' ? '#34d39e' : c === 'medium' ? '#f5a623' : '#ff8568';
+      return c === 'high' ? '#12876f' : c === 'medium' ? '#a9720f' : '#a8532c'; }
+    var serif = "Georgia,'Times New Roman',serif";
+    var sans = "'Segoe UI','Helvetica Neue',Arial,sans-serif";
+    function sec(label) {
+      return '<p style="margin:26px 0 12px;padding-top:15px;border-top:1px solid ' + P.hair + ';font-family:' + sans
+        + ';font-size:11px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">' + label + '</p>';
+    }
+    var takes = r.takeaways.map(function (t) {
+      return '<p style="margin:0 0 10px;font-family:' + sans + ';font-size:14px;line-height:1.5;color:' + P.ink + '">'
+        + '<span style="color:' + P.accent + '">&#9670;</span>&nbsp;&nbsp;' + esc(t) + '</p>';
     }).join('');
-    var ev = r.evidence.map(function (x) {
-      return '<p style="margin:3px 0;font-size:11px">' + esc(x.id) + ' — <b>' + esc(x.domain) + '</b> — ' + esc(x.topic) + ' — <a href="' + esc(x.url) + '">' + esc(x.url) + '</a></p>';
+    var finds = r.findings.map(function (x) {
+      return '<p style="margin:16px 0 3px;font-family:' + sans + ';font-size:14px;font-weight:600;color:' + P.ink + '">'
+        + esc(x.q) + ' &nbsp;<span style="font-weight:normal;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:'
+        + conf(x.conf) + '">' + esc(x.conf) + ' confidence</span></p>'
+        + '<p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '">' + esc(x.text) + '</p>';
+    }).join('');
+    var srcs = r.evidence.map(function (x) {
+      return '<p style="margin:0 0 6px;font-family:' + sans + ';font-size:12px;color:' + P.soft + '">'
+        + '<span style="font-family:Consolas,monospace;color:' + P.accent + '">' + esc(x.domain) + '</span> &mdash; ' + esc(x.topic)
+        + ' &mdash; <a href="' + esc(x.url) + '" style="color:' + P.accent + '">' + esc(x.url) + '</a></p>';
     }).join('');
     return '<html xmlns:o="urn:schemas-microsoft-office:office" xmlns:w="urn:schemas-microsoft-office:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
-      + '<head><meta charset="utf-8"><title>Market scan — ' + esc(r.category) + '</title></head>'
-      + '<body style="font-family:Calibri,Arial,sans-serif;color:#111;max-width:720px">'
-      + '<h1 style="margin-bottom:2px">Market scan — ' + esc(r.category) + '</h1>'
-      + '<p style="color:#666;margin:0">Generated by the Clarity agent platform · ' + esc(r.date) + '</p>'
-      + '<p style="color:#666;margin:2px 0 10px">Report type: market · Overall DQ: ' + r.dq + '% · Territory: ' + esc(r.region) + '</p>'
-      + '<table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;font-size:12px;margin:8px 0">'
-      + '<tr style="background:#f1f5f9"><td><b>Sources</b></td><td><b>Depth</b></td><td><b>DQ overall</b></td><td><b>Sections</b></td></tr>'
-      + '<tr><td>' + r.sources + '</td><td>' + esc(r.depth) + '</td><td>' + r.dq + '%</td><td>' + r.sections + '</td></tr></table>'
-      + '<h2>Executive summary</h2><p>' + esc(r.summary) + '</p>'
-      + '<h2>Key findings</h2>' + f
-      + '<h2>Evidence appendix</h2>' + ev
-      + '</body></html>';
+      + '<head><meta charset="utf-8"><title>Market report — ' + esc(r.category) + '</title></head>'
+      + '<body style="margin:0;background:' + P.bg + '">'
+      + '<div style="background:' + P.bg + ';color:' + P.ink + ';padding:42px 48px;max-width:700px;font-family:' + sans + '">'
+      + '<p style="margin:0 0 8px;font-family:Consolas,monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:' + P.accent + '">Market report</p>'
+      + '<h1 style="margin:0 0 8px;font-family:' + serif + ';font-size:34px;font-weight:normal;color:' + P.ink + '">' + esc(r.category) + '</h1>'
+      + '<p style="margin:0;font-family:' + sans + ';font-size:12px;color:' + P.faint + '">' + esc(r.date) + ' &nbsp;&middot;&nbsp; ' + esc(r.region) + ' &nbsp;&middot;&nbsp; Prepared by Clarity</p>'
+      + '<div style="height:3px;background:' + P.accent + ';margin:20px 0 24px"></div>'
+      + '<p style="margin:0 0 10px;font-family:Consolas,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">The verdict</p>'
+      + '<p style="margin:0;font-family:' + serif + ';font-size:20px;line-height:1.45;color:' + P.ink + '">' + esc(r.verdict) + '</p>'
+      + sec('What we found') + takes
+      + sec('The detail')
+      + '<p style="margin:0 0 14px;font-family:' + sans + ';font-size:13px;color:' + P.soft + '">Competitors: <b style="color:' + P.ink + '">' + esc(r.stats.competitors) + '</b> &nbsp;&middot;&nbsp; Avg price: <b style="color:' + P.ink + '">' + esc(r.stats.avg) + '</b> &nbsp;&middot;&nbsp; Demand signals: <b style="color:' + P.ink + '">' + esc(r.stats.signals) + '</b></p>'
+      + finds
+      + sec('How solid is this?')
+      + '<p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '"><b style="color:' + P.ink + '">Solid read &mdash; ' + r.dq + '% data quality.</b> Drawn from ' + r.evidence.length + ' independent sources across market size, live demand and pricing. The &ldquo;High confidence&rdquo; findings are the ones to bank on; treat the rest as strong signals.</p>'
+      + sec('Sources') + srcs
+      + '</div></body></html>';
   }
-  function downloadReport(r) {
+  function downloadReport(r, theme) {
     try {
-      var blob = new Blob(['﻿', buildWordHtml(r)], { type: 'application/msword' });
+      var blob = new Blob(['﻿', buildWordHtml(r, theme)], { type: 'application/msword' });
       var url = URL.createObjectURL(blob);
       var a = document.createElement('a');
-      a.href = url; a.download = 'Market_scan_' + slug(r.category) + '.doc';
+      a.href = url; a.download = 'Market_report_' + slug(r.category) + '.doc';
       document.body.appendChild(a); a.click();
       setTimeout(function () { if (a.parentNode) a.parentNode.removeChild(a); URL.revokeObjectURL(url); }, 200);
     } catch (err) { /* no-op in the mockup */ }
@@ -186,6 +255,7 @@
     var fo = React.useState(['demand', 'competitors', 'pricing']); var foci = fo[0], setFoci = fo[1];
     var rs = React.useState(props.result || null); var result = rs[0], setResult = rs[1];
     var rv = React.useState(0);   var revealed = rv[0], setRevealed = rv[1];
+    var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
     var soldWhat = (profile.desc || 'your product').trim();
 
@@ -289,58 +359,79 @@
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
-    /* ── RESULT — intel report (findings-first) ── */
+    /* ── RESULT — clean-document report (verdict-first, human voice) ── */
     var r = result || buildReport(profile, regions);
-    function metaTag(l, v) { return e('span', { className: 'mm-rtag' }, e('b', null, l), v); }
+    function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
+      /* the game reward moment wraps the document */
       e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Intel Acquired'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
-      e('h1', { className: 'mm-title' }, 'Market intel report'),
-      capcom('Scan complete. Findings first, sources in the appendix — and the full report is yours to download.'),
+      capcom('Scan complete — here is the read on your market. Plain version up top; the detail sits underneath if you want it.'),
 
-      /* report header: DQ dial + meta + download */
-      e('div', { className: 'mm-rephead' },
-        e('div', { className: 'mm-dq', style: { background: 'conic-gradient(var(--clr-primary-hover) ' + (r.dq * 3.6) + 'deg, var(--clr-border) 0)' } },
-          e('div', { className: 'mm-dq-in' }, e('span', { className: 'mm-dq-num' }, r.dq + '%'), e('span', { className: 'mm-dq-l' }, 'Data quality'))),
-        e('div', { className: 'mm-repmeta' },
-          e('div', { className: 'mm-repmeta-title' }, 'Market scan — ' + r.category),
-          e('div', { className: 'mm-repmeta-sub' }, 'Generated by Clarity · ' + r.date),
-          e('div', { className: 'mm-rtags' }, metaTag('Report ', 'market'), metaTag('Sources ', r.sources), metaTag('Depth ', 'Standard'), metaTag('Territory ', r.region))),
-        e('button', { className: 'pf-cta mm-cta mm-dl', onClick: function () { downloadReport(r); } }, e(Icon, { name: 'Download', size: 15 }), ' Download report')
+      /* ── the report document ── */
+      e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
+
+        /* toolbar: category tag + reader controls */
+        e('div', { className: 'rc-bar' },
+          e('div', { className: 'rc-bar-cat' }, e('span', { className: 'rc-dot' }), CATEGORY.name),
+          e('div', { className: 'rc-bar-tools' },
+            e('button', { className: 'rc-tool', onClick: toggleTheme, title: 'Toggle reading mode' },
+              e(Icon, { name: theme === 'light' ? 'Moon' : 'Sun', size: 14 }), theme === 'light' ? 'Night' : 'Day'),
+            e('button', { className: 'rc-tool rc-tool-dl', onClick: function () { downloadReport(r, theme); } },
+              e(Icon, { name: 'Download', size: 14 }), 'Download'))),
+
+        /* masthead */
+        e('div', { className: 'rc-mast' },
+          e('div', { className: 'rc-eyebrow' }, CATEGORY.eyebrow),
+          e('h1', { className: 'rc-h1' }, r.category),
+          e('div', { className: 'rc-mast-meta' }, r.date + '  ·  ' + r.region + '  ·  Prepared by Clarity')),
+        e('div', { className: 'rc-rule' }),
+
+        /* verdict — the hero, in plain human voice */
+        e('div', { className: 'rc-kicker' }, 'The verdict'),
+        e('p', { className: 'rc-verdict' }, r.verdict),
+
+        /* what we found — plain takeaways */
+        e('div', { className: 'rc-sec' }, 'What we found'),
+        e('ul', { className: 'rc-takeaways' },
+          r.takeaways.map(function (t, i) {
+            return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } },
+              e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
+          })),
+
+        /* the detail — demoted below the answer */
+        e('div', { className: 'rc-sec' }, 'The detail'),
+        e('div', { className: 'rc-stats' },
+          [['Competitors', r.stats.competitors], ['Avg price', r.stats.avg], ['Demand signals', r.stats.signals]].map(function (s, i) {
+            return e('div', { key: i, className: 'rc-stat' }, e('div', { className: 'rc-stat-v' }, s[1]), e('div', { className: 'rc-stat-l' }, s[0]));
+          })),
+        e('div', { className: 'rc-findings' },
+          r.findings.map(function (f, i) {
+            return e('div', { key: i, className: 'rc-finding' },
+              e('div', { className: 'rc-finding-h' },
+                e('span', { className: 'rc-finding-q' }, f.q),
+                e('span', { className: 'rc-conf ' + f.conf.toLowerCase() }, f.conf + ' confidence')),
+              e('p', { className: 'rc-finding-t' }, f.text));
+          })),
+
+        /* how solid is this — trust, reframed in plain words */
+        e('div', { className: 'rc-sec' }, 'How solid is this?'),
+        e('div', { className: 'rc-trust' },
+          e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } },
+            e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
+          e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'),
+            ' Drawn from ' + r.evidence.length + ' independent sources across market size, live demand and pricing — the “High confidence” findings above are the ones to bank on; treat the rest as strong signals.')),
+
+        /* sources */
+        e('div', { className: 'rc-sec' }, 'Sources'),
+        e('div', { className: 'rc-sources' },
+          r.evidence.map(function (ev, i) {
+            return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' },
+              e('span', { className: 'rc-source-d' }, ev.domain),
+              e('span', { className: 'rc-source-t' }, ev.topic),
+              e(Icon, { name: 'ExternalLink', size: 12 }));
+          }))
       ),
-
-      /* executive summary */
-      e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Executive summary'),
-      e('p', { className: 'mm-summary-box' }, r.summary),
-
-      /* quick stat strip */
-      e('div', { className: 'mm-statgrid' },
-        [['Category', r.stats ? r.category : '—'], ['Competitors', r.stats.competitors], ['Avg price', r.stats.avg], ['Signals', r.stats.signals]].map(function (s, i) {
-          return e('div', { key: i, className: 'mm-stat' }, e('div', { className: 'mm-stat-l' }, s[0]), e('div', { className: 'mm-stat-v' }, s[1]));
-        })),
-
-      /* key findings */
-      e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Key findings'),
-      e('div', { className: 'mm-findings' },
-        r.findings.map(function (f, i) {
-          return e('div', { key: i, className: 'mm-finding', style: { animationDelay: (0.07 * i + 0.1) + 's' } },
-            e('div', { className: 'mm-finding-top' },
-              e('span', { className: 'mm-finding-q' }, f.q),
-              e('span', { className: 'mm-conf ' + f.conf.toLowerCase() }, f.conf + ' confidence')),
-            e('p', { className: 'mm-finding-text' }, f.text),
-            e('div', { className: 'mm-finding-refs' }, 'Sources: ' + f.refs.join(', ')));
-        })),
-
-      /* evidence appendix */
-      e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Evidence appendix · ' + r.evidence.length + ' sources'),
-      e('div', { className: 'mm-evidence' },
-        r.evidence.map(function (ev, i) {
-          return e('a', { key: i, className: 'mm-evrow', href: ev.url, target: '_blank', rel: 'noreferrer' },
-            e('span', { className: 'mm-ev-id' }, ev.id),
-            e('span', { className: 'mm-ev-domain' }, ev.domain),
-            e('span', { className: 'mm-ev-topic' }, ev.topic),
-            e(Icon, { name: 'ExternalLink', size: 12 }));
-        })),
 
       e('div', { className: 'mm-row' },
         e('button', { className: 'id-back', onClick: function () { setResult(null); setView('scan'); setStep(0); } }, '↻ Re-scan'),

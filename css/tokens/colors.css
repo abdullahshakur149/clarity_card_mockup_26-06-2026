@@ -64,6 +64,19 @@
   --clr-pillar-content: #15b8a0;       /* jade (primary) */
   --clr-pillar-campaigns: #ff6f4d;     /* ember coral */
 
+  /* ---- Strategic-Plan / report category accents (client's six-category system) ---- */
+  --clr-cat-market:      #22c9db;  --clr-cat-market-dim:      rgba(34, 201, 219, 0.14);  /* Market Snapshot — cyan */
+  --clr-cat-positioning: #a78bfa;  --clr-cat-positioning-dim: rgba(167, 139, 250, 0.14); /* Your Positioning — purple */
+  --clr-cat-competitor:  #f2685f;  --clr-cat-competitor-dim:  rgba(242, 104, 95, 0.14);  /* Competitor Intel — red */
+  --clr-cat-customer:    #34d39e;  --clr-cat-customer-dim:    rgba(52, 211, 158, 0.14);  /* Ideal Customer — green */
+  --clr-cat-gtm:         #f5a623;  --clr-cat-gtm-dim:         rgba(245, 166, 35, 0.14);  /* Go-To-Market — amber */
+  --clr-cat-risk:        #9aa7a3;  --clr-cat-risk-dim:        rgba(154, 167, 163, 0.14); /* Risk & Confidence — grey */
+
+  /* ---- Persona pillar ("Living Characters" — warm, human, distinct from the cold recon) ---- */
+  --clr-persona: #b48bfa;            --clr-persona-dim: rgba(180, 139, 250, 0.15);
+  --clr-persona-2: #ff9e7a;          /* ember warmth */
+  --clr-warmth-cold: #5aa9e6;        --clr-warmth-hot: #ffb454;   /* trust ring: cold-blue -> ember-gold */
+
   /* ---- Semantic aliases ---- */
   --surface-app: var(--clr-bg);
   --surface-card: var(--clr-card);

@@ -493,26 +493,84 @@ function ClarityApp() {
    Pre-flight Clearance (login) shows first. On clearance, the existing app
    mounts fresh. Kept as a separate component so ClarityApp's hook order is
    never affected by the auth boundary. */
+/* ── Ideas-aware router ───────────────────────────────────────────────────
+   An "idea" is the top-level concept. First visit: login → onboarding (creates
+   idea #1) → Strategic Planning. Return visit: login → Your Ideas → an idea's
+   Hub (4 pillars + Tools) → a pillar / Concept Comparison. Each idea persists
+   its own recon + plan. */
 function ClarityRoot() {
-  const [authed,    setAuthed]    = React.useState(false);
-  const [onboarded, setOnboarded] = React.useState(false);
-  const [profile,   setProfile]   = React.useState(null);   // onboarding answers
+  const e = React.createElement;
+  const STORE = 'clarity_state_v1';
+  const bootRef = React.useRef(null);
+  if (bootRef.current === null) {
+    try { bootRef.current = JSON.parse(localStorage.getItem(STORE)) || {}; } catch (_) { bootRef.current = {}; }
+  }
+  const boot = bootRef.current;
+
+  const [authed,    setAuthed]    = React.useState(!!boot.authed);
+  const [ideas,     setIdeas]     = React.useState(Array.isArray(boot.ideas) ? boot.ideas : []);
+  const [currentId, setCurrentId] = React.useState(null);
+  const [view,      setView]      = React.useState('home');    // return visit → Your Ideas list (the start point)
+  const [creating,  setCreating]  = React.useState(false);     // onboarding a new idea
+  const idRef = React.useRef(boot.nextId || 1);
+
+  /* persist the session so a return visit skips login/onboarding and lands on the hub */
+  React.useEffect(() => {
+    try { localStorage.setItem(STORE, JSON.stringify({ authed, ideas, currentId, nextId: idRef.current })); } catch (_) {}
+  }, [authed, ideas, currentId]);
+
+  const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function dayLabel() { try { const d = new Date(); return MON[d.getMonth()] + ' ' + d.getDate(); } catch (_) { return ''; } }
+
+  function makeIdea(profile) {
+    const id = 'idea_' + (idRef.current++);
+    const idea = { id, name: (profile && profile.name) || 'Untitled idea', createdLabel: dayLabel(), profile: profile || {}, missions: {}, xp: 90, jobs: [] };
+    setIdeas(list => list.concat([idea]));
+    setCurrentId(id);
+    return idea;
+  }
+  function updateIdea(id, patch) { setIdeas(list => list.map(i => i.id === id ? Object.assign({}, i, patch) : i)); }
+  const idea = ideas.filter(i => i.id === currentId)[0] || null;
 
   if (!authed) {
-    return window.ClarityLogin
-      ? React.createElement(window.ClarityLogin, { onAuthed: () => setAuthed(true) })
-      : null;
+    return window.ClarityLogin ? e(window.ClarityLogin, { onAuthed: () => setAuthed(true) }) : null;
   }
-  if (!onboarded && window.ClarityOnboarding) {
-    return React.createElement(window.ClarityOnboarding, {
-      onComplete: (answers) => { setProfile(answers || {}); setOnboarded(true); }
+  /* first idea, or an explicit "+ New idea" → onboarding (Decode) → Strategic Planning */
+  if ((ideas.length === 0 || creating) && window.ClarityOnboarding) {
+    return e(window.ClarityOnboarding, {
+      onComplete: (profile) => { makeIdea(profile || {}); setCreating(false); setView('strategic'); }
     });
   }
-  /* Intelligence "Command Deck" is the new post-onboarding home (old pillar shell set aside) */
-  if (window.ClarityIntel) {
-    return React.createElement(window.ClarityIntel, { profile });
+  if (view === 'strategic' && idea && window.ClarityIntel) {
+    return e(window.ClarityIntel, {
+      key: idea.id, profile: idea.profile, idea: idea,
+      onChange: (patch) => updateIdea(idea.id, patch),
+      onExit: () => setView('hub')
+    });
   }
-  return React.createElement(ClarityApp);
+  if (view === 'tools' && window.ClarityCompare) {
+    return e(window.ClarityCompare, { ideas: ideas, currentId: currentId, onBack: () => setView('hub') });
+  }
+  if (view === 'persona' && idea && window.ClarityPersona) {
+    return e(window.ClarityPersona, { key: idea.id, idea: idea, onChange: (patch) => updateIdea(idea.id, patch), onBack: () => setView('hub') });
+  }
+  if (view === 'hub' && idea && window.ClarityHub) {
+    return e(window.ClarityHub, {
+      idea: idea,
+      onPillar: (p) => { if (p === 'strategic') setView('strategic'); else if (p === 'persona') setView('persona'); },
+      onCompare: () => setView('tools'),
+      onBack: () => { setCurrentId(null); setView('home'); }
+    });
+  }
+  /* default: Your Ideas home */
+  if (window.ClarityIdeasHome) {
+    return e(window.ClarityIdeasHome, {
+      ideas: ideas,
+      onOpen: (id) => { setCurrentId(id); setView('hub'); },
+      onNew: () => setCreating(true)
+    });
+  }
+  return e(ClarityApp);
 }
 
 window.ClarityApp = ClarityRoot;
