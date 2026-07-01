@@ -489,5 +489,31 @@ function ClarityApp() {
   );
 }
 
-window.ClarityApp = ClarityApp;
+/* ── Auth gate ───────────────────────────────────────────────────────────
+   Pre-flight Clearance (login) shows first. On clearance, the existing app
+   mounts fresh. Kept as a separate component so ClarityApp's hook order is
+   never affected by the auth boundary. */
+function ClarityRoot() {
+  const [authed,    setAuthed]    = React.useState(false);
+  const [onboarded, setOnboarded] = React.useState(false);
+  const [profile,   setProfile]   = React.useState(null);   // onboarding answers
+
+  if (!authed) {
+    return window.ClarityLogin
+      ? React.createElement(window.ClarityLogin, { onAuthed: () => setAuthed(true) })
+      : null;
+  }
+  if (!onboarded && window.ClarityOnboarding) {
+    return React.createElement(window.ClarityOnboarding, {
+      onComplete: (answers) => { setProfile(answers || {}); setOnboarded(true); }
+    });
+  }
+  /* Intelligence "Command Deck" is the new post-onboarding home (old pillar shell set aside) */
+  if (window.ClarityIntel) {
+    return React.createElement(window.ClarityIntel, { profile });
+  }
+  return React.createElement(ClarityApp);
+}
+
+window.ClarityApp = ClarityRoot;
 })();

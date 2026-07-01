@@ -1,0 +1,292 @@
+/* ============================================================================
+   auth.css — "Pre-flight Clearance" login + CAPCOM comms-HUD
+   Mission-control cinematic. Uses the existing dark Jade & Ember token system.
+   Prefix: pf-  (pre-flight)  /  capcom-  (the handler)
+   ========================================================================== */
+
+/* ── Root / console backdrop ─────────────────────────────────────────────── */
+.pf-root {
+  position: fixed; inset: 0; z-index: 4000;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--clr-bg);
+  font-family: var(--font-body);
+  color: var(--clr-text);
+  overflow: hidden;
+  padding: 24px;
+}
+/* layered ambience: ember + jade glows, console grid, vignette */
+.pf-bg { position: absolute; inset: 0; pointer-events: none; }
+.pf-bg-glow {
+  position: absolute; inset: -20%;
+  background:
+    radial-gradient(40% 50% at 18% 14%, rgba(43,212,187,0.16), transparent 70%),
+    radial-gradient(46% 56% at 86% 92%, rgba(21,184,160,0.13), transparent 72%);
+  animation: pf-glow 9s ease-in-out infinite alternate;
+}
+.pf-bg-grid {
+  position: absolute; inset: 0; opacity: 0.5;
+  background-image:
+    linear-gradient(var(--clr-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
+  background-size: 46px 46px;
+  -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%);
+          mask-image: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%);
+}
+.pf-bg-scan {
+  position: absolute; inset: 0; opacity: 0.5;
+  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
+  animation: pf-scan 8s linear infinite;
+}
+.pf-bg-vignette {
+  position: absolute; inset: 0;
+  box-shadow: inset 0 0 240px 40px rgba(0,0,0,0.65);
+}
+
+/* ── Top status bar ──────────────────────────────────────────────────────── */
+.pf-topbar {
+  position: absolute; top: 0; left: 0; right: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 26px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em;
+  color: var(--clr-muted); text-transform: uppercase;
+}
+.pf-wordmark {
+  font-family: var(--font-display); font-size: 22px; font-weight: 700;
+  letter-spacing: 0; text-transform: none; color: var(--clr-text);
+}
+.pf-wordmark b { color: var(--clr-primary); }
+.pf-tele { display: flex; align-items: center; gap: 16px; }
+.pf-tele span { white-space: nowrap; }
+/* LIVE pulse keeps ember (the one warm energy pop) — literal so it survives the teal re-skin */
+.pf-live { display: inline-flex; align-items: center; gap: 6px; color: #ff6f4d; }
+.pf-live i {
+  width: 7px; height: 7px; border-radius: 50%; background: #ff6f4d;
+  box-shadow: 0 0 10px #ff6f4d; animation: pf-blink 1.4s steps(1) infinite;
+}
+
+/* ── Console card ────────────────────────────────────────────────────────── */
+.pf-console {
+  position: relative; width: 468px; max-width: 100%;
+  background: linear-gradient(180deg, rgba(18,24,23,0.92), rgba(11,15,14,0.92));
+  border: 1px solid var(--clr-border-strong);
+  border-radius: 16px;
+  padding: 30px 30px 26px;
+  box-shadow: 0 30px 80px -30px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.03);
+  animation: pf-rise 0.6s cubic-bezier(0.2,0.8,0.3,1) both;
+  backdrop-filter: blur(4px);
+}
+/* HUD corner brackets */
+.pf-corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--clr-primary-hover); opacity: 0.7; }
+.pf-corner.tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; border-radius: 4px 0 0 0; }
+.pf-corner.tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; border-radius: 0 4px 0 0; }
+.pf-corner.bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; border-radius: 0 0 0 4px; }
+.pf-corner.br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-radius: 0 0 4px 0; }
+
+.pf-stage {
+  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--clr-muted); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.pf-stage b { color: var(--clr-primary-hover); font-weight: 500; }
+
+/* ── CAPCOM comms-HUD ────────────────────────────────────────────────────── */
+.capcom {
+  display: flex; gap: 13px; align-items: flex-start;
+  background: var(--clr-card-2); border: 1px solid var(--clr-border);
+  border-left: 3px solid var(--clr-primary-hover);
+  border-radius: 12px; padding: 13px 15px; margin-bottom: 22px;
+}
+.capcom-avatar {
+  flex-shrink: 0; width: 42px; height: 42px; border-radius: 10px;
+  background: radial-gradient(circle at 50% 35%, rgba(43,212,187,0.28), rgba(43,212,187,0.06));
+  border: 1px solid var(--clr-primary-dim);
+  display: flex; align-items: center; justify-content: center; gap: 2.5px;
+  overflow: hidden;
+}
+.capcom-avatar i {
+  width: 3px; border-radius: 2px; background: var(--clr-primary-hover);
+  animation: capcom-wave 1s ease-in-out infinite;
+}
+.capcom-avatar i:nth-child(1) { height: 10px; animation-delay: 0s; }
+.capcom-avatar i:nth-child(2) { height: 20px; animation-delay: 0.12s; }
+.capcom-avatar i:nth-child(3) { height: 14px; animation-delay: 0.24s; }
+.capcom-avatar i:nth-child(4) { height: 22px; animation-delay: 0.36s; }
+.capcom-avatar i:nth-child(5) { height: 9px;  animation-delay: 0.48s; }
+.capcom.idle .capcom-avatar i { animation-play-state: paused; height: 6px; }
+
+.capcom-body { flex: 1; min-width: 0; }
+.capcom-name {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 3px;
+}
+.capcom-name b {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 0.16em; color: var(--clr-primary-hover); text-transform: uppercase;
+}
+.capcom-name span {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  color: var(--clr-faint); text-transform: uppercase;
+}
+.capcom-line { font-size: 13px; line-height: 1.5; color: var(--clr-text); min-height: 19px; }
+.pf-cursor { color: var(--clr-primary-hover); animation: pf-cursor 1s steps(1) infinite; font-weight: 400; }
+
+/* ── Clearance panel ─────────────────────────────────────────────────────── */
+.pf-google {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 12px; border-radius: 10px;
+  background: var(--clr-card-2); border: 1px solid var(--clr-border-strong);
+  color: var(--clr-text); font-family: var(--font-body); font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all var(--dur-fast,0.16s) var(--ease,ease);
+}
+.pf-google:hover { border-color: var(--clr-primary-border); background: var(--clr-card-hover); }
+
+.pf-divider {
+  display: flex; align-items: center; gap: 12px; margin: 18px 0;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--clr-faint); white-space: nowrap;
+}
+.pf-divider::before, .pf-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--clr-border);
+}
+
+.pf-field { margin-bottom: 14px; }
+.pf-label {
+  display: flex; align-items: center; justify-content: space-between;
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--clr-muted); margin-bottom: 7px;
+}
+.pf-label .pf-prompt { color: var(--clr-primary-hover); margin-right: 5px; }
+.pf-label a { color: var(--clr-primary-hover); cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 11px; }
+.pf-input-wrap {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--clr-bg); border: 1px solid var(--clr-border-strong);
+  border-radius: 9px; padding: 0 12px;
+  transition: border-color var(--dur-fast,0.16s) var(--ease,ease), box-shadow var(--dur-fast,0.16s) var(--ease,ease);
+}
+.pf-input-wrap:focus-within {
+  border-color: var(--clr-primary-hover); box-shadow: 0 0 0 3px var(--clr-primary-dim);
+}
+.pf-input-wrap > svg { flex-shrink: 0; color: var(--clr-faint); }
+.pf-input {
+  flex: 1; background: transparent; border: 0; outline: 0;
+  padding: 12px 0; color: var(--clr-text);
+  font-family: var(--font-mono); font-size: 13.5px; letter-spacing: 0.02em;
+  caret-color: var(--clr-primary-hover);
+}
+.pf-input::placeholder { color: var(--clr-faint); }
+/* kill Chrome's white autofill background — keep the field dark + our text colour */
+.pf-input:-webkit-autofill,
+.pf-input:-webkit-autofill:hover,
+.pf-input:-webkit-autofill:focus,
+.pf-input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--clr-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--clr-bg) inset;
+          box-shadow: 0 0 0 1000px var(--clr-bg) inset;
+  caret-color: var(--clr-primary-hover);
+  font-family: var(--font-mono);
+  transition: background-color 9999s ease-out 0s;
+}
+/* verified state — Operator ID border locks green */
+.pf-input-wrap.ok { border-color: var(--clr-accent); }
+.pf-input-wrap.ok:focus-within { box-shadow: 0 0 0 3px var(--clr-accent-dim); }
+
+/* per-field verification chip (Operator ID) */
+.pf-verified {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; padding: 2px 8px; border-radius: var(--radius-pill, 99px);
+}
+.pf-verified.ok { color: var(--clr-accent); background: var(--clr-accent-dim); }
+.pf-verified.ok svg { display: block; }
+.pf-verified.pending { color: var(--clr-muted); }
+.pf-verified.pending i {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--clr-warning);
+  animation: pf-blink 1s steps(1) infinite;
+}
+
+/* access-key encryption meter (HUD gauge) */
+.pf-enc { display: flex; align-items: center; gap: 9px; margin-top: 9px; padding: 0 2px; }
+.pf-enc-label {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--clr-faint); white-space: nowrap;
+}
+.pf-enc-bars { display: flex; gap: 4px; flex: 1; }
+.pf-enc-bar {
+  flex: 1; height: 4px; border-radius: 2px; background: var(--clr-border);
+  transition: background 0.22s ease, box-shadow 0.22s ease;
+}
+.pf-enc-pct {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  text-transform: uppercase; min-width: 50px; text-align: right;
+}
+.pf-reveal {
+  flex-shrink: 0; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--clr-muted); cursor: pointer; user-select: none;
+  background: none; border: 0; padding: 4px;
+}
+.pf-reveal:hover { color: var(--clr-primary-hover); }
+
+.pf-cta {
+  width: 100%; margin-top: 8px; padding: 13px;
+  border: 0; border-radius: 10px; cursor: pointer;
+  background: linear-gradient(180deg, var(--clr-primary-hover), var(--clr-primary));
+  color: #04221d; font-family: var(--font-body); font-size: 14.5px; font-weight: 700;
+  letter-spacing: 0.01em; box-shadow: 0 8px 22px -8px rgba(21,184,160,0.6);
+  transition: transform var(--dur-fast,0.16s) var(--ease,ease), box-shadow var(--dur-fast,0.16s) var(--ease,ease);
+}
+.pf-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px -8px rgba(21,184,160,0.7); }
+.pf-cta:active { transform: translateY(0); }
+
+.pf-foot {
+  margin-top: 18px; text-align: center; font-size: 12.5px; color: var(--clr-muted);
+}
+.pf-foot b { color: var(--clr-primary-hover); cursor: pointer; font-weight: 600; }
+
+/* ── Clearance sequence overlay ──────────────────────────────────────────── */
+.pf-seq {
+  position: absolute; inset: 0; border-radius: 16px;
+  background: rgba(11,15,14,0.96); backdrop-filter: blur(2px);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 30px 30px; animation: pf-seq-in 0.25s ease both;
+}
+.pf-seq-log { font-family: var(--font-mono); font-size: 12px; line-height: 1.9; color: var(--clr-muted); }
+.pf-seq-log .ok { color: var(--clr-primary-hover); }
+.pf-seq-log .dim { color: var(--clr-faint); }
+.pf-seq-bar { height: 4px; border-radius: 2px; background: var(--clr-border); margin-top: 18px; overflow: hidden; }
+.pf-seq-bar i { display: block; height: 100%; background: var(--clr-primary-hover); border-radius: 2px; animation: pf-bar 1.6s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+.pf-granted {
+  position: absolute; inset: 0; border-radius: 16px;
+  background: rgba(11,15,14,0.97);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  text-align: center; padding: 30px;
+}
+.pf-stamp {
+  font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.14em;
+  font-size: 26px; color: var(--clr-accent); text-transform: uppercase;
+  border: 2px solid var(--clr-accent); border-radius: 12px; padding: 12px 22px;
+  box-shadow: 0 0 30px var(--clr-accent-dim), inset 0 0 24px var(--clr-accent-dim);
+  animation: pf-stamp 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.pf-granted-sub { font-size: 13px; color: var(--clr-muted); max-width: 300px; line-height: 1.55; animation: pf-cursor 0.4s ease 0.3s both; }
+
+/* ── Keyframes ───────────────────────────────────────────────────────────── */
+@keyframes pf-rise   { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes pf-glow   { from { opacity: 0.7; } to { opacity: 1; } }
+@keyframes pf-scan   { from { background-position: 0 0; } to { background-position: 0 240px; } }
+@keyframes pf-blink  { 0%,55% { opacity: 1; } 56%,100% { opacity: 0.25; } }
+@keyframes pf-cursor { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+@keyframes capcom-wave { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+@keyframes pf-bar    { from { width: 0; } to { width: 100%; } }
+@keyframes pf-seq-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pf-stamp  { from { opacity: 0; transform: scale(0.7) rotate(-4deg); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-bg-scan, .pf-bg-glow, .capcom-avatar i, .pf-live i { animation: none !important; }
+}
+
+/* ── Small screens ───────────────────────────────────────────────────────── */
+@media (max-width: 540px) {
+  .pf-topbar { padding: 14px 16px; }
+  .pf-tele .pf-hide-sm { display: none; }
+  .pf-console { padding: 24px 20px 22px; }
+}
