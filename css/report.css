@@ -48,7 +48,7 @@
 
 /* ---- toolbar -------------------------------------------------------------- */
 .rc-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
-.rc-bar-cat { display: flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rc-ink-soft); }
+.rc-bar-cat { display: flex; align-items: center; gap: 9px; font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rc-ink-soft); }
 .rc-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rc-accent); box-shadow: 0 0 0 4px var(--rc-accent-dim); flex-shrink: 0; }
 .rc-bar-tools { display: flex; gap: 8px; }
 .rc-tool { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--rc-ink-soft); background: transparent; border: 1px solid var(--rc-hair); border-radius: 99px; padding: 6px 13px; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
@@ -57,14 +57,14 @@
 .rc-tool-dl:hover { color: #052b26; filter: brightness(1.07); }
 
 /* ---- masthead ------------------------------------------------------------- */
-.rc-eyebrow { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--rc-accent-ink); margin-bottom: 9px; }
-.rc-h1 { font-family: var(--font-display); font-weight: 600; font-size: 38px; line-height: 1.04; letter-spacing: -0.01em; color: var(--rc-ink); margin: 0 0 9px; }
+.rc-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rc-accent-ink); margin-bottom: 9px; }
+.rc-h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.12; letter-spacing: -0.02em; color: var(--rc-ink); margin: 0 0 9px; }
 .rc-mast-meta { font-size: 12.5px; color: var(--rc-ink-faint); }
 .rc-rule { height: 2px; background: linear-gradient(90deg, var(--rc-accent), transparent); border-radius: 2px; margin: 22px 0 24px; }
 
 /* ---- verdict (the hero) --------------------------------------------------- */
 .rc-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rc-ink-faint); margin-bottom: 11px; }
-.rc-verdict { font-family: var(--font-display); font-weight: 500; font-size: 25px; line-height: 1.42; letter-spacing: -0.004em; color: var(--rc-ink); margin: 0; }
+.rc-verdict { font-family: var(--font-display); font-weight: 500; font-size: 19px; line-height: 1.55; letter-spacing: -0.005em; color: var(--rc-ink); margin: 0; }
 
 /* ---- section heads -------------------------------------------------------- */
 .rc-sec { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--rc-ink-faint); margin: 30px 0 15px; padding-top: 20px; border-top: 1px solid var(--rc-hair); }
@@ -79,7 +79,7 @@
 /* ---- the detail: stats + findings ----------------------------------------- */
 .rc-stats { display: flex; gap: 10px; margin-bottom: 22px; }
 .rc-stat { flex: 1; background: var(--rc-panel); border: 1px solid var(--rc-hair); border-radius: 10px; padding: 13px 15px; }
-.rc-stat-v { font-family: var(--font-display); font-weight: 600; font-size: 25px; color: var(--rc-ink); line-height: 1; }
+.rc-stat-v { font-family: var(--font-display); font-weight: 700; font-size: 22px; letter-spacing: -0.01em; color: var(--rc-ink); line-height: 1; }
 .rc-stat-l { font-size: 11px; color: var(--rc-ink-soft); margin-top: 6px; }
 .rc-findings { display: flex; flex-direction: column; gap: 17px; }
 .rc-finding-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 5px; }
@@ -196,8 +196,8 @@
 /* ---- mission report roster (dark landing — browse past scans) --------------- */
 .rr { --rr-accent: var(--clr-primary); }
 .rr-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
-.rr-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clr-muted); }
-.rr-title { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--clr-text); margin: 6px 0 0; line-height: 1.05; }
+.rr-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clr-muted); }
+.rr-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--clr-text); margin: 6px 0 0; line-height: 1.12; }
 .rr-list { display: flex; flex-direction: column; gap: 12px; }
 .rr-card { display: flex; align-items: stretch; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s ease, transform 0.15s ease; animation: rc-acc-reveal 0.35s var(--ease) both; }
 .rr-card:hover { border-color: color-mix(in srgb, var(--rr-accent) 45%, var(--clr-border)); transform: translateY(-1px); }
@@ -220,7 +220,7 @@
 /* stat-card overview — the glance shown before the full report */
 .rc-ov { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 4px 0 22px; }
 .rc-ov-card { background: var(--rc-panel); border: 1px solid var(--rc-hair); border-radius: 14px; padding: 17px 18px; }
-.rc-ov-v { font-family: var(--font-display); font-weight: 600; font-size: 33px; line-height: 1.02; letter-spacing: -0.01em; color: var(--rc-ink); }
+.rc-ov-v { font-family: var(--font-display); font-weight: 700; font-size: 27px; line-height: 1.08; letter-spacing: -0.015em; color: var(--rc-ink); }
 .rc-ov-l { font-size: 12.5px; color: var(--rc-ink-soft); margin-top: 9px; }
 .rc-ov-n { font-size: 12.5px; font-weight: 600; margin-top: 7px; }
 .rc-ov-n.good { color: #12876f; }

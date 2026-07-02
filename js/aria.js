@@ -557,7 +557,7 @@
      after all three strategy pillars (Intelligence / Audience / Tasks) are done.
      Props: { earned, goal, strategyCards, onStart }
   ═══════════════════════════════════════════════════════════════════ */
-  var DC_LINE = "Strategy locked and loaded. You know exactly who you’re talking to, why they care, and what you need to say. Time to make something they won’t forget.";
+  var DC_LINE = "Strategy locked in. You know exactly who you’re talking to, why they care, and what you need to say. Time to make something they won’t forget.";
   var DC_LS   = 'clarity_director_seen';
 
   function DirectorsCall(props) {

@@ -1,7 +1,9 @@
 /* ============================================================================
-   auth.css — "Pre-flight Clearance" login + CAPCOM comms-HUD
-   Mission-control cinematic. Uses the existing dark Jade & Ember token system.
-   Prefix: pf-  (pre-flight)  /  capcom-  (the handler)
+   auth.css — the welcome screen + the shared "Clarity speaks" voice system.
+   Journey tone: soft breathing glow (no grid/scanlines), first-person serif
+   guidance, signature-underline milestones. Dark Jade & Ember token system.
+   Prefix: pf-  (kept for compatibility across screens)
+   capcom-  (legacy class names — now the unattributed voice strip)
    ========================================================================== */
 
 /* ── Root / console backdrop ─────────────────────────────────────────────── */
@@ -14,32 +16,22 @@
   overflow: hidden;
   padding: 24px;
 }
-/* layered ambience: ember + jade glows, console grid, vignette */
+/* layered ambience: a slow-breathing jade glow with a faint ember warmth.
+   Journey pass — the console grid + CRT scanlines are retired; the DOM nodes
+   still render on every screen, so they are simply switched off here. */
 .pf-bg { position: absolute; inset: 0; pointer-events: none; }
 .pf-bg-glow {
   position: absolute; inset: -20%;
   background:
-    radial-gradient(40% 50% at 18% 14%, rgba(43,212,187,0.16), transparent 70%),
-    radial-gradient(46% 56% at 86% 92%, rgba(21,184,160,0.13), transparent 72%);
-  animation: pf-glow 9s ease-in-out infinite alternate;
+    radial-gradient(42% 52% at 18% 12%, rgba(43,212,187,0.15), transparent 70%),
+    radial-gradient(46% 56% at 86% 92%, rgba(21,184,160,0.10), transparent 72%),
+    radial-gradient(38% 46% at 80% 16%, rgba(255,111,77,0.055), transparent 75%);
+  animation: pf-glow 12s ease-in-out infinite alternate;
 }
-.pf-bg-grid {
-  position: absolute; inset: 0; opacity: 0.5;
-  background-image:
-    linear-gradient(var(--clr-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--clr-border) 1px, transparent 1px);
-  background-size: 46px 46px;
-  -webkit-mask-image: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%);
-          mask-image: radial-gradient(70% 70% at 50% 50%, #000 30%, transparent 100%);
-}
-.pf-bg-scan {
-  position: absolute; inset: 0; opacity: 0.5;
-  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
-  animation: pf-scan 8s linear infinite;
-}
+.pf-bg-grid, .pf-bg-scan { display: none; }
 .pf-bg-vignette {
   position: absolute; inset: 0;
-  box-shadow: inset 0 0 240px 40px rgba(0,0,0,0.65);
+  box-shadow: inset 0 0 180px 20px rgba(0,0,0,0.38);
 }
 
 /* ── Top status bar ──────────────────────────────────────────────────────── */
@@ -47,11 +39,12 @@
   position: absolute; top: 0; left: 0; right: 0;
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 26px;
-  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.12em;
-  color: var(--clr-muted); text-transform: uppercase;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500; letter-spacing: 0.03em;
+  color: var(--clr-muted);
 }
+/* the one place the brand serif survives — the wordmark */
 .pf-wordmark {
-  font-family: var(--font-display); font-size: 22px; font-weight: 700;
+  font-family: var(--font-brand, var(--font-display)); font-size: 22px; font-weight: 700;
   letter-spacing: 0; text-transform: none; color: var(--clr-text);
 }
 .pf-wordmark b { color: var(--clr-primary); }
@@ -75,59 +68,38 @@
   animation: pf-rise 0.6s cubic-bezier(0.2,0.8,0.3,1) both;
   backdrop-filter: blur(4px);
 }
-/* HUD corner brackets */
-.pf-corner { position: absolute; width: 16px; height: 16px; border: 2px solid var(--clr-primary-hover); opacity: 0.7; }
-.pf-corner.tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; border-radius: 4px 0 0 0; }
-.pf-corner.tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; border-radius: 0 4px 0 0; }
-.pf-corner.bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; border-radius: 0 0 0 4px; }
-.pf-corner.br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; border-radius: 0 0 4px 0; }
+/* journey pass — HUD corner brackets retired (nodes may still render) */
+.pf-corner { display: none; }
 
 .pf-stage {
-  font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--clr-muted); margin-bottom: 16px;
+  font-family: var(--font-body); font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em;
+  color: var(--clr-muted); margin-bottom: 16px;
   display: flex; align-items: center; gap: 8px;
 }
 .pf-stage b { color: var(--clr-primary-hover); font-weight: 500; }
 
-/* ── CAPCOM comms-HUD ────────────────────────────────────────────────────── */
+/* ── The voice of Clarity ────────────────────────────────────────────────────
+   Journey pass: the guidance strip is unattributed — no avatar, no nameplate,
+   no telemetry. Legacy .capcom class names are kept so every screen that
+   renders the old markup restyles at once; the spoken line carries the moment
+   in the display serif, first person. */
 .capcom {
   display: flex; gap: 13px; align-items: flex-start;
   background: var(--clr-card-2); border: 1px solid var(--clr-border);
   border-left: 3px solid var(--clr-primary-hover);
-  border-radius: 12px; padding: 13px 15px; margin-bottom: 22px;
+  border-radius: 12px; padding: 14px 17px; margin-bottom: 22px;
 }
-.capcom-avatar {
-  flex-shrink: 0; width: 42px; height: 42px; border-radius: 10px;
-  background: radial-gradient(circle at 50% 35%, rgba(43,212,187,0.28), rgba(43,212,187,0.06));
-  border: 1px solid var(--clr-primary-dim);
-  display: flex; align-items: center; justify-content: center; gap: 2.5px;
-  overflow: hidden;
-}
-.capcom-avatar i {
-  width: 3px; border-radius: 2px; background: var(--clr-primary-hover);
-  animation: capcom-wave 1s ease-in-out infinite;
-}
-.capcom-avatar i:nth-child(1) { height: 10px; animation-delay: 0s; }
-.capcom-avatar i:nth-child(2) { height: 20px; animation-delay: 0.12s; }
-.capcom-avatar i:nth-child(3) { height: 14px; animation-delay: 0.24s; }
-.capcom-avatar i:nth-child(4) { height: 22px; animation-delay: 0.36s; }
-.capcom-avatar i:nth-child(5) { height: 9px;  animation-delay: 0.48s; }
-.capcom.idle .capcom-avatar i { animation-play-state: paused; height: 6px; }
-
+.capcom-avatar, .capcom-name { display: none; }
 .capcom-body { flex: 1; min-width: 0; }
-.capcom-name {
-  display: flex; align-items: center; gap: 8px; margin-bottom: 3px;
+.capcom-line {
+  font-family: var(--font-body); font-style: italic; font-weight: 500;
+  font-size: 14.5px; line-height: 1.55; color: var(--clr-text); min-height: 23px;
 }
-.capcom-name b {
-  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.16em; color: var(--clr-primary-hover); text-transform: uppercase;
+.pf-cursor {
+  color: var(--clr-primary-hover); opacity: 0.85; font-size: 0.68em;
+  font-style: normal; font-weight: 400;
+  animation: pf-cursor 1s steps(1) infinite;
 }
-.capcom-name span {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
-  color: var(--clr-faint); text-transform: uppercase;
-}
-.capcom-line { font-size: 13px; line-height: 1.5; color: var(--clr-text); min-height: 19px; }
-.pf-cursor { color: var(--clr-primary-hover); animation: pf-cursor 1s steps(1) infinite; font-weight: 400; }
 
 /* ── Clearance panel ─────────────────────────────────────────────────────── */
 .pf-google {
@@ -141,8 +113,8 @@
 
 .pf-divider {
   display: flex; align-items: center; gap: 12px; margin: 18px 0;
-  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.16em;
-  text-transform: uppercase; color: var(--clr-faint); white-space: nowrap;
+  font-family: var(--font-body); font-size: 11.5px; letter-spacing: 0.02em;
+  color: var(--clr-faint); white-space: nowrap;
 }
 .pf-divider::before, .pf-divider::after {
   content: ''; flex: 1; height: 1px; background: var(--clr-border);
@@ -151,8 +123,8 @@
 .pf-field { margin-bottom: 14px; }
 .pf-label {
   display: flex; align-items: center; justify-content: space-between;
-  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--clr-muted); margin-bottom: 7px;
+  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  letter-spacing: 0.02em; color: var(--clr-muted); margin-bottom: 7px;
 }
 .pf-label .pf-prompt { color: var(--clr-primary-hover); margin-right: 5px; }
 .pf-label a { color: var(--clr-primary-hover); cursor: pointer; text-transform: none; letter-spacing: 0; font-size: 11px; }
@@ -169,7 +141,7 @@
 .pf-input {
   flex: 1; background: transparent; border: 0; outline: 0;
   padding: 12px 0; color: var(--clr-text);
-  font-family: var(--font-mono); font-size: 13.5px; letter-spacing: 0.02em;
+  font-family: var(--font-body); font-size: 14px; letter-spacing: 0.01em;
   caret-color: var(--clr-primary-hover);
 }
 .pf-input::placeholder { color: var(--clr-faint); }
@@ -182,18 +154,18 @@
   -webkit-box-shadow: 0 0 0 1000px var(--clr-bg) inset;
           box-shadow: 0 0 0 1000px var(--clr-bg) inset;
   caret-color: var(--clr-primary-hover);
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   transition: background-color 9999s ease-out 0s;
 }
-/* verified state — Operator ID border locks green */
+/* verified state — email border settles green */
 .pf-input-wrap.ok { border-color: var(--clr-accent); }
 .pf-input-wrap.ok:focus-within { box-shadow: 0 0 0 3px var(--clr-accent-dim); }
 
-/* per-field verification chip (Operator ID) */
+/* per-field confirmation chip (email) */
 .pf-verified {
   display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em;
-  text-transform: uppercase; padding: 2px 8px; border-radius: var(--radius-pill, 99px);
+  font-family: var(--font-body); font-size: 10.5px; letter-spacing: 0.02em;
+  padding: 2px 8px; border-radius: var(--radius-pill, 99px);
 }
 .pf-verified.ok { color: var(--clr-accent); background: var(--clr-accent-dim); }
 .pf-verified.ok svg { display: block; }
@@ -203,11 +175,11 @@
   animation: pf-blink 1s steps(1) infinite;
 }
 
-/* access-key encryption meter (HUD gauge) */
+/* password strength meter */
 .pf-enc { display: flex; align-items: center; gap: 9px; margin-top: 9px; padding: 0 2px; }
 .pf-enc-label {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em;
-  text-transform: uppercase; color: var(--clr-faint); white-space: nowrap;
+  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.02em;
+  color: var(--clr-faint); white-space: nowrap;
 }
 .pf-enc-bars { display: flex; gap: 4px; flex: 1; }
 .pf-enc-bar {
@@ -215,12 +187,12 @@
   transition: background 0.22s ease, box-shadow 0.22s ease;
 }
 .pf-enc-pct {
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; min-width: 50px; text-align: right;
+  font-family: var(--font-body); font-size: 10px; letter-spacing: 0.02em;
+  min-width: 50px; text-align: right;
 }
 .pf-reveal {
-  flex-shrink: 0; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--clr-muted); cursor: pointer; user-select: none;
+  flex-shrink: 0; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.02em;
+  color: var(--clr-muted); cursor: pointer; user-select: none;
   background: none; border: 0; padding: 4px;
 }
 .pf-reveal:hover { color: var(--clr-primary-hover); }
@@ -241,14 +213,14 @@
 }
 .pf-foot b { color: var(--clr-primary-hover); cursor: pointer; font-weight: 600; }
 
-/* ── Clearance sequence overlay ──────────────────────────────────────────── */
+/* ── "One moment" overlay — Clarity thinking aloud ───────────────────────── */
 .pf-seq {
   position: absolute; inset: 0; border-radius: 16px;
   background: rgba(11,15,14,0.96); backdrop-filter: blur(2px);
   display: flex; flex-direction: column; justify-content: center;
   padding: 30px 30px; animation: pf-seq-in 0.25s ease both;
 }
-.pf-seq-log { font-family: var(--font-mono); font-size: 12px; line-height: 1.9; color: var(--clr-muted); }
+.pf-seq-log { font-family: var(--font-body); font-size: 13.5px; line-height: 2; color: var(--clr-muted); }
 .pf-seq-log .ok { color: var(--clr-primary-hover); }
 .pf-seq-log .dim { color: var(--clr-faint); }
 .pf-seq-bar { height: 4px; border-radius: 2px; background: var(--clr-border); margin-top: 18px; overflow: hidden; }
@@ -260,28 +232,36 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
   text-align: center; padding: 30px;
 }
+/* milestone moment — a plain sentence Clarity signs off with an underline draw
+   (echoes the handwritten boot-loader signature; shared by every screen) */
 .pf-stamp {
-  font-family: var(--font-mono); font-weight: 500; letter-spacing: 0.14em;
-  font-size: 26px; color: var(--clr-accent); text-transform: uppercase;
-  border: 2px solid var(--clr-accent); border-radius: 12px; padding: 12px 22px;
-  box-shadow: 0 0 30px var(--clr-accent-dim), inset 0 0 24px var(--clr-accent-dim);
-  animation: pf-stamp 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  position: relative;
+  font-family: var(--font-display); font-style: italic; font-weight: 600;
+  font-size: 24px; letter-spacing: -0.01em; color: var(--clr-text);
+  padding: 4px 10px 16px;
+  animation: pf-stamp 0.55s cubic-bezier(0.2,0.8,0.3,1) both;
+}
+.pf-stamp::after {
+  content: ''; position: absolute; left: 6px; right: 6px; bottom: 8px; height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--clr-reward) 14%, var(--clr-reward) 86%, transparent);
+  transform-origin: left center;
+  animation: pf-sign 0.7s cubic-bezier(0.3,0.8,0.3,1) 0.35s both;
 }
 .pf-granted-sub { font-size: 13px; color: var(--clr-muted); max-width: 300px; line-height: 1.55; animation: pf-cursor 0.4s ease 0.3s both; }
 
 /* ── Keyframes ───────────────────────────────────────────────────────────── */
 @keyframes pf-rise   { from { opacity: 0; transform: translateY(18px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes pf-glow   { from { opacity: 0.7; } to { opacity: 1; } }
-@keyframes pf-scan   { from { background-position: 0 0; } to { background-position: 0 240px; } }
 @keyframes pf-blink  { 0%,55% { opacity: 1; } 56%,100% { opacity: 0.25; } }
 @keyframes pf-cursor { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
-@keyframes capcom-wave { 0%,100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
 @keyframes pf-bar    { from { width: 0; } to { width: 100%; } }
 @keyframes pf-seq-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes pf-stamp  { from { opacity: 0; transform: scale(0.7) rotate(-4deg); } to { opacity: 1; transform: none; } }
+@keyframes pf-stamp  { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes pf-sign   { from { transform: scaleX(0); opacity: 0.5; } to { transform: scaleX(1); opacity: 1; } }
 
 @media (prefers-reduced-motion: reduce) {
-  .pf-bg-scan, .pf-bg-glow, .capcom-avatar i, .pf-live i { animation: none !important; }
+  .pf-bg-glow, .pf-live i { animation: none !important; }
 }
 
 /* ── Small screens ───────────────────────────────────────────────────────── */

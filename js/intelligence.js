@@ -1,9 +1,9 @@
 /* ============================================================================
-   intelligence.js — "Command Deck" (post-onboarding home, Intelligence layer)
-   Exposes window.ClarityIntel({ profile }). Mission-control / CAPCOM / teal.
-   Reimagines the reference Dashboard (4.png) as a game-like recon hub. Mission
-   flows (Market scan w/ world-map, Customers, Competition, Try-a-New-Idea,
-   Reports) are built next; mission cards currently open a briefing placeholder.
+   intelligence.js — "The groundwork" (post-onboarding home, research layer)
+   Exposes window.ClarityIntel({ profile }). Journey tone: warm first-person
+   guidance, three get-to-know-your-ground steps, then the plan comes together.
+   Step flows (Market w/ world-map, Customers, Competition, Reports) live in
+   their own modules; unbuilt steps open a friendly placeholder.
    ========================================================================== */
 (function () {
   'use strict';
@@ -11,27 +11,24 @@
   var e = React.createElement;
   function Icon(props) { var NS = window.ClarityDesignSystem_29c088 || {}; return NS.Icon ? e(NS.Icon, props) : null; }
 
-  var RANKS = [{ min: 0, label: 'Rookie' }, { min: 80, label: 'Strategist' }, { min: 180, label: 'Creator' }, { min: 300, label: 'Master' }];
-  function rankFor(xp) { var r = RANKS[0]; for (var i = 0; i < RANKS.length; i++) if (xp >= RANKS[i].min) r = RANKS[i]; return r; }
-
   var PHASES = ['Plan', 'Launch', 'Grow', 'Scale'];
 
   var MISSIONS = [
-    { id: 'market',      icon: 'Radar',     title: 'My Market',      mission: 'Scan the market',        cta: 'Run scan', rec: true,
-      desc: 'Map your local landscape, competitors and live demand signals.' },
-    { id: 'customers',   icon: 'Users',     title: 'My Customers',   mission: 'Sketch your customers',  cta: 'Sketch',
+    { id: 'market',      icon: 'Map',   title: 'My Market',      mission: 'Understand your market',      cta: 'Start the research', rec: true,
+      desc: 'See your local landscape, who is in it, and what people are asking for.' },
+    { id: 'customers',   icon: 'Users', title: 'My Customers',   mission: 'Sketch your customers',       cta: 'Sketch',
       desc: 'Build sharp sketches of exactly who you are selling to.' },
-    { id: 'competition', icon: 'Crosshair', title: 'Competition',    mission: 'Scout the competition', cta: 'Scout',
-      desc: 'Size up who you are up against — and where the gaps are.' }
+    { id: 'competition', icon: 'Store', title: 'Competition',    mission: 'See who’s already out there', cta: 'Take a look',
+      desc: 'See where the others are strong — and where the gaps are.' }
   ];
   var STATS = [
-    { id: 'market',      icon: 'Radar',     label: 'Market scans' },
-    { id: 'customers',   icon: 'Users',     label: 'Customer sketches' },
-    { id: 'competition', icon: 'Crosshair', label: 'Competitors' }
+    { id: 'market',      icon: 'Map',   label: 'Market reports' },
+    { id: 'customers',   icon: 'Users', label: 'Customer sketches' },
+    { id: 'competition', icon: 'Store', label: 'Competitors' }
   ];
 
-  /* CAPCOM comms strip with a typewriter line (reuses .capcom styles) */
-  function Capcom(props) {
+  /* the voice of Clarity — unattributed typewriter line (reuses .capcom styles) */
+  function Voice(props) {
     var line = props.line;
     var ty = React.useState(''); var typed = ty[0], setTyped = ty[1];
     var dn = React.useState(false); var done = dn[0], setDone = dn[1];
@@ -41,9 +38,7 @@
       return function () { clearInterval(iv); };
     }, [line]);
     return e('div', { className: 'capcom' },
-      e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
       e('div', { className: 'capcom-body' },
-        e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
         e('div', { className: 'capcom-line' }, typed, !done && e('span', { className: 'pf-cursor' }, '▉'))
       )
     );
@@ -51,24 +46,18 @@
 
   function deckBg() {
     return e('div', { className: 'pf-bg' },
-      e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }),
-      e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' }));
+      e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' }));
   }
-  function deckTopbar(rank, xp) {
+  function deckTopbar() {
     return e('div', { className: 'pf-topbar' },
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
         e('span', { className: 'pf-wordmark' }, 'Clarity'),
-        e('span', { className: 'pf-hide-sm' }, 'Mission Control // Command Deck')
-      ),
-      e('div', { className: 'pf-tele' },
-        /* per-idea rank badge removed — the global XP HUD (top-right) is the single source of level/XP */
-        e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'),
-        e('span', { className: 'pf-live' }, e('i', null), 'Live')
+        e('span', { className: 'pf-hide-sm' }, 'Your journey · The groundwork')
       )
     );
   }
 
-  /* Level-up milestone — fires once when all three recon missions are complete */
+  /* Milestone — fires once when all three groundwork steps are complete */
   function LevelUpOverlay(props) {
     return e('div', { className: 'sp-lu', onClick: props.onClose },
       e('div', { className: 'sp-lu-card', onClick: function (ev) { ev.stopPropagation(); } },
@@ -77,8 +66,7 @@
         e('div', { className: 'sp-lu-eyebrow' }, 'Milestone'),
         e('div', { className: 'sp-lu-badge' }, e(Icon, { name: 'Trophy', size: 32 })),
         e('div', { className: 'sp-lu-title' }, 'Level up'),
-        e('div', { className: 'sp-lu-sub' }, 'All recon complete, operator. Your ', e('b', null, 'Strategic Plan'), ' is unlocked.'),
-        e('div', { className: 'sp-lu-rank' }, e(Icon, { name: 'Shield', size: 13 }), 'Rank · ', props.rankLabel),
+        e('div', { className: 'sp-lu-sub' }, 'The groundwork is done — you know your ground. Your ', e('b', null, 'Strategic Plan'), ' is ready to come together.'),
         e('div', { className: 'sp-lu-actions' },
           e('button', { className: 'pf-cta', onClick: props.onAssemble }, 'Assemble my plan →'),
           e('button', { className: 'sp-lu-later', onClick: props.onClose }, 'Later'))));
@@ -97,7 +85,6 @@
     var lu = React.useState(false); var levelUp = lu[0], setLevelUp = lu[1];   /* recon-complete celebration */
     var reconRef = React.useRef(!!(savedIdea.missions && savedIdea.missions.market && savedIdea.missions.customers && savedIdea.missions.competition));
 
-    var rank = rankFor(xp);
     function cnt(id) { var d = done[id]; if (!d) return 0; if (d.reports) return d.reports.length; if (d.sketches) return d.sketches.length; return d.count || 1; }
     var counts = { market: cnt('market'), customers: cnt('customers'), competition: cnt('competition') };
 
@@ -123,7 +110,7 @@
     if (sel === 'market' && window.ClarityMarketMission) {
       return e(window.ClarityMarketMission, {
         profile: profile, result: done.market || null,
-        onComplete: function (r) { if (r && r.xp) { missionDone('market', 'Market scan', r); } else { setDone(function (d) { return Object.assign({}, d, { market: r }); }); } },
+        onComplete: function (r) { if (r && r.xp) { missionDone('market', 'Market research', r); } else { setDone(function (d) { return Object.assign({}, d, { market: r }); }); } },
         onBack: function () { setSel(null); }
       });
     }
@@ -144,7 +131,7 @@
     if (sel === 'competition' && window.ClarityCompetitionMission) {
       return e(window.ClarityCompetitionMission, {
         profile: profile, result: done.competition || null,
-        onComplete: function (r) { if (r && r.xp) { missionDone('competition', 'Competitor scan', r); } else { setDone(function (d) { return Object.assign({}, d, { competition: r }); }); } },
+        onComplete: function (r) { if (r && r.xp) { missionDone('competition', 'Competition research', r); } else { setDone(function (d) { return Object.assign({}, d, { competition: r }); }); } },
         onBack: function () { setSel(null); }
       });
     }
@@ -158,45 +145,45 @@
       });
     }
 
-    /* ── Mission briefing placeholder (until the other recon flows are built) ── */
+    /* ── Step placeholder (until the other research flows are built) ── */
     if (sel) {
       var m = MISSIONS.filter(function (x) { return x.id === sel; })[0] || {};
-      return e('div', { className: 'id-root' }, deckBg(), deckTopbar(rank, xp),
+      return e('div', { className: 'id-root' }, deckBg(), deckTopbar(),
         e('div', { className: 'id-main' },
-          e('button', { className: 'id-back', onClick: function () { setSel(null); } }, '‹ Back to deck'),
+          e('button', { className: 'id-back', onClick: function () { setSel(null); } }, '‹ Back'),
           e('div', { className: 'id-briefing' },
             e('div', { className: 'id-brief-ic' }, e(Icon, { name: m.icon, size: 30 })),
-            e('div', { className: 'id-eyebrow' }, 'Recon mission'),
+            e('div', { className: 'id-eyebrow' }, 'Coming up'),
             e('h2', { className: 'id-brief-title' }, m.mission),
-            e(Capcom, { line: 'Stand by — the ' + m.title + ' recon flow is coming online next, operator.' }),
-            e('div', { className: 'id-brief-note' }, 'This mission is being prepped. Hang tight.')
+            e(Voice, { line: 'Hang on — the ' + m.title + ' step is still being built.' }),
+            e('div', { className: 'id-brief-note' }, 'This part is on its way. Check back soon.')
           )
         )
       );
     }
 
-    /* ── Command Deck ── */
-    var greet = (op ? op + ' is on the board. ' : '') + 'Strategy first, operator — run recon and gather intel before we build.';
-    return e('div', { className: 'id-root' }, deckBg(), deckTopbar(rank, xp),
+    /* ── The groundwork (home) ── */
+    var greet = (op ? 'So — ' + op + '. ' : '') + 'Before we build anything, let’s understand the ground you’re standing on.';
+    return e('div', { className: 'id-root' }, deckBg(), deckTopbar(),
       e('div', { className: 'id-main' },
-        props.onExit && e('button', { className: 'id-back', onClick: props.onExit }, '‹ Hub'),
+        props.onExit && e('button', { className: 'id-back', onClick: props.onExit }, '‹ Home base'),
         e('div', { className: 'id-head' },
-          e('div', { className: 'id-eyebrow' }, 'Mission Control // Command Deck'),
-          e('h1', { className: 'id-title' }, 'Command Deck'),
-          e('p', { className: 'id-sub' }, 'Strategy first. Run recon, gather intel, then we build.')
+          e('div', { className: 'id-eyebrow' }, 'Your journey'),
+          e('h1', { className: 'id-title' }, 'The groundwork'),
+          e('p', { className: 'id-sub' }, 'Get to know your market, your customers and the landscape — then your plan writes itself.')
         ),
 
-        e(Capcom, { line: greet }),
+        e(Voice, { line: greet }),
 
         goal && e('div', { className: 'id-directive' },
           e(Icon, { name: 'Target', size: 15 }),
-          e('span', { className: 'id-directive-label' }, 'Primary directive'),
+          e('span', { className: 'id-directive-label' }, 'Your goal'),
           e('span', { className: 'id-directive-val' }, goal)
         ),
 
         /* journey tracker */
         e('div', { className: 'id-journey' },
-          e('div', { className: 'id-journey-head' }, e('span', null, 'Your journey'), e('span', { className: 'id-journey-phase' }, 'Phase · Plan')),
+          e('div', { className: 'id-journey-head' }, e('span', null, 'The road ahead'), e('span', { className: 'id-journey-phase' }, 'You are here · Plan')),
           e('div', { className: 'id-phases' },
             PHASES.map(function (p, i) {
               return e('div', { key: p, className: 'id-phase' + (i === 0 ? ' active' : '') },
@@ -214,14 +201,14 @@
           })
         ),
 
-        /* recon missions */
-        e('div', { className: 'id-section-label' }, 'Recon missions'),
+        /* the three groundwork steps */
+        e('div', { className: 'id-section-label' }, 'Three things to learn'),
         e('div', { className: 'id-missions' },
           MISSIONS.map(function (mn) {
             return e('button', { key: mn.id, className: 'id-mission' + (mn.rec ? ' rec' : ''), onClick: function () { setSel(mn.id); } },
               e('div', { className: 'id-mission-top' },
                 e('div', { className: 'id-mission-ic' }, e(Icon, { name: mn.icon, size: 20 })),
-                e('span', { className: 'id-mission-chip' + (done[mn.id] ? ' ok' : mn.rec ? ' rec' : '') }, done[mn.id] ? 'Done ✓' : mn.rec ? 'Start here' : 'Not run')
+                e('span', { className: 'id-mission-chip' + (done[mn.id] ? ' ok' : mn.rec ? ' rec' : '') }, done[mn.id] ? 'Done ✓' : mn.rec ? 'Start here' : 'Waiting')
               ),
               e('div', { className: 'id-mission-title' }, mn.title),
               e('div', { className: 'id-mission-sub' }, mn.mission),
@@ -231,27 +218,27 @@
           })
         ),
 
-        /* capstone — the synthesis (locked until all three recon missions are done) */
-        e('div', { className: 'id-section-label' }, 'Capstone'),
+        /* the plan — where it all comes together (opens after the three steps) */
+        e('div', { className: 'id-section-label' }, 'Then it comes together'),
         (function () {
           var unlocked = reconComplete || done.plan;
           var n = (done.market ? 1 : 0) + (done.customers ? 1 : 0) + (done.competition ? 1 : 0);
           return e('button', { className: 'id-mission id-capstone' + (unlocked ? '' : ' locked'), onClick: unlocked ? function () { setSel('plan'); } : undefined },
             e('div', { className: 'id-mission-top' },
               e('div', { className: 'id-mission-ic' }, e(Icon, { name: unlocked ? 'FileText' : 'Lock', size: 20 })),
-              e('span', { className: 'id-mission-chip' + (done.plan ? ' ok' : unlocked ? ' rec' : '') }, done.plan ? 'Done ✓' : unlocked ? 'Unlocked' : 'Locked · ' + n + '/3')),
+              e('span', { className: 'id-mission-chip' + (done.plan ? ' ok' : unlocked ? ' rec' : '') }, done.plan ? 'Done ✓' : unlocked ? 'Ready' : 'Opens at 3/3 · now ' + n)),
             e('div', { className: 'id-mission-title' }, 'Strategic Plan'),
-            e('div', { className: 'id-mission-sub' }, unlocked ? 'Your one combined report' : 'Complete all three recon missions to unlock'),
+            e('div', { className: 'id-mission-sub' }, unlocked ? 'Your one combined report' : 'Finish the three steps above and this opens'),
             e('div', { className: 'id-mission-desc' }, unlocked
-              ? 'Feeds Market, Customer and Competitor intel into one colour-coded plan you can read in a minute.'
-              : 'Run My Market, My Customers and My Competition — then synthesise them into a single strategic plan.'),
-            e('div', { className: 'id-mission-cta' }, unlocked ? ((done.plan ? 'Review' : 'Assemble') + ' →') : (n + ' of 3 complete')));
+              ? 'Everything you’ve learned, pulled into one colour-coded plan you can read in a minute.'
+              : 'Learn your market, your customers and the landscape — it all comes together here, in one plan.'),
+            e('div', { className: 'id-mission-cta' }, unlocked ? ((done.plan ? 'Review' : 'Assemble') + ' →') : (n + ' of 3 done')));
         })(),
 
-        /* recent ops */
-        e('div', { className: 'id-section-label' }, 'Recent ops'),
+        /* what you've done so far */
+        e('div', { className: 'id-section-label' }, 'What you’ve done so far'),
         jobs.length === 0
-          ? e('div', { className: 'id-ops' }, e(Icon, { name: 'Radio', size: 16 }), e('span', null, 'No scans run yet — deploy a recon mission to gather intel.'))
+          ? e('div', { className: 'id-ops' }, e(Icon, { name: 'Footprints', size: 16 }), e('span', null, 'Nothing yet — your market is the best place to start.'))
           : e('div', { className: 'id-opslist' },
               jobs.map(function (j, i) {
                 return e('div', { key: i, className: 'id-opsrow' },
@@ -261,7 +248,7 @@
               })
             )
       ),
-      levelUp && e(LevelUpOverlay, { rankLabel: rank.label, onAssemble: function () { setLevelUp(false); setSel('plan'); }, onClose: function () { setLevelUp(false); } })
+      levelUp && e(LevelUpOverlay, { onAssemble: function () { setLevelUp(false); setSel('plan'); }, onClose: function () { setLevelUp(false); } })
     );
   }
 

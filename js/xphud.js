@@ -74,12 +74,12 @@
         e('span', { className: 'xph-meta' },
           e('span', { className: 'xph-top' },
             e('span', { className: 'xph-lvl' }, 'Lv.' + cur.lvl),
-            e('span', { className: 'xph-rank', style: { color: cur.color } }, cur.label.toUpperCase())),
+            e('span', { className: 'xph-rank', style: { color: cur.color } }, cur.label)),
           e('span', { className: 'xph-xp' }, fmt(shown), ' XP')),
         e('span', { className: 'xph-caret' }, e(Icon, { name: open ? 'ChevronUp' : 'ChevronDown', size: 13 })),
         gain && e('span', { className: 'xph-glow' + (gain.rankUp ? ' up' : ''), key: 'glow' + gain.key }),
         gain && e('span', { className: 'xph-mote' + (gain.rankUp ? ' up' : ''), key: 'mote' + gain.key },
-          gain.rankUp ? ('LEVEL UP · ' + gain.rankLabel) : ('+' + gain.amount + ' XP'))),
+          gain.rankUp ? ('Level up · ' + gain.rankLabel) : ('+' + gain.amount + ' XP'))),
 
       /* expanded panel */
       open && e('div', { className: 'xph-backdrop', onClick: function () { setOpen(false); } }),
@@ -87,7 +87,7 @@
         e('div', { className: 'xph-panel-head' },
           e('span', { className: 'xph-panel-ico', style: { color: cur.color, background: 'color-mix(in srgb, ' + cur.color + ' 16%, transparent)' } }, e(Icon, { name: cur.icon, size: 17 })),
           e('div', { className: 'xph-panel-id' },
-            e('div', { className: 'xph-panel-rank', style: { color: cur.color } }, cur.label.toUpperCase()),
+            e('div', { className: 'xph-panel-rank', style: { color: cur.color } }, cur.label),
             e('div', { className: 'xph-panel-lvl' }, 'Level ' + cur.lvl)),
           e('div', { className: 'xph-panel-xp' }, fmt(total), e('span', null, ' XP'))),
 
@@ -106,7 +106,7 @@
               })
             : e('div', { className: 'xph-prow-empty' }, 'Start an idea to earn XP.')),
 
-        e('div', { className: 'xph-hint' }, e(Icon, { name: 'Zap', size: 12 }), 'Earn more — run recon, build a persona, or compare two ideas.'))
+        e('div', { className: 'xph-hint' }, e(Icon, { name: 'Zap', size: 12 }), 'Earn more — do the groundwork, meet a customer, or compare two ideas.'))
     );
   }
 

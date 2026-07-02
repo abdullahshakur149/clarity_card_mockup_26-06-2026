@@ -1,18 +1,18 @@
 /* ============================================================================
-   onboarding-decode.css — "Decode the Transmission" intake.
-   Mission-control dark, CAPCOM-led. One open prompt (speak / type / link) →
-   decode cinematic → auto-filled dossier. Reuses pf-* (auth.css) + .capcom.
-   Prefix: dt-
+   onboarding-decode.css — "Tell me about your idea" intake.
+   Journey tone: one open prompt (speak / type / link) → Clarity gets the
+   picture → your idea captured on cards. Reuses pf-* (auth.css) + .capcom
+   (the unattributed voice strip). Prefix: dt-
    ========================================================================== */
 
 .dt-root { position: relative; min-height: 100vh; width: 100%; overflow: hidden; color: var(--clr-text); }
 .dt-main { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; padding: 92px 24px 64px; }
 @media (max-width: 640px) { .dt-main { padding: 82px 18px 48px; } }
 
-.dt-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--clr-primary-hover); margin-bottom: 10px; }
-.dt-title { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: 1.05; letter-spacing: -0.01em; color: var(--clr-text); margin: 0 0 14px; }
+.dt-eyebrow { font-family: var(--font-body); font-size: 11.5px; font-weight: 600; letter-spacing: 0.04em; color: var(--clr-primary-hover); margin-bottom: 10px; }
+.dt-title { font-family: var(--font-display); font-weight: 700; font-size: 31px; line-height: 1.12; letter-spacing: -0.02em; color: var(--clr-text); margin: 0 0 14px; }
 .dt-sub { font-size: 14.5px; line-height: 1.6; color: var(--clr-muted); margin: 12px 0 20px; max-width: 460px; }
-@media (max-width: 640px) { .dt-title { font-size: 32px; } }
+@media (max-width: 640px) { .dt-title { font-size: 26px; } }
 
 /* mode switch */
 .dt-modes { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
@@ -33,7 +33,7 @@
 .dt-mic.live .dt-mic-rings::before, .dt-mic.live .dt-mic-rings::after { content: ''; position: absolute; inset: -1px; border-radius: 50%; border: 2px solid var(--clr-primary-hover); animation: dt-ring 1.5s ease-out infinite; }
 .dt-mic.live .dt-mic-rings::after { animation-delay: .55s; }
 @keyframes dt-ring { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.7); opacity: 0; } }
-.dt-mic-hint { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; color: var(--clr-muted); margin-top: 16px; }
+.dt-mic-hint { font-family: var(--font-body); font-size: 12px; letter-spacing: 0.02em; color: var(--clr-muted); margin-top: 16px; }
 .dt-transcript { margin-top: 16px; width: 100%; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; font-size: 15px; line-height: 1.5; color: var(--clr-text); text-align: left; min-height: 54px; }
 .dt-note { margin-top: 10px; font-size: 12px; color: var(--clr-warning); }
 
@@ -51,12 +51,13 @@
 .dt-cta { margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
 .dt-speak .dt-cta { margin-top: 18px; }
 
-/* ── decode cinematic ── */
+/* ── "getting the picture" moment (journey pass: no scanline — a soft light
+      breathes at the top of the card while Clarity thinks aloud) ── */
 .dt-decode { position: relative; margin-top: 20px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; padding: 22px; overflow: hidden; }
-.dt-decode-scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--clr-primary-hover), transparent); animation: dt-scanline 1.5s ease-in-out infinite; }
-@keyframes dt-scanline { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(200px); opacity: 0; } }
+.dt-decode-scan { position: absolute; left: 12%; right: 12%; top: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--clr-primary-hover), transparent); animation: dt-breathe 2.4s ease-in-out infinite; }
+@keyframes dt-breathe { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.85; } }
 .dt-decode-src { font-size: 13.5px; line-height: 1.6; color: var(--clr-faint); font-style: italic; max-height: 92px; overflow: hidden; margin-bottom: 16px; border-left: 2px solid var(--clr-primary-border); padding-left: 12px; }
-.dt-log { font-family: var(--font-mono); font-size: 12px; line-height: 1.95; color: var(--clr-muted); }
+.dt-log { font-family: var(--font-body); font-size: 13px; line-height: 2; color: var(--clr-muted); }
 .dt-log .live { color: var(--clr-primary-hover); }
 
 /* ── name follow-up ── */
@@ -65,16 +66,16 @@
 .dt-skip { margin-top: 14px; background: none; border: none; color: var(--clr-faint); font-size: 12.5px; cursor: pointer; }
 .dt-skip:hover { color: var(--clr-muted); }
 
-/* ── dossier ── */
+/* ── your idea, captured ── */
 .dt-acq { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.dt-acq-stamp { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-primary-hover); border: 1px solid var(--clr-primary-border); background: var(--clr-primary-dim); border-radius: 99px; padding: 5px 12px; }
+.dt-acq-stamp { font-family: var(--font-body); font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; color: var(--clr-primary-hover); border: 1px solid var(--clr-primary-border); background: var(--clr-primary-dim); border-radius: 99px; padding: 5px 12px; }
 .dt-acq-xp { font-family: var(--font-mono); font-size: 12px; color: var(--clr-reward); }
 .dt-dossier { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 24px; }
 .dt-card { display: flex; align-items: center; gap: 14px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 13px; padding: 14px 16px; animation: dt-cardin .42s ease both; }
 @keyframes dt-cardin { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
 .dt-card-ic { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--clr-primary-dim); color: var(--clr-primary-hover); display: grid; place-items: center; }
 .dt-card-body { flex: 1; min-width: 0; }
-.dt-card-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clr-faint); margin-bottom: 4px; }
+.dt-card-label { font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.04em; color: var(--clr-faint); margin-bottom: 4px; }
 .dt-card-val { font-size: 15.5px; color: var(--clr-text); line-height: 1.4; }
 .dt-cardinput { width: 100%; font-size: 15px; padding: 9px 12px; }
 .dt-chips { display: flex; flex-wrap: wrap; gap: 6px; }

@@ -15,14 +15,13 @@
   var SData = window.ClarityData || {};
   var XP_PUBLISH = 40;
 
-  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
+  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
   function shell(inner) {
     return e('div', { className: 'id-root ct-root' }, bg(),
       e('div', { className: 'pf-topbar' },
         e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
           e('span', { className: 'pf-wordmark' }, 'Clarity'),
-          e('span', { className: 'pf-hide-sm' }, 'Mission Control // Content Engine')),
-        e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+          e('span', { className: 'pf-hide-sm' }, 'Your journey · Content Engine'))),
       e('div', { className: 'id-main ct-main' }, inner));
   }
 
@@ -76,7 +75,7 @@
 
     /* engine home (default) */
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: onBack }, '‹ Back to hub'),
+      e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
       window.ContentEngineScreen
         ? e(window.ContentEngineScreen, { onCreate: function (k) { setStudioKey(k); setView('studio'); }, onCampaign: function () { setView('campaigns'); } })
         : e('div', { style: { padding: 40, color: 'var(--clr-muted)' } }, 'Content Engine unavailable.'),

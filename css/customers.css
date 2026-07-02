@@ -1,32 +1,32 @@
 /* ============================================================================
-   customers.css — "My Customers" Target Dossier (persona character-sheet).
-   Reuses id-*/pf-*/mm-* + capcom. Prefix: cu-
+   customers.css — "My Customers" sketchbook (customer character-sheet).
+   Journey tone. Reuses id-*/pf-*/mm-* + .capcom (voice strip). Prefix: cu-
    ========================================================================== */
 
 .cu-roster { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 16px; }
 .cu-rostercard { position: relative; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; }
 .cu-rostercard .cu-card.mini { transition: transform 0.16s var(--ease, ease), border-color 0.16s var(--ease, ease); }
 .cu-rostercard:hover .cu-card.mini { border-color: var(--clr-primary-border); transform: translateY(-2px); }
-.cu-primary-badge { position: absolute; top: -8px; right: 12px; z-index: 2; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #04221d; background: var(--clr-primary-hover); border-radius: var(--radius-pill, 99px); padding: 3px 9px; }
+.cu-primary-badge { position: absolute; top: -8px; right: 12px; z-index: 2; font-family: var(--font-body); font-size: 10px; font-weight: 600; letter-spacing: 0.02em; color: #04221d; background: var(--clr-primary-hover); border-radius: var(--radius-pill, 99px); padding: 3px 9px; }
 
 .cu-card { background: var(--clr-card); border: 1px solid var(--clr-border-strong); border-radius: 14px; padding: 18px; }
 .cu-card.mini { padding: 14px 16px; }
 .cu-card.primary { border-color: var(--clr-primary-border); }
 .cu-card-head { display: flex; align-items: center; gap: 13px; }
-.cu-avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--clr-primary-dim); border: 1px solid var(--clr-primary-border); color: var(--clr-primary-hover); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 22px; font-weight: 700; flex-shrink: 0; }
+.cu-avatar { width: 46px; height: 46px; border-radius: 12px; background: var(--clr-primary-dim); border: 1px solid var(--clr-primary-border); color: var(--clr-primary-hover); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 19px; font-weight: 700; flex-shrink: 0; }
 .cu-id { flex: 1; min-width: 0; }
-.cu-name { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--clr-text); line-height: 1.1; }
-.cu-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-primary-hover); margin-top: 3px; }
-.cu-fit { font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--clr-text); text-align: right; line-height: 1; flex-shrink: 0; }
-.cu-fit span { display: block; font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clr-muted); font-weight: 400; margin-top: 2px; }
+.cu-name { font-family: var(--font-display); font-size: 16.5px; letter-spacing: -0.01em; font-weight: 700; color: var(--clr-text); line-height: 1.1; }
+.cu-tag { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-primary-hover); margin-top: 3px; }
+.cu-fit { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--clr-text); text-align: right; line-height: 1; flex-shrink: 0; }
+.cu-fit span { display: block; font-family: var(--font-body); font-size: 9px; letter-spacing: 0.03em; color: var(--clr-muted); font-weight: 400; margin-top: 2px; }
 
 .cu-summary { font-size: 13.5px; color: var(--clr-muted); line-height: 1.55; margin: 14px 0; }
 .cu-traits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 18px; margin-bottom: 16px; }
-.cu-trait-l { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 5px; }
+.cu-trait-l { display: flex; justify-content: space-between; font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); margin-bottom: 5px; }
 .cu-trait-bar { height: 5px; border-radius: 3px; background: var(--clr-border); overflow: hidden; }
 .cu-trait-bar i { display: block; height: 100%; background: var(--clr-primary-hover); border-radius: 3px; transition: width 0.5s var(--ease, ease); }
 .cu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
-.cu-block-l { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 7px; }
+.cu-block-l { font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); margin-bottom: 7px; }
 .cu-block-v { font-size: 13px; color: var(--clr-text); line-height: 1.45; }
 .cu-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .cu-chip { font-size: 11.5px; color: var(--clr-text); background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: var(--radius-pill, 99px); padding: 4px 10px; }
@@ -43,12 +43,14 @@
 .cu-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 34px; background: var(--clr-card); border: 1px dashed var(--clr-border-strong); border-radius: 14px; color: var(--clr-muted); margin-bottom: 16px; }
 .cu-empty svg { color: var(--clr-faint); }
 
+/* journey pass — the sweeping scan line is retired; the sketch "comes into
+   focus" under a soft breathing light instead */
 .cu-building { height: 120px; border: 1px solid var(--clr-border); border-radius: 14px; background: radial-gradient(circle, rgba(43,212,187,0.06), transparent 70%); position: relative; overflow: hidden; margin: 6px 0; }
-.cu-build-scan { position: absolute; left: 0; right: 0; height: 2px; background: var(--clr-primary-hover); box-shadow: 0 0 12px var(--clr-primary-hover); animation: cu-scan 1.2s ease-in-out infinite; }
-@keyframes cu-scan { 0% { top: 8%; } 50% { top: 88%; } 100% { top: 8%; } }
+.cu-build-scan { position: absolute; inset: 0; background: radial-gradient(46% 62% at 50% 50%, rgba(43,212,187,0.18), transparent 75%); animation: cu-breathe 2.2s ease-in-out infinite; }
+@keyframes cu-breathe { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 
-/* ── call-sign picker (gamified naming) ── */
-.cu-shuffle { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clr-primary-hover); background: none; border: 1px solid var(--clr-primary-border); border-radius: var(--radius-pill, 99px); padding: 4px 11px; cursor: pointer; transition: background 0.14s var(--ease, ease); }
+/* ── name picker (gamified naming) ── */
+.cu-shuffle { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-primary-hover); background: none; border: 1px solid var(--clr-primary-border); border-radius: var(--radius-pill, 99px); padding: 4px 11px; cursor: pointer; transition: background 0.14s var(--ease, ease); }
 .cu-shuffle:hover { background: var(--clr-primary-dim); }
 .cu-callsigns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
 .cu-callsign { display: flex; align-items: center; gap: 10px; text-align: left; background: var(--clr-card); border: 1px solid var(--clr-border-strong); border-radius: 11px; padding: 11px 13px; cursor: pointer; color: var(--clr-text); transition: transform 0.15s var(--ease, ease), border-color 0.15s var(--ease, ease), background 0.15s var(--ease, ease); }
@@ -58,12 +60,12 @@
 .cu-callsign.sel .cu-cs-badge { background: var(--clr-primary-hover); color: #04221d; }
 .cu-cs-name { font-size: 13.5px; font-weight: 600; }
 .cu-coin { margin-bottom: 8px; }
-.cu-coin-l { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-faint); display: block; margin-bottom: 7px; }
+.cu-coin-l { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-faint); display: block; margin-bottom: 7px; }
 
 /* ── audience report ── */
 .cu-profile { font-size: 13.5px; color: var(--clr-text); line-height: 1.6; margin: 0 0 8px; }
 .cu-demo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px 28px; margin-bottom: 8px; }
-.cu-demo-title { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 9px; }
+.cu-demo-title { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); margin-bottom: 9px; }
 .cu-demo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
 .cu-demo-l { font-size: 12px; color: var(--clr-text); width: 96px; flex-shrink: 0; }
 .cu-demo-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--clr-border); overflow: hidden; }
@@ -77,7 +79,7 @@
 .cu-wtp-band { font-size: 14px; font-weight: 700; color: var(--clr-text); margin-bottom: 4px; }
 .cu-wtp-note { font-size: 12.5px; color: var(--clr-muted); line-height: 1.5; }
 
-.cu-isprimary { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clr-primary-hover); }
+.cu-isprimary { font-family: var(--font-body); font-size: 12px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-primary-hover); }
 
 @media (max-width: 720px) {
   .cu-roster, .cu-archs, .cu-grid, .cu-traits, .cu-demo, .cu-twocol { grid-template-columns: 1fr; }

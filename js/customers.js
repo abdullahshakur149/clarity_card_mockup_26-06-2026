@@ -1,10 +1,10 @@
 /* ============================================================================
-   customers.js — "My Customers" recon mission (Sketch my customer).  ref 13-15.png
+   customers.js — "My Customers" groundwork step (Sketch my customer). ref 13-15
    Exposes window.ClarityCustomersMission({ profile, result, onComplete, onBack }).
-   Distinct mechanic vs My Market: a "Target Dossier" / persona character-sheet
-   builder. Flow: roster → sketch (name + INFERRED desc → pick archetype) →
-   building reveal → persona dossier (traits, channels, motivations, fit %) with a
-   real downloadable persona file. Build several; mark a Primary target. Mocked.
+   Distinct mechanic vs My Market: a character-sheet sketchbook of the people
+   you're for. Flow: sketches → sketch (name + INFERRED desc → pick archetype) →
+   building reveal → customer sheet (traits, channels, motivations, fit %) with a
+   real downloadable file. Build several; star your main person. Mocked.
    ========================================================================== */
 (function () {
   'use strict';
@@ -15,32 +15,33 @@
   var XP = 50;
   var CATEGORY = { name: 'My Customers', eyebrow: 'Customer report', accent: 'var(--clr-cat-customer)', accentDim: 'var(--clr-cat-customer-dim)' };
   var ARCHETYPES = [
-    { id: 'risk',        label: 'Risk-reducer',       tag: 'RISK-REDUCER', icon: 'ShieldCheck', age: 42, fit: 88,
+    { id: 'risk',        label: 'Risk-reducer',       tag: 'Risk-reducer', icon: 'ShieldCheck', age: 42, fit: 88,
       blurb: 'Wants safety, proof and guarantees before committing.', demo: '40s · settled · reputation over novelty',
       traits: { 'Price sensitivity': 55, 'Brand loyalty': 82, 'Risk appetite': 22, 'Research depth': 85 },
       channels: ['Reviews & ratings', 'Word-of-mouth', 'Comparison sites'], cares: ['Trust & proof', 'Guarantees / returns', 'Avoiding mistakes'] },
-    { id: 'performance', label: 'Performance-driven', tag: 'PERFORMANCE', icon: 'Gauge', age: 35, fit: 84,
+    { id: 'performance', label: 'Performance-driven', tag: 'Performance', icon: 'Gauge', age: 35, fit: 84,
       blurb: 'Chases the best result — and will pay for it.', demo: '30s · ambitious · outcome-obsessed',
       traits: { 'Price sensitivity': 35, 'Brand loyalty': 60, 'Risk appetite': 55, 'Research depth': 90 },
       channels: ['Niche communities', 'YouTube / expert reviews', 'Spec comparisons'], cares: ['Best outcome', 'Specs & results', 'An edge over others'] },
-    { id: 'cost',        label: 'Cost-driven',        tag: 'COST-DRIVEN', icon: 'Tag', age: 29, fit: 76,
+    { id: 'cost',        label: 'Cost-driven',        tag: 'Cost-driven', icon: 'Tag', age: 29, fit: 76,
       blurb: 'Leads with price; loyal only while the deal lasts.', demo: 'late 20s · budget-conscious · comparison shopper',
       traits: { 'Price sensitivity': 90, 'Brand loyalty': 35, 'Risk appetite': 50, 'Research depth': 60 },
       channels: ['Search & deal sites', 'Social offers', 'Marketplaces'], cares: ['Value for money', 'Deals & discounts', 'Not overpaying'] },
-    { id: 'status',      label: 'Status-seeker',      tag: 'STATUS', icon: 'Sparkles', age: 31, fit: 80,
+    { id: 'status',      label: 'Status-seeker',      tag: 'Status', icon: 'Sparkles', age: 31, fit: 80,
       blurb: 'Buys for identity, image and being seen.', demo: '30s · image-led · early adopter',
       traits: { 'Price sensitivity': 30, 'Brand loyalty': 55, 'Risk appetite': 45, 'Research depth': 40 },
       channels: ['Instagram / TikTok', 'Influencers', 'Premium press'], cares: ['Identity & prestige', 'Being seen', 'Brand cachet'] },
-    { id: 'convenience', label: 'Convenience-first',  tag: 'CONVENIENCE', icon: 'Zap', age: 38, fit: 82,
+    { id: 'convenience', label: 'Convenience-first',  tag: 'Convenience', icon: 'Zap', age: 38, fit: 82,
       blurb: 'Wants it easy and fast — friction loses the sale.', demo: '30s–40s · time-poor · mobile-first',
       traits: { 'Price sensitivity': 50, 'Brand loyalty': 58, 'Risk appetite': 30, 'Research depth': 35 },
       channels: ['App stores / marketplaces', 'Paid ads', 'One-tap checkout'], cares: ['Speed & ease', 'No friction', 'Reliability'] },
-    { id: 'community',   label: 'Community-led',      tag: 'COMMUNITY', icon: 'Users', age: 33, fit: 86,
+    { id: 'community',   label: 'Community-led',      tag: 'Community', icon: 'Users', age: 33, fit: 86,
       blurb: 'Buys into belonging, values and the story.', demo: '30s · values-driven · brand advocate',
       traits: { 'Price sensitivity': 50, 'Brand loyalty': 85, 'Risk appetite': 28, 'Research depth': 55 },
       channels: ['Community groups', 'Local events', 'Instagram'], cares: ['Belonging', 'Shared values', 'The story behind it'] }
   ];
-  var BUILD_LOG = ['> PROFILING TARGET…', '> MAPPING MOTIVATIONS…', '> LOCATING CHANNELS…', '> SCORING FIT…', '> DOSSIER READY'];
+  /* what Clarity thinks aloud while it sketches */
+  var BUILD_LOG = ['Getting to know them…', 'Understanding what drives them…', 'Finding where they spend time…', 'Checking how well they fit you…', 'Ready to introduce you.'];
 
   /* call-sign generator — turns naming into a pick/shuffle mechanic */
   var CS_NAMES = ['Sam', 'Priya', 'Luca', 'Bea', 'Theo', 'Mia', 'Sven', 'Nova', 'Owen', 'Lena', 'Marco', 'Ivy', 'Dara', 'Cole', 'Asha', 'Finn'];
@@ -265,12 +266,11 @@
       return function () { clearInterval(iv); clearTimeout(t); };
     }, [view]);
 
-    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
-    function capcom(line) {
+    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
+    /* the voice of Clarity — unattributed (reuses .capcom styles) */
+    function voice(line) {
       return e('div', { className: 'capcom' },
-        e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
         e('div', { className: 'capcom-body' },
-          e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
           e('div', { className: 'capcom-line' }, line)));
     }
     function shell(inner) {
@@ -278,8 +278,7 @@
         e('div', { className: 'pf-topbar' },
           e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             e('span', { className: 'pf-wordmark' }, 'Clarity'),
-            e('span', { className: 'pf-hide-sm' }, 'Mission Control // Recon · My Customers')),
-          e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+            e('span', { className: 'pf-hide-sm' }, 'Your journey · My Customers'))),
         e('div', { className: 'id-main' }, inner));
     }
 
@@ -305,15 +304,15 @@
             e('div', { className: 'cu-block' }, e('div', { className: 'cu-block-l' }, 'What they care about'), e('div', { className: 'cu-chips' }, p.cares.map(function (c, i) { return e('span', { key: i, className: 'cu-chip' }, c); }))))));
     }
 
-    /* ── ROSTER ── */
+    /* ── SKETCHES ── */
     if (view === 'roster') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · My Customers'),
-        e('h1', { className: 'mm-title' }, 'Target profiles'),
-        capcom(sketches.length ? 'Your target roster, operator. Build more, or set your primary.' : 'No targets on file yet. Sketch the customer you are really flying for.'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Customers'),
+        e('h1', { className: 'mm-title' }, 'The people you’re for'),
+        voice(sketches.length ? 'These are the people you’re for. Sketch more of them, or star the one who matters most.' : 'No sketches yet. Let’s draw the customer you’re really doing this for.'),
         sketches.length === 0
-          ? e('div', { className: 'cu-empty' }, e(Icon, { name: 'UserPlus', size: 26 }), e('span', null, 'No target profiles yet.'))
+          ? e('div', { className: 'cu-empty' }, e(Icon, { name: 'UserPlus', size: 26 }), e('span', null, 'No customer sketches yet.'))
           : e('div', { className: 'cu-roster' },
               sketches.map(function (p, i) {
                 return e('button', { key: i, className: 'cu-rostercard' + (p.name === primary ? ' primary' : ''), onClick: function () { setCurrent(p); setView('result'); } },
@@ -330,8 +329,8 @@
       if (step === 0) {
         var picked = suggestions.indexOf(name) >= 0;
         node = e(React.Fragment, null,
-          capcom('Every target needs a call-sign. Recruit one I drafted — shuffle for more, or coin your own.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Target call-sign',
+          voice('Give them a name — pick one I drafted, shuffle for more, or write your own.'),
+          e('div', { className: 'mm-sec' }, 'Their name',
             e('button', { className: 'cu-shuffle', onClick: function () { setSuggestions(genCallsigns(profile)); } }, e(Icon, { name: 'Shuffle', size: 12 }), ' Shuffle')),
           e('div', { className: 'cu-callsigns' },
             suggestions.map(function (cs) {
@@ -344,12 +343,12 @@
             e('div', { className: 'pf-input-wrap' }, e(Icon, { name: 'PenLine', size: 15 }),
               e('input', { className: 'pf-input', value: picked ? '' : name, placeholder: 'e.g. Saturday-market Sam',
                 onChange: function (ev) { setName(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter' && name.trim()) setStep(1); } }))),
-          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'Describe them'), e('span', { className: 'mm-inferred-v' }, inferred), e('span', { className: 'mm-inferred-badge' }, 'Inferred')),
+          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'Describe them'), e('span', { className: 'mm-inferred-v' }, inferred), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
           e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: !name.trim() }, 'Continue →'));
       } else {
         node = e(React.Fragment, null,
-          capcom('What drives them? Pick their archetype — it shapes the whole dossier.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Archetype'),
+          voice('What drives them? Pick the shape that fits — it colours the whole sketch.'),
+          e('div', { className: 'mm-sec' }, 'What drives them'),
           e('div', { className: 'cu-archs' },
             ARCHETYPES.map(function (a) {
               return e('button', { key: a.id, className: 'cu-arch' + (arch === a.id ? ' sel' : ''), onClick: function () { setArch(a.id); } },
@@ -358,22 +357,22 @@
                 e('span', { className: 'cu-arch-blurb' }, a.blurb));
             })),
           e('div', { className: 'mm-row' },
-            e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Call-sign'),
+            e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Their name'),
             e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('building'); }, disabled: !arch }, 'Build the sketch →')));
       }
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster'),
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · My Customers'),
-        e('div', { className: 'mm-steps' }, ['Call-sign', 'Archetype'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
+        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All sketches'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Customers'),
+        e('div', { className: 'mm-steps' }, ['Name', 'What drives them'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
         e('div', { className: 'mm-panel', key: step }, node)));
     }
 
     /* ── BUILDING ── */
     if (view === 'building') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · My Customers'),
-        e('h1', { className: 'mm-title' }, 'Building the sketch…'),
-        capcom('Profiling your target, operator. Reading motivations and channels…'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Customers'),
+        e('h1', { className: 'mm-title' }, 'Sketching them…'),
+        voice('Drawing them out now — what they want, where they spend their time…'),
         e('div', { className: 'cu-building' }, e('div', { className: 'cu-build-scan' })),
         e('div', { className: 'mm-log' }, BUILD_LOG.slice(0, revealed).map(function (l, i) { return e('div', { key: i, className: i === revealed - 1 ? 'live' : '' }, l); })),
         e('div', { className: 'mm-bar' }, e('i', null))));
@@ -421,9 +420,9 @@
     ] : [];
 
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster'),
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Target Profiled'), e('span', { className: 'mm-acq-xp' }, '+ ', XP, ' XP')),
-      capcom('Dossier complete — the plain read is up top, the full profile sits underneath. Download it or build another.'),
+      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All sketches'),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know who you’re for'), e('span', { className: 'mm-acq-xp' }, '+ ', XP, ' XP')),
+      voice('Meet them — the plain read is up top, the full profile sits underneath. Download it or sketch another.'),
 
       r && e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
         e('div', { className: 'rc-bar' },
@@ -449,10 +448,10 @@
 
       e('div', { className: 'mm-row', style: { marginTop: 16 } },
         p.name !== primary
-          ? e('button', { className: 'id-back', onClick: function () { setPrimary(p.name); if (onComplete) onComplete({ xp: 0, count: sketches.length, sketches: sketches, primary: p.name, lastName: p.name }); } }, '★ Set as primary')
-          : e('span', { className: 'cu-isprimary' }, '★ Primary target'),
+          ? e('button', { className: 'id-back', onClick: function () { setPrimary(p.name); if (onComplete) onComplete({ xp: 0, count: sketches.length, sketches: sketches, primary: p.name, lastName: p.name }); } }, '★ Make them your main person')
+          : e('span', { className: 'cu-isprimary' }, '★ Your main person'),
         e('button', { className: 'pf-cta mm-cta', onClick: startSketch }, 'Sketch another →')),
-      e('button', { className: 'id-back', style: { marginTop: 16 }, onClick: onBack }, '‹ Back to Command Deck')
+      e('button', { className: 'id-back', style: { marginTop: 16 }, onClick: onBack }, '‹ The groundwork')
     ));
   }
 

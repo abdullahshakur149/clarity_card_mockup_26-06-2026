@@ -59,12 +59,11 @@
   }
   window.ClarityMakeTasks = makeTasks;
 
-  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
-  function capcom(line) {
+  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
+  /* the voice of Clarity — unattributed (reuses .capcom styles) */
+  function voice(line) {
     return e('div', { className: 'capcom' },
-      e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
       e('div', { className: 'capcom-body' },
-        e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
         e('div', { className: 'capcom-line' }, line)));
   }
   function shell(inner) {
@@ -72,8 +71,7 @@
       e('div', { className: 'pf-topbar' },
         e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
           e('span', { className: 'pf-wordmark' }, 'Clarity'),
-          e('span', { className: 'pf-hide-sm' }, 'Mission Control // My Tasks')),
-        e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+          e('span', { className: 'pf-hide-sm' }, 'Your journey · My Tasks'))),
       e('div', { className: 'id-main' }, inner));
   }
 
@@ -118,10 +116,16 @@
     var pct = total ? Math.round(doneN / total * 100) : 0;
 
     function persist(next, dxp) { var patch = { tasks: next }; if (dxp) patch.xp = Math.max(0, (idea.xp || 0) + dxp); if (onChange) onChange(patch); }
+    /* journey pass — no XP penalty for moving a task back; each task pays out
+       its XP once (the first time it reaches Done), so it can't be farmed */
     function moveTask(id, status) {
-      var was = false, nowDone = status === 'done';
-      var next = tasks.map(function (t) { if (t.id !== id) return t; was = t.status === 'done'; return Object.assign({}, t, { status: status, done: nowDone }); });
-      persist(next, (nowDone && !was) ? XP_TASK : (!nowDone && was) ? -XP_TASK : 0);
+      var award = 0, nowDone = status === 'done';
+      var next = tasks.map(function (t) {
+        if (t.id !== id) return t;
+        if (nowDone && t.status !== 'done' && !t.awarded) award = XP_TASK;
+        return Object.assign({}, t, { status: status, done: nowDone, awarded: t.awarded || nowDone });
+      });
+      persist(next, award);
     }
     function toggle(id) { var t = tasks.filter(function (x) { return x.id === id; })[0]; if (t) moveTask(id, t.status === 'done' ? 'todo' : 'done'); }
     function remove(id) { persist(tasks.filter(function (t) { return t.id !== id; }), 0); }
@@ -135,10 +139,10 @@
     /* header: progress + view toggle */
     function header() {
       return e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to hub'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
         e('div', { className: 'tk-head' },
           e('div', null,
-            e('div', { className: 'id-eyebrow' }, 'Pillar · My Tasks'),
+            e('div', { className: 'id-eyebrow' }, 'Your journey · My Tasks'),
             e('h1', { className: 'tk-title-h' }, 'Your launch plan')),
           e('div', { className: 'tk-seg' },
             e('button', { className: 'tk-vt' + (view === 'board' ? ' on' : ''), onClick: function () { setView('board'); } }, e(Icon, { name: 'ListChecks', size: 13 }), 'Board'),
@@ -146,7 +150,7 @@
         e('div', { className: 'tk-progress' },
           e('div', { className: 'tk-progress-bar' }, e('div', { className: 'tk-progress-fill', style: { width: pct + '%' } })),
           e('div', { className: 'tk-progress-l' }, doneN + ' / ' + total + ' done')),
-        allDone && e('div', { className: 'tk-celebrate' }, e(Icon, { name: 'PartyPopper', size: 15 }), 'Plan complete — every play is live. Nice work, operator.'));
+        allDone && e('div', { className: 'tk-celebrate' }, e(Icon, { name: 'PartyPopper', size: 15 }), 'Plan complete — every move is live. Beautifully done.'));
     }
 
     /* quick-add (light inline composer) */
@@ -188,7 +192,7 @@
       }
       return shell(e(React.Fragment, null,
         header(),
-        capcom('Your launch board. Drag a card across the columns as you work it — or tap the arrow. Add your own tasks anytime.'),
+        voice('Your launch board. Drag a card across the columns as you work it — or tap the arrow. Add your own tasks anytime.'),
         quickAdd(),
         e('div', { className: 'kb-board' }, COLS.map(column))
       ));
@@ -208,7 +212,7 @@
 
     return shell(e(React.Fragment, null,
       header(),
-      capcom('Here’s your plan on a calendar. Tap a day to see what’s due.'),
+      voice('Here’s your plan on a calendar. Tap a day to see what’s due.'),
       quickAdd(),
       e('div', { className: 'tk-cal' },
         e('div', { className: 'tk-cal-head' },

@@ -1,15 +1,17 @@
 /* ============================================================================
-   onboarding.js — "Decode the Transmission" (gamified intake, CAPCOM-led)
+   onboarding.js — "Tell me about your idea" (gamified intake, journey tone)
    Exposes window.ClarityOnboarding({ onComplete }).
 
    Client mandate: feel like how Claude/ChatGPT asks for input — ONE open
    prompt, no forms. Type it, SPEAK it (real Web Speech API), or drop a link.
-   The game is the RESPONSE: CAPCOM "decodes" the single input and assembles a
-   dossier the user just confirms. Minimum cost: one held mic + one tap.
+   The game is the RESPONSE: Clarity listens, gets the picture, and lays the
+   idea out on cards the user just confirms. Minimum cost: one held mic + tap.
 
-   Flow:  input → decoding cinematic → (name follow-up if needed) → dossier → enter
+   Flow:  input → getting-the-picture moment → (name follow-up if needed)
+          → idea cards → enter
    Extraction is client-side heuristics only (no API). Reuses .pf-* + .capcom
-   from auth.css; own styles live in css/onboarding-decode.css (prefix dt-).
+   (the unattributed voice strip) from auth.css; own styles live in
+   css/onboarding-decode.css (prefix dt-).
    Output profile {sector,name,desc,audience,goal,priorities} — unchanged
    contract for shell.js ClarityRoot → ClarityIntel.
    ========================================================================== */
@@ -132,10 +134,11 @@
     };
   }
 
-  var SCAN = ['> READING TRANSMISSION…', '> PARSING SIGNAL…', '> EXTRACTING INTEL…', '> MATCHING SECTOR…', '> ASSEMBLING DOSSIER…'];
+  /* what Clarity thinks aloud while it reads what you shared */
+  var SCAN = ['Reading what you shared…', 'Picking out what matters…', 'Getting a feel for your world…', 'Placing you among your people…', 'Laying your idea out…'];
 
-  /* CAPCOM comms strip with a typewriter line */
-  function Capcom(props) {
+  /* the voice of Clarity — unattributed, typewriter line */
+  function Voice(props) {
     var line = props.line;
     var ty = React.useState(''); var typed = ty[0], setTyped = ty[1];
     var dn = React.useState(false); var done = dn[0], setDone = dn[1];
@@ -145,9 +148,7 @@
       return function () { clearInterval(iv); };
     }, [line]);
     return e('div', { className: 'capcom' },
-      e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
       e('div', { className: 'capcom-body' },
-        e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
         e('div', { className: 'capcom-line' }, typed, !done && e('span', { className: 'pf-cursor' }, '▉'))));
   }
 
@@ -235,16 +236,13 @@
     }
 
     /* ── frame ── */
-    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
+    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
     function shell(inner) {
       return e('div', { className: 'dt-root' }, bg(),
         e('div', { className: 'pf-topbar' },
           e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             e('span', { className: 'pf-wordmark' }, 'Clarity'),
-            e('span', { className: 'pf-hide-sm' }, 'Mission Control // Intake')),
-          e('div', { className: 'pf-tele' },
-            e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'),
-            e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+            e('span', { className: 'pf-hide-sm' }, 'Getting to know you'))),
         e('div', { className: 'dt-main' }, inner));
     }
 
@@ -264,25 +262,25 @@
           e('div', { className: 'dt-mic-hint' }, listening ? 'Listening… release when done' : (hasText ? 'Hold to add more' : 'Hold and tell me about it')),
           (hasText || interim) && e('div', { className: 'dt-transcript' }, text || interim, listening && e('span', { className: 'pf-cursor' }, '▉')),
           micNote && e('div', { className: 'dt-note' }, micNote),
-          hasText && e('button', { className: 'pf-cta dt-cta', onClick: function () { stopListening(); runDecode(text, false); } }, 'Transmit ', e(Icon, { name: 'ArrowRight', size: 16 })));
+          hasText && e('button', { className: 'pf-cta dt-cta', onClick: function () { stopListening(); runDecode(text, false); } }, 'Take a look ', e(Icon, { name: 'ArrowRight', size: 16 })));
       } else if (mode === 'type') {
         panel = e('div', { className: 'dt-type' },
           e('textarea', { className: 'pf-input dt-textarea', value: text, autoFocus: true, rows: 4,
             placeholder: 'e.g. I run a small-batch sourdough bakery for local families and weekend markets. Trying to get known and grow regular orders.',
             onChange: function (ev) { setText(ev.target.value); } }),
-          e('button', { className: 'pf-cta dt-cta', disabled: !hasText, onClick: function () { runDecode(text, false); } }, 'Transmit ', e(Icon, { name: 'ArrowRight', size: 16 })));
+          e('button', { className: 'pf-cta dt-cta', disabled: !hasText, onClick: function () { runDecode(text, false); } }, 'Take a look ', e(Icon, { name: 'ArrowRight', size: 16 })));
       } else {
         panel = e('div', { className: 'dt-link' },
           e('input', { className: 'pf-input dt-linkinput', value: link, autoFocus: true, placeholder: 'yourbusiness.com   ·   or paste a socials link',
             onChange: function (ev) { setLink(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter' && link.trim()) runDecode(link, true); } }),
           e('label', { className: 'dt-file' }, e(Icon, { name: 'Paperclip', size: 14 }), 'Attach a deck instead',
             e('input', { type: 'file', style: { display: 'none' }, onChange: function (ev) { var f = ev.target.files && ev.target.files[0]; if (f) runDecode(f.name.replace(/\.[^.]+$/, ''), true); } })),
-          e('button', { className: 'pf-cta dt-cta', disabled: !link.trim(), onClick: function () { runDecode(link, true); } }, 'Scan ', e(Icon, { name: 'ArrowRight', size: 16 })));
+          e('button', { className: 'pf-cta dt-cta', disabled: !link.trim(), onClick: function () { runDecode(link, true); } }, 'Have a read ', e(Icon, { name: 'ArrowRight', size: 16 })));
       }
       return shell(e(React.Fragment, null,
-        e('div', { className: 'dt-eyebrow' }, 'First contact'),
-        e('h1', { className: 'dt-title' }, 'Brief me once.'),
-        e(Capcom, { line: SR ? 'CAPCOM online. Just tell me about it — hold the mic and talk. No forms, I promise.' : 'CAPCOM online. Tell me about it in a line or two — I’ll take it from there.' }),
+        e('div', { className: 'dt-eyebrow' }, 'The first step'),
+        e('h1', { className: 'dt-title' }, 'Tell me about your idea.'),
+        e(Voice, { line: SR ? 'This is the easy part — hold the mic and just talk. No forms, I promise.' : 'Tell me about it in a line or two — I’ll take it from there.' }),
         e('p', { className: 'dt-sub' }, 'What are you building, and who’s it for? One pass — talk it, type it, or drop a link. I’ll pull the rest.'),
         e('div', { className: 'dt-modes' },
           SR && e('button', { className: 'dt-mode' + (mode === 'speak' ? ' on' : ''), onClick: function () { setMode('speak'); } }, e(Icon, { name: 'Mic', size: 14 }), 'Speak'),
@@ -292,11 +290,11 @@
       ));
     }
 
-    /* ── DECODING ── */
+    /* ── GETTING THE PICTURE ── */
     if (view === 'decoding') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'dt-eyebrow' }, 'Decoding transmission'),
-        e('h1', { className: 'dt-title' }, 'Reading you…'),
+        e('div', { className: 'dt-eyebrow' }, 'One moment'),
+        e('h1', { className: 'dt-title' }, 'Getting the picture…'),
         e('div', { className: 'dt-decode' },
           e('div', { className: 'dt-decode-scan' }),
           e('div', { className: 'dt-decode-src' }, (decodedRef.current && decodedRef.current.raw) || text || link),
@@ -310,16 +308,16 @@
       return shell(e(React.Fragment, null,
         e('div', { className: 'dt-eyebrow' }, 'One quick thing'),
         e('h1', { className: 'dt-title' }, 'What’s it called?'),
-        e(Capcom, { line: 'Got the picture. I just didn’t catch a name — what should I put on the dossier?' }),
+        e(Voice, { line: 'Got the picture — I just didn’t catch the name. What do you call it?' }),
         e('div', { className: 'dt-namewrap' },
           e('input', { className: 'pf-input dt-nameinput', value: nameVal, autoFocus: true, placeholder: 'Your business name',
             onChange: function (ev) { setNameVal(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter') submitName(); } }),
-          e('button', { className: 'pf-cta dt-cta', onClick: submitName }, 'Lock it in ', e(Icon, { name: 'ArrowRight', size: 16 }))),
+          e('button', { className: 'pf-cta dt-cta', onClick: submitName }, 'That’s the one ', e(Icon, { name: 'ArrowRight', size: 16 }))),
         e('button', { className: 'dt-skip', onClick: function () { setNameVal(''); submitName(); } }, 'Skip for now')
       ));
     }
 
-    /* ── DOSSIER ── */
+    /* ── YOUR IDEA, ON CARDS ── */
     var d = dossier || decodedRef.current || {};
     var fields = [
       { key: 'sector', label: 'Sector', icon: SECTOR_ICON[d.sector] || 'Briefcase', value: d.sectorLabel || SECTOR_LABEL[d.sector] || '—' },
@@ -328,9 +326,9 @@
       { key: 'goal', label: 'Your goal', icon: 'Target', value: d.goal || '—' }
     ];
     return shell(e(React.Fragment, null,
-      e('div', { className: 'dt-acq' }, e('span', { className: 'dt-acq-stamp' }, 'Dossier assembled'), e('span', { className: 'dt-acq-xp' }, '+ ', XP_AWARD, ' XP')),
-      e('h1', { className: 'dt-title' }, d.name || 'Your dossier'),
-      e(Capcom, { line: 'Here’s what I pulled from that. Tweak anything that’s off — otherwise we’re moving.' }),
+      e('div', { className: 'dt-acq' }, e('span', { className: 'dt-acq-stamp' }, 'Your idea, captured'), e('span', { className: 'dt-acq-xp' }, '+ ', XP_AWARD, ' XP')),
+      e('h1', { className: 'dt-title' }, d.name || 'Your idea'),
+      e(Voice, { line: 'Here’s what I took from that. Fix anything that’s off — otherwise, we’re good to go.' }),
       e('div', { className: 'dt-dossier' },
         fields.map(function (f, i) {
           var isEd = editing && editing.key === f.key;

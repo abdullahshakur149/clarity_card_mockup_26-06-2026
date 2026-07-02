@@ -81,14 +81,13 @@
     return { text: text, winnerId: tie ? null : win.id, ca: ca, cb: cb };
   }
 
-  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
+  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
   function shell(inner) {
     return e('div', { className: 'iq-root' }, bg(),
       e('div', { className: 'pf-topbar' },
         e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
           e('span', { className: 'pf-wordmark' }, 'Clarity'),
-          e('span', { className: 'pf-hide-sm' }, 'Mission Control // Tools · Concept Comparison')),
-        e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+          e('span', { className: 'pf-hide-sm' }, 'Tools · Concept Comparison'))),
       e('div', { className: 'iq-main' }, inner));
   }
 
@@ -140,11 +139,11 @@
         e('div', { className: 'id-eyebrow' }, 'Tools · Concept Comparison'),
         e('h1', { className: 'iq-title' }, 'Head-to-head'),
         e('div', { className: 'cmp-empty' },
-          e('div', { className: 'cmp-empty-ic' }, e(Icon, { name: 'Swords', size: 26 })),
-          e('div', { className: 'cmp-empty-t' }, 'You need two concepts with finished recon to compare.'),
+          e('div', { className: 'cmp-empty-ic' }, e(Icon, { name: 'Scale', size: 26 })),
+          e('div', { className: 'cmp-empty-t' }, 'You need two ideas with finished groundwork to compare.'),
           e('div', { className: 'cmp-empty-s' }, eligible.length === 1
-            ? 'One concept is ready. Create another idea and run its three recon missions, then come back to pit them head-to-head.'
-            : 'Run all three recon missions on at least two ideas, then come back — CAPCOM will call the stronger concept.'))
+            ? 'One idea is ready. Start another and finish its three groundwork steps, then come back to see them side by side.'
+            : 'Finish the groundwork on at least two ideas, then come back — I’ll tell you which one is stronger.'))
       ));
     }
 
@@ -185,7 +184,7 @@
       /* AI verdict */
       e('div', { className: 'cmp-verdict' },
         e('div', { className: 'cmp-verdict-ic' }, e(Icon, { name: 'Sparkles', size: 15 })),
-        e('div', null, e('div', { className: 'cmp-verdict-l' }, 'CAPCOM verdict'), e('div', { className: 'cmp-verdict-t' }, verdict.text))),
+        e('div', null, e('div', { className: 'cmp-verdict-l' }, 'The verdict'), e('div', { className: 'cmp-verdict-t' }, verdict.text))),
 
       /* per-category rows */
       e('div', { className: 'cmp-rows' }, CATS.map(function (c) {

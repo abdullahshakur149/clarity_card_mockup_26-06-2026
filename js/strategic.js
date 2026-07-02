@@ -21,9 +21,9 @@
 
   /* the six categories — colors are the client's system (see colors.css) */
   var CATS = [
-    { id: 'market',      title: 'Market Snapshot',        icon: 'Radar',       accent: 'var(--clr-cat-market)',      dim: 'var(--clr-cat-market-dim)',      hex: '#22c9db', log: 'Compiling market snapshot' },
+    { id: 'market',      title: 'Market Snapshot',        icon: 'Map',         accent: 'var(--clr-cat-market)',      dim: 'var(--clr-cat-market-dim)',      hex: '#22c9db', log: 'Compiling market snapshot' },
     { id: 'positioning', title: 'Your Positioning',       icon: 'Compass',     accent: 'var(--clr-cat-positioning)', dim: 'var(--clr-cat-positioning-dim)', hex: '#a78bfa', log: 'Fixing your positioning' },
-    { id: 'competitor',  title: 'Competitor Intelligence',icon: 'Crosshair',   accent: 'var(--clr-cat-competitor)',  dim: 'var(--clr-cat-competitor-dim)',  hex: '#f2685f', log: 'Mapping the competition' },
+    { id: 'competitor',  title: 'Competitor Intelligence',icon: 'Store',       accent: 'var(--clr-cat-competitor)',  dim: 'var(--clr-cat-competitor-dim)',  hex: '#f2685f', log: 'Mapping the competition' },
     { id: 'customer',    title: 'Your Ideal Customer',    icon: 'Users',       accent: 'var(--clr-cat-customer)',    dim: 'var(--clr-cat-customer-dim)',    hex: '#34d39e', log: 'Profiling your buyer' },
     { id: 'gtm',         title: 'Go-To-Market',           icon: 'Rocket',      accent: 'var(--clr-cat-gtm)',         dim: 'var(--clr-cat-gtm-dim)',         hex: '#f5a623', log: 'Drafting go-to-market' },
     { id: 'risk',        title: 'Risk & Confidence',      icon: 'ShieldAlert', accent: 'var(--clr-cat-risk)',        dim: 'var(--clr-cat-risk-dim)',        hex: '#9aa7a3', log: 'Scoring risk & confidence' }
@@ -282,15 +282,14 @@
     } catch (err) {}
   }
 
-  function Capcom(props) {
+  /* the voice of Clarity — unattributed typewriter line (reuses .capcom styles) */
+  function Voice(props) {
     var line = props.line;
     var ty = React.useState(''); var typed = ty[0], setTyped = ty[1];
     var dn = React.useState(false); var done = dn[0], setDone = dn[1];
     React.useEffect(function () { setTyped(''); setDone(false); var i = 0; var iv = setInterval(function () { i++; setTyped(line.slice(0, i)); if (i >= line.length) { clearInterval(iv); setDone(true); } }, 16); return function () { clearInterval(iv); }; }, [line]);
     return e('div', { className: 'capcom' },
-      e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
       e('div', { className: 'capcom-body' },
-        e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
         e('div', { className: 'capcom-line' }, typed, !done && e('span', { className: 'pf-cursor' }, '▉'))));
   }
 
@@ -388,14 +387,13 @@
 
     function toggle(id) { setExpanded(function (x) { var o = Object.assign({}, x); o[id] = !o[id]; return o; }); }
 
-    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
+    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
     function shell(inner) {
       return e('div', { className: 'id-root' }, bg(),
         e('div', { className: 'pf-topbar' },
           e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             e('span', { className: 'pf-wordmark' }, 'Clarity'),
-            e('span', { className: 'pf-hide-sm' }, 'Mission Control // Strategic Plan')),
-          e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+            e('span', { className: 'pf-hide-sm' }, 'Your journey · Strategic Plan'))),
         e('div', { className: 'id-main' }, inner));
     }
 
@@ -405,9 +403,9 @@
       var flash = insight ? '#2bd4bb' : (revealed > 0 ? INPUTS[revealed - 1].hex : '#2bd4bb');
       var wy = [44, 110, 176], iy = [21, 87, 153];
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'Synthesising intel'),
-        e('h1', { className: 'sp-title' }, insight ? 'Connecting the dots…' : 'Feeding the intel in…'),
-        e(Capcom, { line: insight ? 'That’s it — I can see the play. Bringing your plan together now, operator.' : 'Feeding your recon into the model — market, customers, competition.' }),
+        e('div', { className: 'id-eyebrow' }, 'One moment'),
+        e('h1', { className: 'sp-title' }, insight ? 'Connecting the dots…' : 'Gathering what you’ve learned…'),
+        e(Voice, { line: insight ? 'That’s it — I can see the play. Bringing your plan together now.' : 'Bringing in everything you learned — your market, your customers, the landscape.' }),
         e('div', { className: 'sp-brainstage' },
           e('svg', { className: 'sp-wires', viewBox: '0 0 320 220', preserveAspectRatio: 'none' },
             INPUTS.map(function (inp, i) {
@@ -432,15 +430,15 @@
 
     /* ── PLAN ── */
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Strategic Plan assembled'), e('span', { className: 'mm-acq-xp' }, '+ ', plan.xp, ' XP')),
+      e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your plan has come together'), e('span', { className: 'mm-acq-xp' }, '+ ', plan.xp, ' XP')),
       e('div', { className: 'sp-planhead' },
         e('div', null,
           e('div', { className: 'id-eyebrow' }, 'Strategic Plan'),
           e('h1', { className: 'sp-title' }, plan.biz || plan.category),
           e('div', { className: 'sp-planmeta' }, plan.category + '  ·  ' + plan.date)),
         e('div', { className: 'sp-conf' }, e('span', { className: 'sp-conf-n' }, plan.dq + '%'), e('span', { className: 'sp-conf-l' }, 'Overall confidence'))),
-      e(Capcom, { line: 'Here’s the whole play on one screen. Each block is a 5-second read — open any for the detail.' }),
+      e(Voice, { line: 'Here’s the whole play on one screen. Each block is a 5-second read — open any for the detail.' }),
 
       e('div', { className: 'sp-cats' }, plan.cats.map(function (c) {
         var open = !!expanded[c.id];
@@ -460,7 +458,7 @@
 
       e('div', { className: 'sp-actions' },
         e('button', { className: 'pf-cta mm-cta', onClick: function () { downloadPlan(plan); } }, e(Icon, { name: 'Download', size: 15 }), ' Download PDF'),
-        e('button', { className: 'id-back', onClick: onBack }, 'Back to Command Deck →'))
+        e('button', { className: 'id-back', onClick: onBack }, 'Back to the groundwork →'))
     ));
   }
 

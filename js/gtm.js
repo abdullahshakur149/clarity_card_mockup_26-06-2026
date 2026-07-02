@@ -1,10 +1,10 @@
 /* ============================================================================
    gtm.js — Go-To-Market pillar. Zero-forms: auto-feeds the market average from
-   the Competition/Market recon, the owner CALIBRATES price + margin on tactile
-   dials (no typed fields), then CAPCOM reveals the go-to-market MOVES — pricing
-   plays (from where the price lands vs market) + priority-driven plays, each with
-   Impact/Effort. Completing it awards XP and stores idea.missions.gtm.moves,
-   which the coming My Tasks pillar turns into scheduled tasks.
+   the Market research, the owner CALIBRATES price + margin on tactile dials
+   (no typed fields), then Clarity reveals the go-to-market MOVES — pricing
+   plays (from where the price lands vs market) + priority-driven plays, each
+   with Impact/Effort. Completing it awards XP and stores idea.missions.gtm.moves,
+   which the My Tasks pillar turns into scheduled tasks. Journey tone.
      window.ClarityGTM({ idea, onChange, onBack })
    ========================================================================== */
 (function () {
@@ -54,12 +54,11 @@
     var seen = {}; return moves.filter(function (m) { if (seen[m.id]) return false; seen[m.id] = true; return true; });
   }
 
-  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
-  function capcom(line) {
+  function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
+  /* the voice of Clarity — unattributed (reuses .capcom styles) */
+  function voice(line) {
     return e('div', { className: 'capcom' },
-      e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
       e('div', { className: 'capcom-body' },
-        e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
         e('div', { className: 'capcom-line' }, line)));
   }
   function shell(inner) {
@@ -67,8 +66,7 @@
       e('div', { className: 'pf-topbar' },
         e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
           e('span', { className: 'pf-wordmark' }, 'Clarity'),
-          e('span', { className: 'pf-hide-sm' }, 'Mission Control // Go-To-Market')),
-        e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+          e('span', { className: 'pf-hide-sm' }, 'Your journey · Go-To-Market'))),
       e('div', { className: 'id-main' }, inner));
   }
 
@@ -117,20 +115,20 @@
       var step = market > 200 ? 5 : market > 20 ? 1 : 0.1;
       var verdict = market
         ? (deltaPct === 0 ? 'right at market' : Math.abs(deltaPct) + '% ' + (deltaPct < 0 ? 'below' : 'above') + ' market') + ' — ' + POS_LABEL[pos]
-        : 'set your price — run My Market to auto-load the market average';
+        : 'set your price — look at My Market first and I’ll load the average';
       var bandPct = market ? Math.max(4, Math.min(96, Math.round((price - lo) / (hi - lo) * 100))) : 50;
 
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to hub'),
-        e('div', { className: 'id-eyebrow' }, 'Pillar · Go-To-Market'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
+        e('div', { className: 'id-eyebrow' }, 'Your journey · Go-To-Market'),
         e('h1', { className: 'gtm-title' }, 'Price your play'),
-        capcom(market
-          ? 'Your recon’s in — market average is loaded. Dial in your price and margin, and I’ll call your go-to-market moves.'
-          : 'Dial in your price and margin and I’ll call your go-to-market moves. Tip: run My Market first and I’ll auto-load the market average.'),
+        voice(market
+          ? 'Your research is in — the market average is loaded. Dial in your price and margin, and I’ll suggest your go-to-market moves.'
+          : 'Dial in your price and margin and I’ll suggest your moves. Tip: look at My Market first and I’ll load the market average for you.'),
 
         /* auto-loaded context */
         e('div', { className: 'gtm-ctx' },
-          e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Market avg'), e('span', { className: 'gtm-pill-v' }, market ? fmtPrice(market, mk.unit) + ' · from recon' : 'not loaded')),
+          e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Market avg'), e('span', { className: 'gtm-pill-v' }, market ? fmtPrice(market, mk.unit) + ' · from your research' : 'not loaded')),
           profile.goal && e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Your goal'), e('span', { className: 'gtm-pill-v' }, profile.goal))),
         (profile.priorities && profile.priorities.length) ? e('div', { className: 'gtm-prio' },
           e('span', { className: 'gtm-prio-l' }, 'Priorities'),
@@ -151,16 +149,16 @@
             e('input', { className: 'gtm-range', type: 'range', min: 10, max: 90, step: 1, value: margin, onChange: function (ev) { setMargin(parseInt(ev.target.value, 10)); } })),
           e('div', { className: 'gtm-verdict ' + (margin < 40 ? 'gtm-value' : 'gtm-at-market') }, e('span', { className: 'gtm-verdict-dot' }), margin < 40 ? 'thin — protect profit' : 'healthy — room to invest')),
 
-        e('button', { className: 'pf-cta gtm-cta', onClick: function () { setView('running'); } }, 'Run the analysis →')
+        e('button', { className: 'pf-cta gtm-cta', onClick: function () { setView('running'); } }, 'Work out my moves →')
       ));
     }
 
     /* ── RUNNING ── */
     if (view === 'running') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'Pillar · Go-To-Market'),
+        e('div', { className: 'id-eyebrow' }, 'Your journey · Go-To-Market'),
         e('h1', { className: 'gtm-title' }, 'Calling your plays…'),
-        capcom('Running your price against the market and your priorities, operator.'),
+        voice('Weighing your price against the market — and against what you said matters most…'),
         e('div', { className: 'gtm-compile' },
           e('div', { className: 'gtm-compile-ic' }, e(Icon, { name: 'Rocket', size: 30 })),
           e('div', { className: 'gtm-compile-bar' }, e('i', null)))
@@ -171,9 +169,9 @@
     var gtm = saved || { moves: genMoves(pos, margin, profile.priorities), position: pos, avgOrder: price, margin: margin, unit: mk.unit };
     var moves = gtm.moves || [];
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: onBack }, '‹ Back to hub'),
-      e('div', { className: 'mm-acq gtm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Go-To-Market Locked'), e('span', { className: 'mm-acq-xp' }, '+ ', XP_GTM, ' XP')),
-      capcom('Here’s your go-to-market play, operator. Each move is a lever — the coming Tasks pillar will turn them into a schedule.'),
+      e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
+      e('div', { className: 'mm-acq gtm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your go-to-market is set'), e('span', { className: 'mm-acq-xp' }, '+ ', XP_GTM, ' XP')),
+      voice('Here’s your go-to-market play. Each move is a lever — and My Tasks has already turned them into a schedule for you.'),
 
       e('div', { className: 'gtm-summary' },
         e('span', { className: 'gtm-summary-k' }, 'Priced ' + (POS_LABEL[gtm.position] || 'at market')),
@@ -188,10 +186,10 @@
           e('div', { className: 'gtm-move-badges' }, badge('Impact', m.impact), badge('Effort', m.effort)));
       })),
 
-      e('div', { className: 'gtm-nextnote' }, e(Icon, { name: 'CalendarClock', size: 14 }), 'Next: your My Tasks pillar turns these moves into a scheduled action plan.'),
+      e('div', { className: 'gtm-nextnote' }, e(Icon, { name: 'CalendarClock', size: 14 }), 'Next: My Tasks has these moves laid out as a scheduled action plan.'),
       e('div', { className: 'mm-row' },
         e('button', { className: 'id-back', onClick: function () { setView('calibrate'); } }, '↻ Re-calibrate'),
-        e('button', { className: 'pf-cta gtm-cta', onClick: onBack }, 'Back to Hub →'))
+        e('button', { className: 'pf-cta gtm-cta', onClick: onBack }, 'Back to home base →'))
     ));
   }
 

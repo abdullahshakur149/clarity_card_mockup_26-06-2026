@@ -1,9 +1,10 @@
 /* ============================================================================
-   competition.js — "Competition" recon mission (Scout the competition). ref 16-19.png
+   competition.js — "Competition" groundwork step (See who's already out there).
+   ref 16-19.png
    Exposes window.ClarityCompetitionMission({ profile, result, onComplete, onBack }).
-   Reuses the My Market scan wizard (world-map territory + focus + deploy + scanning),
-   but produces a distinct THREAT BOARD of named rivals + a competitor report with a
-   real downloadable file. Mocked. Mission-control / teal.
+   Reuses the My Market setup (world-map pick + what to look into + researching),
+   but produces a distinct LANDSCAPE of named competitors + a competitor report
+   with a real downloadable file. Mocked. Journey tone / teal.
    ========================================================================== */
 (function () {
   'use strict';
@@ -21,14 +22,17 @@
     { id: 'sov',         label: 'Share of voice' },
     { id: 'gaps',        label: 'Gaps & openings' }
   ];
+  /* what Clarity thinks aloud while it researches */
   var SCAN_LOG = [
-    '> ACQUIRING SATELLITE UPLINK…',
-    '> IDENTIFYING COMPETITORS…',
-    '> MAPPING POSITIONING…',
-    '> BENCHMARKING PRICING…',
-    '> MEASURING SHARE OF VOICE…',
-    '> COMPILING THREAT BOARD…'
+    'Looking around your market…',
+    'Naming the players…',
+    'Reading how they position themselves…',
+    'Checking their prices…',
+    'Measuring who gets heard…',
+    'Mapping the landscape for you…'
   ];
+  /* warm labels for how strongly a competitor plays (keys match report data) */
+  var PLAYER_LABEL = { High: 'Strong player', Medium: 'In the mix', Low: 'On the edges' };
   var EVIDENCE = [
     { id: 'e_01', domain: 'statista.com',      topic: 'Category structure & shares',        url: 'https://www.statista.com/' },
     { id: 'e_03', domain: 'trends.google.com', topic: 'Brand search interest',              url: 'https://trends.google.com/' },
@@ -174,7 +178,7 @@
       + '<p style="margin:0 0 10px;font-family:Consolas,monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:' + P.faint + '">The verdict</p>'
       + '<p style="margin:0;font-family:' + serif + ';font-size:20px;line-height:1.45;color:' + P.ink + '">' + esc(r.verdict) + '</p>'
       + sec('What we found') + takes
-      + sec('Threat board') + comps
+      + sec('The landscape') + comps
       + sec('Key findings') + find
       + sec('How solid is this?') + '<p style="margin:0;font-family:' + sans + ';font-size:13px;line-height:1.55;color:' + P.soft + '"><b style="color:' + P.ink + '">Solid read — ' + r.dq + '% data quality.</b> Built from ' + r.evidence.length + ' independent sources across category structure, share of voice and pricing.</p>'
       + sec('Sources') + srcs
@@ -229,29 +233,28 @@
       return function () { clearInterval(iv); clearTimeout(t); };
     }, [view]);
 
-    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
-    function capcom(line) {
+    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
+    /* the voice of Clarity — unattributed (reuses .capcom styles) */
+    function voice(line) {
       return e('div', { className: 'capcom' },
-        e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
-        e('div', { className: 'capcom-body' }, e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')), e('div', { className: 'capcom-line' }, line)));
+        e('div', { className: 'capcom-body' }, e('div', { className: 'capcom-line' }, line)));
     }
     function shell(inner) {
       return e('div', { className: 'id-root' }, bg(),
         e('div', { className: 'pf-topbar' },
-          e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } }, e('span', { className: 'pf-wordmark' }, 'Clarity'), e('span', { className: 'pf-hide-sm' }, 'Mission Control // Recon · Competition')),
-          e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+          e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } }, e('span', { className: 'pf-wordmark' }, 'Clarity'), e('span', { className: 'pf-hide-sm' }, 'Your journey · Competition'))),
         e('div', { className: 'id-main' }, inner));
     }
 
-    /* ── BRIEF ── */
+    /* ── INTRO ── */
     if (view === 'brief') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · Competition'),
-        e('h1', { className: 'mm-title' }, 'Scout the competition'),
-        capcom('No competitive intel yet, operator. Run a recon scan and I will map the threat board.'),
-        e('div', { className: 'mm-statgrid' }, [['Competitors', '—'], ['Top threat', '—'], ['Avg pricing', '—'], ['Open gaps', '0']].map(function (s, i) { return e('div', { key: i, className: 'mm-stat' }, e('div', { className: 'mm-stat-l' }, s[0]), e('div', { className: 'mm-stat-v dim' }, s[1])); })),
-        e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Run scan →')));
+        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · Competition'),
+        e('h1', { className: 'mm-title' }, 'See who’s already out there'),
+        voice('You haven’t met the competition yet. Give me a minute and I’ll map the landscape around you.'),
+        e('div', { className: 'mm-statgrid' }, [['Competitors', '—'], ['Strongest player', '—'], ['Avg pricing', '—'], ['Open gaps', '0']].map(function (s, i) { return e('div', { key: i, className: 'mm-stat' }, e('div', { className: 'mm-stat-l' }, s[0]), e('div', { className: 'mm-stat-v dim' }, s[1])); })),
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Start the research →')));
     }
 
     /* ── SCAN WIZARD (reuses the world map) ── */
@@ -259,53 +262,53 @@
       var node;
       if (step === 0) {
         node = e(React.Fragment, null,
-          capcom('Where should I scout? Mark the territory — tap regions on the map.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Territory'),
+          voice('First — where should I look? Tap the parts of the world you serve.'),
+          e('div', { className: 'mm-sec' }, 'Where you operate'),
           WorldMap ? e(WorldMap, { selected: regions, onToggle: toggleRegion, scanning: false }) : e('div', { className: 'mm-chosen-empty' }, 'Map unavailable.'),
-          e('div', { className: 'mm-chosen' }, regions.length === 0 ? e('span', { className: 'mm-chosen-empty' }, 'No regions marked yet.') : regions.map(function (id) { var r = REGIONS.filter(function (x) { return x.id === id; })[0] || {}; return e('span', { key: id, className: 'mm-tag' }, r.label, e('button', { onClick: function () { toggleRegion(id); } }, '×')); })),
-          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'Inferred')),
-          e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Confirm territory →'));
+          e('div', { className: 'mm-chosen' }, regions.length === 0 ? e('span', { className: 'mm-chosen-empty' }, 'Nothing picked yet.') : regions.map(function (id) { var r = REGIONS.filter(function (x) { return x.id === id; })[0] || {}; return e('span', { key: id, className: 'mm-tag' }, r.label, e('button', { onClick: function () { toggleRegion(id); } }, '×')); })),
+          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
+          e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Next →'));
       } else if (step === 1) {
         node = e(React.Fragment, null,
-          capcom('What should the scout look for? Pick your recon focus.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Recon focus'),
+          voice('What should I look into? Pick whatever matters to you.'),
+          e('div', { className: 'mm-sec' }, 'What to look into'),
           e('div', { className: 'mm-foci' }, FOCI.map(function (f) { var on = foci.indexOf(f.id) >= 0; return e('button', { key: f.id, className: 'ob-opt' + (on ? ' sel' : ''), onClick: function () { toggleFocus(f.id); } }, f.label); })),
-          e('div', { className: 'mm-row' }, e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Territory'), e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(2); }, disabled: foci.length === 0 }, 'Confirm focus →')));
+          e('div', { className: 'mm-row' }, e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Back'), e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(2); }, disabled: foci.length === 0 }, 'Next →')));
       } else {
         node = e(React.Fragment, null,
-          capcom('Recon parameters locked. Deploy the scout when ready, operator.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Scan summary'),
+          voice('All set. I’ll go meet the neighbours and come back with the lay of the land.'),
+          e('div', { className: 'mm-sec' }, 'What I’ll look at'),
           e('div', { className: 'mm-summary' },
-            e('div', { className: 'mm-srow' }, e('span', null, 'Territory'), e('b', null, regions.length + ' region' + (regions.length > 1 ? 's' : '') + ' · ' + regionNames(regions))),
-            e('div', { className: 'mm-srow' }, e('span', null, 'Focus'), e('b', null, foci.map(function (id) { return (FOCI.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(' · '))),
+            e('div', { className: 'mm-srow' }, e('span', null, 'Where'), e('b', null, regions.length + ' region' + (regions.length > 1 ? 's' : '') + ' · ' + regionNames(regions))),
+            e('div', { className: 'mm-srow' }, e('span', null, 'Looking into'), e('b', null, foci.map(function (id) { return (FOCI.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(' · '))),
             e('div', { className: 'mm-srow' }, e('span', null, 'Category'), e('b', null, soldWhat))),
-          e('div', { className: 'mm-row' }, e('button', { className: 'id-back', onClick: function () { setStep(1); } }, '‹ Focus'), e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('running'); } }, 'Deploy scout →')));
+          e('div', { className: 'mm-row' }, e('button', { className: 'id-back', onClick: function () { setStep(1); } }, '‹ Back'), e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('running'); } }, 'Start the research →')));
       }
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Abort'),
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · Competition'),
-        e('div', { className: 'mm-steps' }, ['Territory', 'Focus', 'Deploy'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Leave for now'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · Competition'),
+        e('div', { className: 'mm-steps' }, ['Where', 'What', 'Go'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
         e('div', { className: 'mm-panel', key: step }, node)));
     }
 
-    /* ── RUNNING ── */
+    /* ── RESEARCHING ── */
     if (view === 'running') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · Competition'),
-        e('h1', { className: 'mm-title' }, 'Scouting…'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · Competition'),
+        e('h1', { className: 'mm-title' }, 'Looking around…'),
         WorldMap && e(WorldMap, { selected: regions, onToggle: function () {}, scanning: true }),
         e('div', { className: 'mm-log' }, SCAN_LOG.slice(0, revealed).map(function (l, i) { return e('div', { key: i, className: i === revealed - 1 ? 'live' : '' }, l); })),
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
-    /* ── ROSTER — browse past competitor scouts ── */
+    /* ── ROSTER — browse past competitor research ── */
     if (view === 'roster') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
-        capcom('Your competitor scouts, operator. Open one, run another, or set which read feeds your plan.'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+        voice('Everyone I’ve met around you. Open a report, run a fresh look, or star the one that feeds your plan.'),
         window.ClarityReportRoster && e(window.ClarityReportRoster, {
-          eyebrow: 'Recon mission · Competition', title: 'Your competitor scouts', accent: CATEGORY.accent,
-          reports: reports, primaryId: primaryId, fallbackTitle: 'Competitor scan', newLabel: 'Run another scout →',
+          eyebrow: 'The groundwork · Competition', title: 'Your competitor research', accent: CATEGORY.accent,
+          reports: reports, primaryId: primaryId, fallbackTitle: 'Competitor research', newLabel: 'Run a fresh look →',
           onOpen: function (id) { setSel(id); setView('result'); },
           onNew: function () { setRegions([]); setStep(0); setView('scan'); },
           onSetPrimary: function (id) { setPrimaryId(id); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: id }); }
@@ -324,12 +327,12 @@
         return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
       })) },
       { id: 'detail', label: 'The detail', node: e('div', { className: 'rc-block' },
-        e('div', { className: 'rc-subhead' }, 'Threat board'),
+        e('div', { className: 'rc-subhead' }, 'The landscape'),
         r.competitors.map(function (c, i) {
           return e('div', { key: i, className: 'rc-comp' },
             e('div', { className: 'rc-comp-head' },
               e('span', { className: 'rc-comp-name' }, c.name),
-              e('span', { className: 'rc-threat ' + c.threat.toLowerCase() }, c.threat + ' threat'),
+              e('span', { className: 'rc-threat ' + c.threat.toLowerCase() }, PLAYER_LABEL[c.threat] || c.threat),
               e('span', { className: 'rc-comp-price' }, c.price)),
             e('div', { className: 'rc-bar-row' },
               e('span', { className: 'rc-bar-l' }, 'Share of voice'),
@@ -347,9 +350,9 @@
     ];
 
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Intel Acquired'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
-      capcom('Scout complete — the plain read is up top, the full threat board sits underneath.'),
+      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know the landscape now'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
+      voice('Done — the plain read is up top, and the full landscape sits underneath.'),
 
       e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
         e('div', { className: 'rc-bar' },
@@ -366,16 +369,16 @@
 
         /* sections rendered as accordion / tabs by the shared viewer */
         window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: [
-          { value: '' + r.competitors.length, label: 'Direct competitors', note: r.competitors.filter(function (c) { return c.threat === 'High'; }).length + ' high threat', tone: r.competitors.filter(function (c) { return c.threat === 'High'; }).length >= 2 ? 'warn' : 'neutral' },
+          { value: '' + r.competitors.length, label: 'Direct competitors', note: r.competitors.filter(function (c) { return c.threat === 'High'; }).length + ' strong', tone: r.competitors.filter(function (c) { return c.threat === 'High'; }).length >= 2 ? 'warn' : 'neutral' },
           { value: r.competitors[0] ? r.competitors[0].sov + '%' : '—', label: 'Top rival share', note: r.competitors[0] ? r.competitors[0].name : '—', tone: 'warn' },
           { value: '' + r.dq, label: 'Confidence score', note: r.dq >= 80 ? 'Solid read' : 'Workable', tone: r.dq >= 80 ? 'good' : 'neutral' }
         ], storeKey: 'competition:' + ((profile && profile.name) || 'idea') + ':' + (r.id || 'r') })
       ),
 
       e('div', { className: 'mm-row' },
-        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
+        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
         (sel !== primaryId) && e('button', { className: 'id-back', onClick: function () { setPrimaryId(sel); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: sel }); } }, '★ Make primary'),
-        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run another scout →'))
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run a fresh look →'))
     ));
   }
 

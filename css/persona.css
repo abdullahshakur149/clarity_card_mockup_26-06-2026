@@ -16,8 +16,8 @@
 .pn-main { position: relative; z-index: 2; max-width: 840px; margin: 0 auto; padding: 88px 24px 72px; }
 @media (max-width: 640px) { .pn-main { padding: 80px 18px 52px; } }
 
-.pn-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--clr-persona); margin: 6px 0 10px; }
-.pn-title { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: 1.05; letter-spacing: -0.01em; color: var(--clr-text); margin: 0 0 12px; }
+.pn-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 11.5px; letter-spacing: 0.05em; color: var(--clr-persona); margin: 6px 0 10px; }
+.pn-title { font-family: var(--font-display); font-weight: 700; font-size: 31px; line-height: 1.12; letter-spacing: -0.02em; color: var(--clr-text); margin: 0 0 12px; }
 .pn-lead { font-size: 15px; line-height: 1.6; color: var(--clr-muted); max-width: 520px; margin: 0 0 24px; }
 @media (max-width: 640px) { .pn-title { font-size: 30px; } }
 
@@ -34,7 +34,7 @@
 .pn-card:hover { transform: translateY(-2px); border-color: var(--clr-persona-border, rgba(180,139,250,0.4)); box-shadow: 0 16px 34px -20px rgba(0,0,0,.7); }
 .pn-card-top { display: flex; align-items: center; gap: 13px; }
 .pn-card-id { min-width: 0; }
-.pn-card-name { font-family: var(--font-display); font-size: 20px; font-weight: 600; color: var(--clr-text); line-height: 1.1; }
+.pn-card-name { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; font-weight: 600; color: var(--clr-text); line-height: 1.1; }
 .pn-card-arch { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--clr-muted); margin-top: 2px; }
 .pn-card-status { font-size: 13px; color: var(--clr-persona-2); font-style: italic; }
 .pn-card-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; padding-top: 11px; border-top: 1px solid var(--clr-border); }
@@ -50,7 +50,7 @@
 .pn-new { align-items: flex-start; justify-content: center; gap: 6px; border-style: dashed; background: transparent; }
 .pn-new:hover { border-color: rgba(180,139,250,0.5); }
 .pn-new-ic { width: 44px; height: 44px; border-radius: 50%; background: var(--clr-persona-dim); color: var(--clr-persona); display: grid; place-items: center; }
-.pn-new-l { font-family: var(--font-display); font-size: 19px; font-weight: 600; color: var(--clr-text); }
+.pn-new-l { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--clr-text); }
 .pn-new-s { font-size: 12.5px; color: var(--clr-muted); }
 
 /* genesis — pick */
@@ -58,7 +58,7 @@
 .pn-arch { text-align: left; display: flex; flex-direction: column; gap: 6px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; padding: 16px; cursor: pointer; transition: border-color .16s ease, transform .16s ease; }
 .pn-arch:hover { transform: translateY(-2px); border-color: rgba(180,139,250,0.45); }
 .pn-arch-ic { width: 40px; height: 40px; border-radius: 11px; background: var(--clr-persona-dim); color: var(--clr-persona); display: grid; place-items: center; }
-.pn-arch-l { font-family: var(--font-display); font-size: 19px; font-weight: 600; color: var(--clr-text); }
+.pn-arch-l { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--clr-text); }
 .pn-arch-b { font-size: 12.5px; line-height: 1.45; color: var(--clr-muted); }
 
 /* genesis — awakening */
@@ -70,13 +70,13 @@
 .pn-awaken.pn-r3, .pn-awaken.pn-r4 { opacity: 1; filter: none; transform: scale(1); box-shadow: 0 0 60px -12px var(--clr-persona), 0 0 30px -10px var(--clr-persona-2); animation: pn-breathe 2.4s ease-in-out infinite; }
 @keyframes pn-breathe { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 .pn-awaken-cap { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.1em; color: var(--clr-muted); margin-top: 22px; }
-.pn-firstwords { font-family: var(--font-display); font-style: italic; font-size: 22px; line-height: 1.4; color: var(--clr-text); max-width: 460px; margin: 16px auto 0; animation: pn-rise .5s ease both; }
+.pn-firstwords { font-family: var(--font-display); font-style: italic; font-size: 18px; line-height: 1.4; color: var(--clr-text); max-width: 460px; margin: 16px auto 0; animation: pn-rise .5s ease both; }
 @keyframes pn-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
 /* conversation */
 .pn-convhead { display: flex; align-items: center; gap: 14px; margin: 4px 0 16px; }
 .pn-convid { flex: 1; min-width: 0; }
-.pn-convname { font-family: var(--font-display); font-size: 24px; font-weight: 600; color: var(--clr-text); line-height: 1.1; }
+.pn-convname { font-family: var(--font-display); font-size: 20px; letter-spacing: -0.01em; font-weight: 600; color: var(--clr-text); line-height: 1.1; }
 .pn-voice { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 500; color: var(--clr-muted); background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 99px; padding: 7px 13px; cursor: pointer; transition: all .15s ease; flex-shrink: 0; }
 .pn-voice.on { color: var(--clr-persona); border-color: rgba(180,139,250,0.45); background: var(--clr-persona-dim); }
 
@@ -154,5 +154,5 @@
 .pn-dempty { font-size: 13px; font-style: italic; color: var(--clr-faint); padding: 2px 2px 4px; }
 .pn-keepsake { background: linear-gradient(160deg, rgba(255,158,122,0.12), var(--clr-card)); border: 1px solid var(--clr-persona-2); border-radius: 13px; padding: 15px 17px; margin-bottom: 22px; box-shadow: 0 0 30px -16px var(--clr-persona-2); }
 .pn-keepsake-l { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-persona-2); margin-bottom: 8px; }
-.pn-keepsake-t { font-family: var(--font-display); font-style: italic; font-size: 17px; line-height: 1.45; color: var(--clr-text); }
+.pn-keepsake-t { font-family: var(--font-display); font-style: italic; font-size: 15px; line-height: 1.45; color: var(--clr-text); }
 .pn-keepsake-sig { font-size: 13px; color: var(--clr-muted); margin-top: 8px; text-align: right; }

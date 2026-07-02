@@ -129,9 +129,9 @@
     return e('div', { className: 'rr', style: { '--rr-accent': props.accent || 'var(--clr-primary)' } },
       e('div', { className: 'rr-head' },
         e('div', null,
-          e('div', { className: 'rr-eyebrow' }, props.eyebrow || 'Recon'),
+          e('div', { className: 'rr-eyebrow' }, props.eyebrow || 'Your research'),
           e('h1', { className: 'rr-title' }, props.title || 'Your reports')),
-        e('button', { className: 'pf-cta mm-cta', onClick: props.onNew }, props.newLabel || 'Run another scan →')),
+        e('button', { className: 'pf-cta mm-cta', onClick: props.onNew }, props.newLabel || 'Run a fresh look →')),
       e('div', { className: 'rr-list' }, reports.map(function (rep) {
         var isP = rep.id === primaryId;
         return e('div', { key: rep.id, className: 'rr-card' + (isP ? ' primary' : '') },

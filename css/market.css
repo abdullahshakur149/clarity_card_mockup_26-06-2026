@@ -1,19 +1,20 @@
 /* ============================================================================
-   market.css — "My Market" recon mission (world-map scan + intel dossier).
-   Reuses .id-root/.pf-bg/.pf-topbar/.id-main/.capcom/.pf-cta/.ob-opt/.id-back
-   and the ob-sweep / ob-slide-left keyframes. Prefix: mm-
+   market.css — "Understand your market" (world-map pick + research report).
+   Journey tone. Reuses .id-root/.pf-bg/.pf-topbar/.id-main/.capcom/.pf-cta/
+   .ob-opt/.id-back and the ob-slide-left keyframe. Prefix: mm-
+   (also reused by the Competition screen)
    ========================================================================== */
 
-.mm-title { font-family: var(--font-display); font-size: 38px; font-weight: 700; color: var(--clr-text); margin: 4px 0 8px; line-height: 1.05; }
+.mm-title { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -0.02em; color: var(--clr-text); margin: 4px 0 8px; line-height: 1.12; }
 .mm-cta { width: auto; }
 .mm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
 
-.mm-sec { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clr-muted); margin: 16px 0 10px; display: flex; gap: 5px; align-items: center; }
+.mm-sec { font-family: var(--font-body); font-size: 12px; font-weight: 500; letter-spacing: 0.03em; color: var(--clr-muted); margin: 16px 0 10px; display: flex; gap: 5px; align-items: center; }
 .mm-sec .pf-prompt { color: var(--clr-primary-hover); }
 
 /* step tracker */
 .mm-steps { display: flex; gap: 8px; margin: 10px 0 16px; flex-wrap: wrap; }
-.mm-step { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clr-faint); padding: 5px 13px; border: 1px solid var(--clr-border); border-radius: var(--radius-pill, 99px); }
+.mm-step { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-faint); padding: 5px 13px; border: 1px solid var(--clr-border); border-radius: var(--radius-pill, 99px); }
 .mm-step.on { color: var(--clr-primary-hover); border-color: var(--clr-primary-border); background: var(--clr-primary-dim); }
 .mm-step.done { color: var(--clr-accent); border-color: var(--clr-accent); }
 .mm-panel { animation: mm-fade 0.32s cubic-bezier(0.2,0.8,0.3,1) both; }
@@ -28,7 +29,10 @@
 .mm-region.sel polygon { fill: var(--clr-primary-dim); stroke: var(--clr-primary-hover); stroke-width: 1.5; }
 .mm-region-label { fill: var(--clr-muted); font-size: 8px; letter-spacing: 0.02em; text-anchor: middle; pointer-events: none; }
 .mm-region.sel .mm-region-label { fill: var(--clr-primary-hover); font-weight: 600; }
-.mm-sweep { position: absolute; inset: 14px; border-radius: 8px; pointer-events: none; background: conic-gradient(from 0deg, rgba(43,212,187,0.28), transparent 64deg); animation: ob-sweep 2.4s linear infinite; }
+/* journey pass — the rotating radar sweep is retired; while Clarity reads the
+   map, a soft light simply breathes over the regions you picked */
+.mm-sweep { position: absolute; inset: 14px; border-radius: 8px; pointer-events: none; background: radial-gradient(62% 62% at 50% 45%, rgba(43,212,187,0.16), transparent 75%); animation: mm-breathe 2.6s ease-in-out infinite; }
+@keyframes mm-breathe { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
 
 .mm-chosen { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; min-height: 22px; }
 .mm-chosen-empty { font-size: 12px; color: var(--clr-faint); }
@@ -37,35 +41,36 @@
 
 .mm-inferred { display: flex; align-items: center; gap: 10px; background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 10px; padding: 10px 14px; margin: 8px 0 18px; }
 .mm-inferred > svg { color: var(--clr-primary-hover); flex-shrink: 0; }
-.mm-inferred-l { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); flex-shrink: 0; }
+.mm-inferred-l { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); flex-shrink: 0; }
 .mm-inferred-v { font-size: 13px; color: var(--clr-text); font-weight: 600; flex: 1; min-width: 0; }
-.mm-inferred-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clr-primary-hover); background: var(--clr-primary-dim); border: 1px solid var(--clr-primary-border); border-radius: var(--radius-pill, 99px); padding: 2px 8px; flex-shrink: 0; }
+.mm-inferred-badge { font-family: var(--font-body); font-size: 10px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-primary-hover); background: var(--clr-primary-dim); border: 1px solid var(--clr-primary-border); border-radius: var(--radius-pill, 99px); padding: 2px 8px; flex-shrink: 0; }
 
 .mm-foci { display: flex; flex-wrap: wrap; gap: 9px; margin-bottom: 18px; }
 
 .mm-summary { display: flex; flex-direction: column; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 4px 14px; margin-bottom: 18px; }
 .mm-srow { display: flex; justify-content: space-between; gap: 16px; padding: 11px 0; border-bottom: 1px solid var(--clr-border); font-size: 13px; }
 .mm-srow:last-child { border-bottom: 0; }
-.mm-srow span { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); white-space: nowrap; padding-top: 2px; }
+.mm-srow span { font-family: var(--font-body); font-size: 11px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); white-space: nowrap; padding-top: 2px; }
 .mm-srow b { color: var(--clr-text); text-align: right; }
 
 /* stat grid (brief empty + result) */
 .mm-statgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0 18px; }
 .mm-stat { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; }
-.mm-stat-l { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); }
-.mm-stat-v { font-family: var(--font-display); font-size: 23px; font-weight: 700; color: var(--clr-text); margin-top: 6px; line-height: 1.12; }
+.mm-stat-l { font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); }
+.mm-stat-v { font-family: var(--font-display); font-size: 21px; letter-spacing: -0.01em; font-weight: 700; color: var(--clr-text); margin-top: 6px; line-height: 1.12; }
 .mm-stat-v.dim { color: var(--clr-faint); }
 
-/* scanning */
-.mm-log { font-family: var(--font-mono); font-size: 12px; line-height: 1.95; color: var(--clr-muted); margin: 16px 0; min-height: 96px; }
+/* Clarity thinking aloud while it researches */
+.mm-log { font-family: var(--font-body); font-size: 13px; line-height: 2; color: var(--clr-muted); margin: 16px 0; min-height: 96px; }
 .mm-log .live { color: var(--clr-primary-hover); }
 .mm-bar { height: 4px; border-radius: 2px; background: var(--clr-border); overflow: hidden; }
 .mm-bar i { display: block; height: 100%; background: var(--clr-primary-hover); animation: mm-bar 2.7s cubic-bezier(0.4,0,0.2,1) forwards; }
 @keyframes mm-bar { from { width: 0; } to { width: 100%; } }
 
-/* result */
-.mm-acq { display: flex; align-items: center; gap: 14px; margin: 6px 0 6px; }
-.mm-acq-stamp { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-accent); border: 1px solid var(--clr-accent); border-radius: 8px; padding: 5px 13px; box-shadow: 0 0 18px var(--clr-accent-dim); animation: pf-stamp 0.5s cubic-bezier(0.34,1.56,0.64,1) both; }
+/* result — milestone sentence Clarity signs off (underline motif from auth.css) */
+.mm-acq { display: flex; align-items: baseline; gap: 14px; margin: 6px 0 6px; flex-wrap: wrap; }
+.mm-acq-stamp { position: relative; font-family: var(--font-display); font-style: italic; font-size: 17px; font-weight: 600; color: var(--clr-text); padding: 2px 4px 11px; animation: pf-stamp 0.55s cubic-bezier(0.2,0.8,0.3,1) both; }
+.mm-acq-stamp::after { content: ''; position: absolute; left: 2px; right: 2px; bottom: 5px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--clr-reward) 14%, var(--clr-reward) 86%, transparent); transform-origin: left center; animation: pf-sign 0.7s cubic-bezier(0.3,0.8,0.3,1) 0.35s both; }
 .mm-acq-xp { font-family: var(--font-mono); font-size: 16px; font-weight: 600; color: var(--clr-reward); }
 .mm-intel { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 10px 0 20px; }
 .mm-intel-card { display: flex; gap: 12px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; opacity: 0; animation: ob-slide-left 0.5s cubic-bezier(0.2,0.8,0.3,1) both; }
@@ -80,7 +85,7 @@
 .mm-dq-num { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--clr-text); line-height: 1; }
 .mm-dq-l { font-family: var(--font-mono); font-size: 6.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clr-muted); margin-top: 2px; }
 .mm-repmeta { flex: 1; min-width: 0; }
-.mm-repmeta-title { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--clr-text); }
+.mm-repmeta-title { font-family: var(--font-display); font-size: 16px; font-weight: 700; color: var(--clr-text); }
 .mm-repmeta-sub { font-size: 12px; color: var(--clr-muted); margin-top: 2px; }
 .mm-rtags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
 .mm-rtag { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.04em; color: var(--clr-text); background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: var(--radius-pill, 99px); padding: 3px 10px; }
@@ -93,7 +98,7 @@
 .mm-finding { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; opacity: 0; animation: ob-slide-left 0.45s cubic-bezier(0.2,0.8,0.3,1) both; }
 .mm-finding-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
 .mm-finding-q { font-size: 14px; font-weight: 700; color: var(--clr-text); }
-.mm-conf { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: var(--radius-pill, 99px); white-space: nowrap; flex-shrink: 0; }
+.mm-conf { font-family: var(--font-body); font-size: 10px; font-weight: 500; letter-spacing: 0.02em; padding: 3px 9px; border-radius: var(--radius-pill, 99px); white-space: nowrap; flex-shrink: 0; }
 .mm-conf.high { color: var(--clr-accent); background: var(--clr-accent-dim); border: 1px solid var(--clr-accent); }
 .mm-conf.medium { color: var(--clr-warning); background: var(--clr-warning-dim); border: 1px solid var(--clr-warning); }
 .mm-conf.low { color: var(--clr-danger); background: var(--clr-danger-dim); border: 1px solid var(--clr-danger); }

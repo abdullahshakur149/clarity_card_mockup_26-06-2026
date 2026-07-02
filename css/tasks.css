@@ -36,7 +36,7 @@
 
 /* ---- groups + task cards -------------------------------------------------- */
 .tk-group { margin-bottom: 22px; }
-.tk-group-h { display: flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 11px; }
+.tk-group-h { display: flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; color: var(--clr-muted); margin-bottom: 11px; }
 .tk-group-n { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--clr-card-2); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0; color: var(--clr-muted); }
 .tk-empty { font-size: 13px; color: var(--clr-muted); padding: 4px 2px 8px; }
 
@@ -50,10 +50,12 @@
 .tk-title { font-size: 14.5px; font-weight: 500; color: var(--clr-text); line-height: 1.4; }
 .tk-card.done .tk-title { text-decoration: line-through; color: var(--clr-muted); }
 .tk-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.tk-kind { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--k); background: color-mix(in srgb, var(--k) 14%, transparent); border-radius: 999px; padding: 2px 8px; }
-.tk-imp { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--clr-muted); }
+/* colour discipline — the kind chip is neutral; its colour lives in a small dot */
+.tk-kind { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-body); font-size: 10px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 999px; padding: 2px 8px; }
+.tk-kind::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--k); flex-shrink: 0; }
+.tk-imp { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.02em; color: var(--clr-muted); }
 .tk-imp.high { color: var(--clr-accent); }
-.tk-own { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clr-primary-hover); background: color-mix(in srgb, var(--clr-primary) 14%, transparent); border-radius: 999px; padding: 2px 8px; }
+.tk-own { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.02em; color: var(--clr-primary-hover); background: color-mix(in srgb, var(--clr-primary) 14%, transparent); border-radius: 999px; padding: 2px 8px; }
 .tk-due { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10.5px; color: var(--clr-muted); }
 .tk-x { flex-shrink: 0; background: transparent; border: none; color: var(--clr-muted); opacity: 0; cursor: pointer; padding: 2px; border-radius: 6px; transition: opacity 0.15s ease, color 0.15s ease; }
 .tk-card:hover .tk-x { opacity: 0.6; }
@@ -76,13 +78,13 @@
 .tk-cal-dots { display: flex; gap: 3px; height: 5px; }
 .tk-cal-dots i { width: 5px; height: 5px; border-radius: 50%; }
 .tk-cal-dots.alldone i { opacity: 0.4; }
-.tk-day-h { font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--clr-cat-customer); text-transform: uppercase; margin: 4px 0 12px; }
+.tk-day-h { font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--clr-cat-customer); margin: 4px 0 12px; }
 
 /* ---- kanban board --------------------------------------------------------- */
 .kb-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
 .kb-col { background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 14px; padding: 10px; min-height: 130px; transition: background 0.15s ease, border-color 0.15s ease; }
 .kb-col.over { border-color: var(--clr-cat-customer); background: color-mix(in srgb, var(--clr-cat-customer) 9%, var(--clr-card-2)); }
-.kb-col-h { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 11px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.kb-col-h { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 11px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
 .kb-col-l { color: var(--clr-muted); }
 .kb-doing .kb-col-l { color: var(--clr-cat-gtm); }
 .kb-done .kb-col-l { color: var(--clr-cat-customer); }

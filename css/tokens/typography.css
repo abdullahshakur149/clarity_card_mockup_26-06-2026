@@ -1,15 +1,16 @@
-/* Clarity — Typography tokens
-   Display: Cormorant Garamond (serif, elegant editorial headings)
-   Body / UI: DM Sans
+/* Clarity — Typography tokens  (professional pass)
+   Display + Body / UI: DM Sans — one clean sans system, weights do the work
+   Brand: Cormorant Garamond — ONLY the wordmark + signature moments
    Mono / data: DM Mono (counts, durations, KPI numbers, codes) */
 
 :root {
   /* ---- Families ---- */
-  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-display: 'DM Sans', system-ui, -apple-system, sans-serif;
+  --font-brand: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'DM Sans', system-ui, -apple-system, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, 'SF Mono', monospace;
 
-  /* ---- Display scale (Cormorant) ---- */
+  /* ---- Display scale (DM Sans) ---- */
   --type-display-xl: 700 44px/1.05 var(--font-display);   /* hero / home title */
   --type-display-lg: 700 34px/1.0 var(--font-display);    /* big KPI value */
   --type-display-md: 600 30px/1.1 var(--font-display);    /* screen title / hero h2 */

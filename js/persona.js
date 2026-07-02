@@ -253,8 +253,8 @@
         e('div', { className: 'pf-topbar' },
           e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             e('span', { className: 'pf-wordmark' }, 'Clarity'),
-            e('span', { className: 'pf-hide-sm' }, 'The Circle // Persona')),
-          e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, idea.name || ''), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+            e('span', { className: 'pf-hide-sm' }, 'Your journey · The Circle')),
+          e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, idea.name || ''))),
         e('div', { className: 'pn-main' }, inner));
     }
 

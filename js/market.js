@@ -1,9 +1,9 @@
 /* ============================================================================
-   market.js — "My Market" recon mission (Scan my market).  ref 8-12.png
+   market.js — "Understand your market" groundwork step.  ref 8-12.png
    Exposes window.ClarityMarketMission({ profile, result, onComplete, onBack }).
-   Flow: brief → scan wizard (world-map territory + focus + deploy) → scanning
-   cinematic → INTEL REPORT (findings-first, honest DQ, evidence appendix) with a
-   real downloadable Word file. Mocked outputs. Mission-control / teal.
+   Flow: intro → setup (world-map pick + what to look into) → Clarity researches
+   (thinking aloud) → REPORT (findings-first, honest DQ, evidence appendix) with
+   a real downloadable Word file. Mocked outputs. Journey tone / teal.
    ========================================================================== */
 (function () {
   'use strict';
@@ -26,13 +26,14 @@
     { id: 'pricing', label: 'Pricing benchmarks' },
     { id: 'trends',  label: 'Local trends' }
   ];
+  /* what Clarity thinks aloud while it researches */
   var SCAN_LOG = [
-    '> ACQUIRING SATELLITE UPLINK…',
-    '> MAPPING SELECTED TERRITORY…',
-    '> TRIANGULATING COMPETITORS…',
-    '> READING DEMAND SIGNALS…',
-    '> SYNTHESISING FINDINGS…',
-    '> COMPILING INTEL DOSSIER…'
+    'Reading your market…',
+    'Walking the areas you picked…',
+    'Seeing who’s already there…',
+    'Listening for what people want…',
+    'Pulling it all together…',
+    'Writing you the plain answer…'
   ];
   var XP = 60;
   /* per-report category identity (signature accent for quick visual scanning) */
@@ -285,12 +286,11 @@
       return function () { clearInterval(iv); clearTimeout(t); };
     }, [view]);
 
-    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-grid' }), e('div', { className: 'pf-bg-scan' }), e('div', { className: 'pf-bg-vignette' })); }
-    function capcom(line) {
+    function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
+    /* the voice of Clarity — unattributed (reuses .capcom styles) */
+    function voice(line) {
       return e('div', { className: 'capcom' },
-        e('div', { className: 'capcom-avatar' }, e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)),
         e('div', { className: 'capcom-body' },
-          e('div', { className: 'capcom-name' }, e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')),
           e('div', { className: 'capcom-line' }, line)));
     }
     function shell(inner) {
@@ -298,23 +298,22 @@
         e('div', { className: 'pf-topbar' },
           e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
             e('span', { className: 'pf-wordmark' }, 'Clarity'),
-            e('span', { className: 'pf-hide-sm' }, 'Mission Control // Recon · My Market')),
-          e('div', { className: 'pf-tele' }, e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'), e('span', { className: 'pf-live' }, e('i', null), 'Live'))),
+            e('span', { className: 'pf-hide-sm' }, 'Your journey · My Market'))),
         e('div', { className: 'id-main' }, inner));
     }
 
-    /* ── BRIEF ── */
+    /* ── INTRO ── */
     if (view === 'brief') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · My Market'),
-        e('h1', { className: 'mm-title' }, 'Scan the market'),
-        capcom('No market intel yet, operator. Run a recon scan — I will come back with findings, not just links.'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
+        e('h1', { className: 'mm-title' }, 'Understand your market'),
+        voice('You haven’t looked at your market yet. Give me a minute and I’ll come back with answers — not a pile of links.'),
         e('div', { className: 'mm-statgrid' },
           [['Category', '—'], ['Competitors', '—'], ['Avg price', '—'], ['Signals', '0']].map(function (s, i) {
             return e('div', { key: i, className: 'mm-stat' }, e('div', { className: 'mm-stat-l' }, s[0]), e('div', { className: 'mm-stat-v dim' }, s[1]));
           })),
-        e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Run scan →')
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Start the research →')
       ));
     }
 
@@ -323,61 +322,61 @@
       var stepNode;
       if (step === 0) {
         stepNode = e(React.Fragment, null,
-          capcom('Where do you operate? Mark your territory — tap regions on the map.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Territory'),
+          voice('First — where do you operate? Tap the parts of the world you serve.'),
+          e('div', { className: 'mm-sec' }, 'Where you operate'),
           e(WorldMap, { selected: regions, onToggle: toggleRegion, scanning: false }),
           e('div', { className: 'mm-chosen' },
             regions.length === 0
-              ? e('span', { className: 'mm-chosen-empty' }, 'No regions marked yet.')
+              ? e('span', { className: 'mm-chosen-empty' }, 'Nothing picked yet.')
               : regions.map(function (id) { var r = REGIONS.filter(function (x) { return x.id === id; })[0]; return e('span', { key: id, className: 'mm-tag' }, r.label, e('button', { onClick: function () { toggleRegion(id); } }, '×')); })),
-          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'Inferred')),
-          e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Confirm territory →'));
+          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
+          e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Next →'));
       } else if (step === 1) {
         stepNode = e(React.Fragment, null,
-          capcom('What should the scan look for? Pick your recon focus.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Recon focus'),
+          voice('What should I look into? Pick whatever matters to you.'),
+          e('div', { className: 'mm-sec' }, 'What to look into'),
           e('div', { className: 'mm-foci' },
             FOCI.map(function (f) { var on = foci.indexOf(f.id) >= 0; return e('button', { key: f.id, className: 'ob-opt' + (on ? ' sel' : ''), onClick: function () { toggleFocus(f.id); } }, f.label); })),
           e('div', { className: 'mm-row' },
-            e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Territory'),
-            e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(2); }, disabled: foci.length === 0 }, 'Confirm focus →')));
+            e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Back'),
+            e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(2); }, disabled: foci.length === 0 }, 'Next →')));
       } else {
         stepNode = e(React.Fragment, null,
-          capcom('Recon parameters locked. Deploy the scan when ready, operator.'),
-          e('div', { className: 'mm-sec' }, e('span', { className: 'pf-prompt' }, '>'), 'Scan summary'),
+          voice('All set. I’ll do the reading and come back with a plain answer.'),
+          e('div', { className: 'mm-sec' }, 'What I’ll look at'),
           e('div', { className: 'mm-summary' },
-            e('div', { className: 'mm-srow' }, e('span', null, 'Territory'), e('b', null, regions.length + ' region' + (regions.length > 1 ? 's' : '') + ' · ' + regions.map(function (id) { return (REGIONS.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(', '))),
-            e('div', { className: 'mm-srow' }, e('span', null, 'Focus'), e('b', null, foci.map(function (id) { return (FOCI.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(' · '))),
+            e('div', { className: 'mm-srow' }, e('span', null, 'Where'), e('b', null, regions.length + ' region' + (regions.length > 1 ? 's' : '') + ' · ' + regions.map(function (id) { return (REGIONS.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(', '))),
+            e('div', { className: 'mm-srow' }, e('span', null, 'Looking into'), e('b', null, foci.map(function (id) { return (FOCI.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(' · '))),
             e('div', { className: 'mm-srow' }, e('span', null, 'Category'), e('b', null, soldWhat))),
           e('div', { className: 'mm-row' },
-            e('button', { className: 'id-back', onClick: function () { setStep(1); } }, '‹ Focus'),
-            e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('running'); } }, 'Deploy scan →')));
+            e('button', { className: 'id-back', onClick: function () { setStep(1); } }, '‹ Back'),
+            e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('running'); } }, 'Start the research →')));
       }
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Abort'),
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · My Market'),
-        e('div', { className: 'mm-steps' }, ['Territory', 'Focus', 'Deploy'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Leave for now'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
+        e('div', { className: 'mm-steps' }, ['Where', 'What', 'Go'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
         e('div', { className: 'mm-panel', key: step }, stepNode)));
     }
 
-    /* ── RUNNING ── */
+    /* ── RESEARCHING ── */
     if (view === 'running') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'Recon mission · My Market'),
-        e('h1', { className: 'mm-title' }, 'Scanning…'),
+        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
+        e('h1', { className: 'mm-title' }, 'Having a look around…'),
         e(WorldMap, { selected: regions, onToggle: function () {}, scanning: true }),
         e('div', { className: 'mm-log' }, SCAN_LOG.slice(0, revealed).map(function (l, i) { return e('div', { key: i, className: i === revealed - 1 ? 'live' : '' }, l); })),
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
-    /* ── ROSTER — browse past market scans ── */
+    /* ── ROSTER — browse past market research ── */
     if (view === 'roster') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
-        capcom('Your market scans, operator. Open one, run another, or set which read feeds your plan.'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+        voice('Everything I’ve read about your market. Open one, run a fresh look, or star the one that feeds your plan.'),
         window.ClarityReportRoster && e(window.ClarityReportRoster, {
-          eyebrow: 'Recon mission · My Market', title: 'Your market scans', accent: CATEGORY.accent,
-          reports: reports, primaryId: primaryId, fallbackTitle: 'Market scan', newLabel: 'Run another scan →',
+          eyebrow: 'The groundwork · My Market', title: 'Your market research', accent: CATEGORY.accent,
+          reports: reports, primaryId: primaryId, fallbackTitle: 'Market research', newLabel: 'Run a fresh look →',
           onOpen: function (id) { setSel(id); setView('result'); },
           onNew: function () { setRegions([]); setStep(0); setView('scan'); },
           onSetPrimary: function (id) { setPrimaryId(id); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: id }); }
@@ -425,10 +424,10 @@
     ];
 
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
-      /* the game reward moment wraps the document */
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Intel Acquired'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
-      capcom('Scan complete — here is the read on your market. Plain version up top; the detail sits underneath if you want it.'),
+      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
+      /* the milestone moment wraps the document */
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know your market now'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
+      voice('Done — here’s the read on your market. The plain version is up top; the detail sits underneath if you want it.'),
 
       /* ── the report document ── */
       e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
@@ -459,9 +458,9 @@
       ),
 
       e('div', { className: 'mm-row' },
-        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
+        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
         (sel !== primaryId) && e('button', { className: 'id-back', onClick: function () { setPrimaryId(sel); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: sel }); } }, '★ Make primary'),
-        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run another scan →'))
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run a fresh look →'))
     ));
   }
 

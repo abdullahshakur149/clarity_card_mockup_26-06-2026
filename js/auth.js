@@ -1,6 +1,7 @@
 /* ============================================================================
-   auth.js — "Pre-flight Clearance" login screen + CAPCOM comms-HUD
-   Mission-control game-frame over real auth fields. Exposes window.ClarityLogin.
+   auth.js — the welcome screen. Journey tone: Clarity itself greets you in
+   warm first person (no CAPCOM, no clearance fiction) over real auth fields.
+   Exposes window.ClarityLogin.
    Plain globals, React.createElement (no build step) — matches the codebase.
    ========================================================================== */
 (function () {
@@ -12,22 +13,22 @@
     return NS.Icon ? e(NS.Icon, props) : null;
   }
 
-  /* CAPCOM dialogue bank */
+  /* What Clarity says (first person, unattributed) */
   var LINES = {
-    hailSignin: 'Mission Control here. Identify yourself, operator.',
-    hailEnlist: 'New recruit. Pick a call-sign and set your credentials.',
-    needCreds:  'I need your Operator ID and access key to clear you.',
-    needCall:   'Every operator needs a call-sign. What do we call you?',
-    running:    'Copy that. Running your clearance…',
-    welcome:    'Welcome aboard, operator. Beginning pre-flight.'
+    hailSignin: "Good to see you. Sign in and we'll pick up right where you left off.",
+    hailEnlist: "Welcome in. Tell me your name, set a password, and I'll take care of the rest.",
+    needCreds:  "Just your email and password, and you're in.",
+    needCall:   'One small thing — what should I call you?',
+    running:    'One moment — opening things up for you…',
+    welcome:    "You're in. Let's pick your journey back up."
   };
 
-  /* Sequence log lines revealed one-by-one during clearance */
+  /* Lines Clarity thinks aloud while it signs you in */
   var SEQ = [
-    { t: '> ESTABLISHING UPLINK…',          c: 'dim' },
-    { t: '> VERIFYING CREDENTIALS… OK',     c: 'ok'  },
-    { t: '> CLEARANCE LEVEL: OPERATOR',          c: 'ok'  },
-    { t: '> LOADING PRE-FLIGHT CHECKLIST…', c: 'dim' }
+    { t: 'Checking your details…',  c: 'dim' },
+    { t: 'Everything checks out ✓', c: 'ok'  },
+    { t: 'Setting your space up…',  c: 'dim' },
+    { t: 'Almost there…',           c: 'dim' }
   ];
 
   /* Google "G" mark */
@@ -52,15 +53,15 @@
     var ac = React.useState(false);   var active = ac[0], setActive = ac[1];
     var fc = React.useState(null);    var focused = fc[0], setFocused = fc[1]; // 'call' | 'id' | 'key' | null
 
-    /* ── Live field state (drives reactions + verification HUD) ── */
+    /* ── Live field state (drives the gentle reactions) ── */
     var emailValid  = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
     var keyLen      = pass.length;
     var keyStrength = keyLen === 0 ? 0 : keyLen < 4 ? 1 : keyLen < 6 ? 2 : keyLen < 8 ? 3 : keyLen < 11 ? 4 : 5;
-    var keyLabel    = ['Awaiting', 'Weak', 'Fair', 'Steady', 'Strong', 'Secure'][keyStrength];
+    var keyLabel    = ['—', 'Too short', 'Getting there', 'Not bad', 'Strong', 'Rock solid'][keyStrength];
     var keyColor    = keyStrength <= 1 ? 'var(--clr-danger)' : keyStrength <= 3 ? 'var(--clr-warning)' : 'var(--clr-accent)';
     var listening   = active || focused !== null;
 
-    /* Typewriter for the CAPCOM line */
+    /* Typewriter for the spoken line */
     var tg = React.useState(LINES.hailSignin); var target = tg[0], setTarget = tg[1];
     var ty = React.useState('');               var typed = ty[0], setTyped = ty[1];
     var dn = React.useState(false);            var done = dn[0], setDone = dn[1];
@@ -70,23 +71,23 @@
       setTarget(text); setActive(!!isActive);
     }
 
-    /* CAPCOM reacts to focus */
-    function focusId()  { setFocused('id');   if (!emailValid)        say('Reading your ID…', true); }
-    function focusKey() { setFocused('key');  if (keyStrength < 2)    say('Standing by for your access key.', true); }
-    function focusCall(){ setFocused('call'); say('Logging your call-sign.', true); }
+    /* Clarity reacts to focus */
+    function focusId()  { setFocused('id');   if (!emailValid)     say("Your email goes there — whenever you're ready.", true); }
+    function focusKey() { setFocused('key');  if (keyStrength < 2) say('And a password — something only you would know.', true); }
+    function focusCall(){ setFocused('call'); say('Your name first — whatever people actually call you.', true); }
     function blurField(){ setFocused(null);   setActive(false); }
 
-    /* CAPCOM reacts when a field locks in (once per transition) */
+    /* Clarity reacts when a field settles (once per transition) */
     var prevEmailValid = React.useRef(false);
     React.useEffect(function () {
-      if (phase === 'form' && emailValid && !prevEmailValid.current) say('ID confirmed. Good copy.', true);
+      if (phase === 'form' && emailValid && !prevEmailValid.current) say('Got it — thanks.', true);
       prevEmailValid.current = emailValid;
     }, [emailValid, phase]);
 
     var prevKeyReady = React.useRef(false);
     var keyReady = keyStrength >= 2;
     React.useEffect(function () {
-      if (phase === 'form' && keyReady && !prevKeyReady.current) say('Access key encrypted. Standing by.', true);
+      if (phase === 'form' && keyReady && !prevKeyReady.current) say("That'll do nicely.", true);
       prevKeyReady.current = keyReady;
     }, [keyReady, phase]);
 
@@ -100,13 +101,13 @@
       return function () { clearInterval(iv); };
     }, [target]);
 
-    /* Mode switch re-hails */
+    /* Mode switch re-greets */
     function switchMode(m) {
       setMode(m);
       say(m === 'signin' ? LINES.hailSignin : LINES.hailEnlist, false);
     }
 
-    /* Clearance sequence */
+    /* Sign-in sequence */
     var sq = React.useState(0); var revealed = sq[0], setRevealed = sq[1];
     React.useEffect(function () {
       if (phase !== 'seq') return;
@@ -122,110 +123,99 @@
       return function () { clearTimeout(t); };
     }, [phase]);
 
-    function beginClearance() { say(LINES.running, true); setPhase('seq'); }
+    function beginSignin() { say(LINES.running, true); setPhase('seq'); }
 
-    function requestClearance() {
+    function submit() {
       if (mode === 'enlist' && !callsign.trim()) { say(LINES.needCall, false); return; }
       if (!email.trim() || !pass.trim())          { say(LINES.needCreds, false); return; }
-      beginClearance();
+      beginSignin();
     }
-    function onKey(ev) { if (ev.key === 'Enter') requestClearance(); }
+    function onKey(ev) { if (ev.key === 'Enter') submit(); }
 
     /* ── Render ── */
     return e('div', { className: 'pf-root' },
       /* backdrop */
       e('div', { className: 'pf-bg' },
         e('div', { className: 'pf-bg-glow' }),
-        e('div', { className: 'pf-bg-grid' }),
-        e('div', { className: 'pf-bg-scan' }),
         e('div', { className: 'pf-bg-vignette' })
       ),
 
-      /* top status bar */
+      /* top bar */
       e('div', { className: 'pf-topbar' },
         e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
           e('span', { className: 'pf-wordmark' }, 'Clarity'),
-          e('span', { className: 'pf-hide-sm' }, 'Mission Control // Pre-flight')
-        ),
-        e('div', { className: 'pf-tele' },
-          e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'),
-          e('span', { className: 'pf-hide-sm' }, 'Sys Nominal'),
-          e('span', { className: 'pf-live' }, e('i', null), 'Live')
+          e('span', { className: 'pf-hide-sm' }, 'Welcome')
         )
       ),
 
-      /* console */
+      /* card */
       e('div', { className: 'pf-console' },
-        e('span', { className: 'pf-corner tl' }), e('span', { className: 'pf-corner tr' }),
-        e('span', { className: 'pf-corner bl' }), e('span', { className: 'pf-corner br' }),
 
-        e('div', { className: 'pf-stage' }, 'Stage 01 · ', e('b', null, 'Clearance')),
+        e('div', { className: 'pf-stage' },
+          mode === 'signin'
+            ? e(React.Fragment, null, 'Welcome ', e('b', null, 'back'))
+            : e(React.Fragment, null, 'Start your ', e('b', null, 'journey'))
+        ),
 
-        /* CAPCOM comms-HUD */
+        /* the voice of Clarity */
         e('div', { className: 'capcom' + (listening ? '' : ' idle') },
-          e('div', { className: 'capcom-avatar' },
-            e('i', null), e('i', null), e('i', null), e('i', null), e('i', null)
-          ),
           e('div', { className: 'capcom-body' },
-            e('div', { className: 'capcom-name' },
-              e('b', null, 'CAPCOM'), e('span', null, 'Launch Director')
-            ),
             e('div', { className: 'capcom-line' },
               typed, !done && e('span', { className: 'pf-cursor' }, '▉')
             )
           )
         ),
 
-        /* Google clearance */
-        e('button', { className: 'pf-google', onClick: beginClearance },
-          e(GoogleG, null), 'Authenticate with Google'
+        /* Google */
+        e('button', { className: 'pf-google', onClick: beginSignin },
+          e(GoogleG, null), 'Continue with Google'
         ),
 
-        e('div', { className: 'pf-divider' }, 'or establish manual uplink'),
+        e('div', { className: 'pf-divider' }, 'or use your email'),
 
-        /* Enlist: call-sign */
+        /* Name (sign-up only) */
         mode === 'enlist' && e('div', { className: 'pf-field' },
           e('div', { className: 'pf-label' },
-            e('span', null, e('span', { className: 'pf-prompt' }, '>'), 'Call-sign')
+            e('span', null, 'Your name')
           ),
           e('div', { className: 'pf-input-wrap' },
-            e(Icon, { name: 'Radio', size: 15 }),
+            e(Icon, { name: 'UserRound', size: 15 }),
             e('input', {
               className: 'pf-input', value: callsign, onKeyDown: onKey,
               onFocus: focusCall, onBlur: blurField,
               onChange: function (ev) { setCallsign(ev.target.value); },
-              placeholder: 'e.g. Maverick', autoComplete: 'off'
+              placeholder: 'What do people call you?', autoComplete: 'off'
             })
           )
         ),
 
-        /* Operator ID */
+        /* Email */
         e('div', { className: 'pf-field' },
           e('div', { className: 'pf-label' },
-            e('span', null, e('span', { className: 'pf-prompt' }, '>'), 'Operator ID'),
+            e('span', null, 'Email'),
             emailValid
               ? e('span', { className: 'pf-verified ok' },
-                  e(Icon, { name: 'CircleCheck', size: 11 }), 'ID Verified')
+                  e(Icon, { name: 'CircleCheck', size: 11 }), 'Looks good')
               : email.trim()
-                ? e('span', { className: 'pf-verified pending' }, e('i', null), 'Verifying…')
+                ? e('span', { className: 'pf-verified pending' }, e('i', null), 'Keep typing…')
                 : null
           ),
           e('div', { className: 'pf-input-wrap' + (emailValid ? ' ok' : '') },
-            e(Icon, { name: 'UserRound', size: 15 }),
+            e(Icon, { name: 'Mail', size: 15 }),
             e('input', {
               className: 'pf-input', type: 'email', value: email, onKeyDown: onKey,
               onFocus: focusId, onBlur: blurField,
               onChange: function (ev) { setEmail(ev.target.value); },
-              placeholder: 'operator@callsign.io', autoComplete: 'username'
+              placeholder: 'you@example.com', autoComplete: 'username'
             })
           )
         ),
 
-        /* Access key */
+        /* Password */
         e('div', { className: 'pf-field' },
           e('div', { className: 'pf-label' },
-            e('span', null, e('span', { className: 'pf-prompt' }, '>'), 'Access key'),
-            mode === 'signin' && e('a', null, 'Lost your access key?')
+            e('span', null, 'Password'),
+            mode === 'signin' && e('a', null, 'Forgot your password?')
           ),
           e('div', { className: 'pf-input-wrap' },
             e(Icon, { name: 'KeyRound', size: 15 }),
@@ -236,17 +226,17 @@
               placeholder: '••••••••', autoComplete: 'current-password'
             }),
             e('button', { className: 'pf-reveal', onClick: function () { setShowPass(!showPass); } },
-              showPass ? 'Hide' : 'Reveal')
+              showPass ? 'Hide' : 'Show')
           ),
-          /* encryption strength gauge */
+          /* strength meter */
           e('div', { className: 'pf-enc' },
-            e('span', { className: 'pf-enc-label' }, 'Encryption'),
+            e('span', { className: 'pf-enc-label' }, 'Strength'),
             e('div', { className: 'pf-enc-bars' },
               [0, 1, 2, 3, 4].map(function (i) {
                 var on = i < keyStrength;
                 return e('div', {
                   key: i, className: 'pf-enc-bar',
-                  style: on ? { background: keyColor, boxShadow: '0 0 8px ' + keyColor } : null
+                  style: on ? { background: keyColor } : null
                 });
               })
             ),
@@ -255,20 +245,20 @@
         ),
 
         /* CTA */
-        e('button', { className: 'pf-cta', onClick: requestClearance },
-          mode === 'signin' ? 'Request clearance →' : 'Enlist & launch →'
+        e('button', { className: 'pf-cta', onClick: submit },
+          mode === 'signin' ? 'Sign in →' : 'Create my account →'
         ),
 
         /* footer */
         e('div', { className: 'pf-foot' },
           mode === 'signin'
-            ? e(React.Fragment, null, 'New operator? ',
-                e('b', { onClick: function () { switchMode('enlist'); } }, 'Enlist'))
-            : e(React.Fragment, null, 'Already cleared? ',
+            ? e(React.Fragment, null, 'New here? ',
+                e('b', { onClick: function () { switchMode('enlist'); } }, 'Create an account'))
+            : e(React.Fragment, null, 'Already have an account? ',
                 e('b', { onClick: function () { switchMode('signin'); } }, 'Sign in'))
         ),
 
-        /* clearance sequence overlay */
+        /* thinking-aloud overlay */
         phase === 'seq' && e('div', { className: 'pf-seq' },
           e('div', { className: 'pf-seq-log' },
             SEQ.slice(0, revealed).map(function (l, i) {
@@ -278,13 +268,13 @@
           e('div', { className: 'pf-seq-bar' }, e('i', null))
         ),
 
-        /* clearance granted overlay */
+        /* welcome overlay */
         phase === 'granted' && e('div', { className: 'pf-granted' },
-          e('div', { className: 'pf-stamp' }, 'Clearance Granted'),
+          e('div', { className: 'pf-stamp' }, "You're in."),
           e('div', { className: 'pf-granted-sub' },
             mode === 'enlist' && callsign.trim()
-              ? 'Welcome aboard, ' + callsign.trim() + '. Beginning pre-flight…'
-              : 'Welcome aboard, operator. Beginning pre-flight…'
+              ? 'Lovely to meet you, ' + callsign.trim() + ". Let's take a look at your idea…"
+              : 'Welcome back. Your ideas are right where you left them…'
           )
         )
       )
