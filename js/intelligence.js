@@ -61,8 +61,7 @@
         e('span', { className: 'pf-hide-sm' }, 'Mission Control // Command Deck')
       ),
       e('div', { className: 'pf-tele' },
-        e('div', { className: 'id-rank' }, e(Icon, { name: 'Shield', size: 12 }),
-          e('span', null, rank.label.toUpperCase()), e('span', { className: 'id-rank-xp' }, xp, ' XP')),
+        /* per-idea rank badge removed — the global XP HUD (top-right) is the single source of level/XP */
         e('span', { className: 'pf-hide-sm' }, 'Guidance: CAPCOM'),
         e('span', { className: 'pf-live' }, e('i', null), 'Live')
       )
@@ -99,7 +98,7 @@
     var reconRef = React.useRef(!!(savedIdea.missions && savedIdea.missions.market && savedIdea.missions.customers && savedIdea.missions.competition));
 
     var rank = rankFor(xp);
-    function cnt(id) { return done[id] ? (done[id].count || 1) : 0; }
+    function cnt(id) { var d = done[id]; if (!d) return 0; if (d.reports) return d.reports.length; if (d.sketches) return d.sketches.length; return d.count || 1; }
     var counts = { market: cnt('market'), customers: cnt('customers'), competition: cnt('competition') };
 
     function missionDone(id, title, result) {
@@ -124,7 +123,7 @@
     if (sel === 'market' && window.ClarityMarketMission) {
       return e(window.ClarityMarketMission, {
         profile: profile, result: done.market || null,
-        onComplete: function (r) { missionDone('market', 'Market scan', r); },
+        onComplete: function (r) { if (r && r.xp) { missionDone('market', 'Market scan', r); } else { setDone(function (d) { return Object.assign({}, d, { market: r }); }); } },
         onBack: function () { setSel(null); }
       });
     }
@@ -145,7 +144,7 @@
     if (sel === 'competition' && window.ClarityCompetitionMission) {
       return e(window.ClarityCompetitionMission, {
         profile: profile, result: done.competition || null,
-        onComplete: function (r) { missionDone('competition', 'Competitor scan', r); },
+        onComplete: function (r) { if (r && r.xp) { missionDone('competition', 'Competitor scan', r); } else { setDone(function (d) { return Object.assign({}, d, { competition: r }); }); } },
         onBack: function () { setSel(null); }
       });
     }

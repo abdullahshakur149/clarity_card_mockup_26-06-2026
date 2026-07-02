@@ -249,11 +249,20 @@
   function ClarityMarketMission(props) {
     var profile = props.profile || {}, onComplete = props.onComplete, onBack = props.onBack;
 
-    var vw = React.useState(props.result ? 'result' : 'brief'); var view = vw[0], setView = vw[1];
+    /* report history: seed from the saved mission state (backward-compatible) */
+    var RP = window.ClarityReports;
+    var seed = (RP ? RP.list(props.result) : (props.result ? [props.result] : []))
+      .map(function (rep, i) { return rep.id ? rep : Object.assign({}, rep, { id: 'seed_' + i }); });
+    var initPrimary = (props.result && props.result.primaryId) || (seed[0] && seed[0].id) || null;
+
+    var rsL = React.useState(seed);          var reports = rsL[0], setReports = rsL[1];
+    var pmS = React.useState(initPrimary);   var primaryId = pmS[0], setPrimaryId = pmS[1];
+    var vw = React.useState(seed.length ? 'roster' : 'brief'); var view = vw[0], setView = vw[1];
+    var slS = React.useState(initPrimary);   var sel = slS[0], setSel = slS[1];
+    var idRef = React.useRef(1);
     var sp = React.useState(0);   var step = sp[0], setStep = sp[1];
     var rg = React.useState([]);  var regions = rg[0], setRegions = rg[1];
     var fo = React.useState(['demand', 'competitors', 'pricing']); var foci = fo[0], setFoci = fo[1];
-    var rs = React.useState(props.result || null); var result = rs[0], setResult = rs[1];
     var rv = React.useState(0);   var revealed = rv[0], setRevealed = rv[1];
     var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
@@ -267,9 +276,11 @@
       var n = 0; setRevealed(0);
       var iv = setInterval(function () { n++; setRevealed(n); if (n >= SCAN_LOG.length) clearInterval(iv); }, 440);
       var t = setTimeout(function () {
-        var r = buildReport(profile, regions);
-        setResult(r); setView('result');
-        if (onComplete) onComplete(r);
+        var rep = buildReport(profile, regions);
+        rep.id = 'mkt_' + (idRef.current++); rep.status = 'ready';
+        var next = reports.concat([rep]);
+        setReports(next); setPrimaryId(rep.id); setSel(rep.id); setView('result');
+        if (onComplete) onComplete({ xp: rep.xp, reports: next, primaryId: rep.id });  /* new scan → primary */
       }, 2900);
       return function () { clearInterval(iv); clearTimeout(t); };
     }, [view]);
@@ -359,11 +370,62 @@
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
+    /* ── ROSTER — browse past market scans ── */
+    if (view === 'roster') {
+      return shell(e(React.Fragment, null,
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
+        capcom('Your market scans, operator. Open one, run another, or set which read feeds your plan.'),
+        window.ClarityReportRoster && e(window.ClarityReportRoster, {
+          eyebrow: 'Recon mission · My Market', title: 'Your market scans', accent: CATEGORY.accent,
+          reports: reports, primaryId: primaryId, fallbackTitle: 'Market scan', newLabel: 'Run another scan →',
+          onOpen: function (id) { setSel(id); setView('result'); },
+          onNew: function () { setRegions([]); setStep(0); setView('scan'); },
+          onSetPrimary: function (id) { setPrimaryId(id); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: id }); }
+        })
+      ));
+    }
+
     /* ── RESULT — clean-document report (verdict-first, human voice) ── */
-    var r = result || buildReport(profile, regions);
+    var r = reports.filter(function (x) { return x.id === sel; })[0] || (RP && RP.primary({ reports: reports, primaryId: primaryId })) || buildReport(profile, regions);
     function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
+
+    /* report sections handed to the shared viewer (accordion / tabs) */
+    var sections = [
+      { id: 'verdict', label: 'The verdict', node: e('p', { className: 'rc-verdict' }, r.verdict) },
+      { id: 'found', label: 'What we found', node: e('ul', { className: 'rc-takeaways' },
+        r.takeaways.map(function (t, i) {
+          return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } },
+            e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
+        })) },
+      { id: 'detail', label: 'The detail', node: e(React.Fragment, null,
+        e('div', { className: 'rc-stats' },
+          [['Competitors', r.stats.competitors], ['Avg price', r.stats.avg], ['Demand signals', r.stats.signals]].map(function (s, i) {
+            return e('div', { key: i, className: 'rc-stat' }, e('div', { className: 'rc-stat-v' }, s[1]), e('div', { className: 'rc-stat-l' }, s[0]));
+          })),
+        e('div', { className: 'rc-findings' },
+          r.findings.map(function (f, i) {
+            return e('div', { key: i, className: 'rc-finding' },
+              e('div', { className: 'rc-finding-h' },
+                e('span', { className: 'rc-finding-q' }, f.q),
+                e('span', { className: 'rc-conf ' + f.conf.toLowerCase() }, f.conf + ' confidence')),
+              e('p', { className: 'rc-finding-t' }, f.text));
+          }))) },
+      { id: 'trust', label: 'How solid is this?', node: e('div', { className: 'rc-trust' },
+        e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } },
+          e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
+        e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'),
+          ' Drawn from ' + r.evidence.length + ' independent sources across market size, live demand and pricing — the “High confidence” findings above are the ones to bank on; treat the rest as strong signals.')) },
+      { id: 'sources', label: 'Sources', node: e('div', { className: 'rc-sources' },
+        r.evidence.map(function (ev, i) {
+          return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' },
+            e('span', { className: 'rc-source-d' }, ev.domain),
+            e('span', { className: 'rc-source-t' }, ev.topic),
+            e(Icon, { name: 'ExternalLink', size: 12 }));
+        })) }
+    ];
+
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
+      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
       /* the game reward moment wraps the document */
       e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Intel Acquired'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
       capcom('Scan complete — here is the read on your market. Plain version up top; the detail sits underneath if you want it.'),
@@ -387,55 +449,19 @@
           e('div', { className: 'rc-mast-meta' }, r.date + '  ·  ' + r.region + '  ·  Prepared by Clarity')),
         e('div', { className: 'rc-rule' }),
 
-        /* verdict — the hero, in plain human voice */
-        e('div', { className: 'rc-kicker' }, 'The verdict'),
-        e('p', { className: 'rc-verdict' }, r.verdict),
-
-        /* what we found — plain takeaways */
-        e('div', { className: 'rc-sec' }, 'What we found'),
-        e('ul', { className: 'rc-takeaways' },
-          r.takeaways.map(function (t, i) {
-            return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } },
-              e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
-          })),
-
-        /* the detail — demoted below the answer */
-        e('div', { className: 'rc-sec' }, 'The detail'),
-        e('div', { className: 'rc-stats' },
-          [['Competitors', r.stats.competitors], ['Avg price', r.stats.avg], ['Demand signals', r.stats.signals]].map(function (s, i) {
-            return e('div', { key: i, className: 'rc-stat' }, e('div', { className: 'rc-stat-v' }, s[1]), e('div', { className: 'rc-stat-l' }, s[0]));
-          })),
-        e('div', { className: 'rc-findings' },
-          r.findings.map(function (f, i) {
-            return e('div', { key: i, className: 'rc-finding' },
-              e('div', { className: 'rc-finding-h' },
-                e('span', { className: 'rc-finding-q' }, f.q),
-                e('span', { className: 'rc-conf ' + f.conf.toLowerCase() }, f.conf + ' confidence')),
-              e('p', { className: 'rc-finding-t' }, f.text));
-          })),
-
-        /* how solid is this — trust, reframed in plain words */
-        e('div', { className: 'rc-sec' }, 'How solid is this?'),
-        e('div', { className: 'rc-trust' },
-          e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } },
-            e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
-          e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'),
-            ' Drawn from ' + r.evidence.length + ' independent sources across market size, live demand and pricing — the “High confidence” findings above are the ones to bank on; treat the rest as strong signals.')),
-
-        /* sources */
-        e('div', { className: 'rc-sec' }, 'Sources'),
-        e('div', { className: 'rc-sources' },
-          r.evidence.map(function (ev, i) {
-            return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' },
-              e('span', { className: 'rc-source-d' }, ev.domain),
-              e('span', { className: 'rc-source-t' }, ev.topic),
-              e(Icon, { name: 'ExternalLink', size: 12 }));
-          }))
+        /* sections rendered as accordion / tabs by the shared viewer */
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: [
+          { value: '' + r.dq, label: 'Confidence score', note: r.dq >= 80 ? 'Strong opportunity' : r.dq >= 65 ? 'Workable' : 'Proceed with care', tone: r.dq >= 80 ? 'good' : r.dq >= 65 ? 'neutral' : 'warn' },
+          { value: '' + r.stats.competitors, label: 'Competitors mapped', note: 'in your space', tone: 'neutral' },
+          { value: r.stats.avg, label: 'Average price', note: 'market rate', tone: 'neutral' },
+          { value: '' + r.stats.signals, label: 'Live demand signals', note: r.stats.signals >= 3 ? 'Active demand' : 'Some demand', tone: r.stats.signals >= 3 ? 'good' : 'neutral' }
+        ], storeKey: 'market:' + ((profile && profile.name) || 'idea') + ':' + (r.id || 'r') })
       ),
 
       e('div', { className: 'mm-row' },
-        e('button', { className: 'id-back', onClick: function () { setResult(null); setView('scan'); setStep(0); } }, '↻ Re-scan'),
-        e('button', { className: 'pf-cta mm-cta', onClick: onBack }, 'Back to Command Deck →'))
+        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
+        (sel !== primaryId) && e('button', { className: 'id-back', onClick: function () { setPrimaryId(sel); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: sel }); } }, '★ Make primary'),
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run another scan →'))
     ));
   }
 

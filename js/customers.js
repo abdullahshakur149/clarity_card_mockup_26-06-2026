@@ -384,33 +384,14 @@
     if (!p) { return shell(e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster')); }
     var r = p.report;
     function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
-    return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster'),
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Target Profiled'), e('span', { className: 'mm-acq-xp' }, '+ ', XP, ' XP')),
-      capcom('Dossier complete — the plain read is up top, the full profile sits underneath. Download it or build another.'),
 
-      r && e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
-        e('div', { className: 'rc-bar' },
-          e('div', { className: 'rc-bar-cat' }, e('span', { className: 'rc-dot' }), CATEGORY.name),
-          e('div', { className: 'rc-bar-tools' },
-            e('button', { className: 'rc-tool', onClick: toggleTheme, title: 'Toggle reading mode' }, e(Icon, { name: theme === 'light' ? 'Moon' : 'Sun', size: 14 }), theme === 'light' ? 'Night' : 'Day'),
-            e('button', { className: 'rc-tool rc-tool-dl', onClick: function () { downloadAudience(p, profile, theme); } }, e(Icon, { name: 'Download', size: 14 }), 'Download'))),
-
-        e('div', { className: 'rc-mast' },
-          e('div', { className: 'rc-eyebrow' }, CATEGORY.eyebrow),
-          e('h1', { className: 'rc-h1' }, p.name + ', ' + p.age),
-          e('div', { className: 'rc-mast-meta' }, p.archetype + '  ·  ' + p.fit + '% fit  ·  ' + r.date)),
-        e('div', { className: 'rc-rule' }),
-
-        e('div', { className: 'rc-kicker' }, 'The verdict'),
-        e('p', { className: 'rc-verdict' }, r.verdict),
-
-        e('div', { className: 'rc-sec' }, 'What we found'),
-        e('ul', { className: 'rc-takeaways' }, r.takeaways.map(function (t, i) {
-          return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
-        })),
-
-        e('div', { className: 'rc-sec' }, 'The detail'),
+    /* report sections handed to the shared viewer (accordion / tabs) */
+    var sections = r ? [
+      { id: 'verdict', label: 'The verdict', node: e('p', { className: 'rc-verdict' }, r.verdict) },
+      { id: 'found', label: 'What we found', node: e('ul', { className: 'rc-takeaways' }, r.takeaways.map(function (t, i) {
+        return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
+      })) },
+      { id: 'detail', label: 'The detail', node: e(React.Fragment, null,
         e('div', { className: 'rc-block' },
           e('div', { className: 'rc-subhead' }, 'What drives them'),
           e('div', { className: 'rc-bars' }, Object.keys(p.traits).map(function (k) {
@@ -430,17 +411,40 @@
           e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'What they care about'), e('div', { className: 'rc-taglist' }, p.cares.map(function (c, i) { return e('span', { key: i, className: 'rc-tag' }, c); })))),
         e('div', { className: 'rc-twocol' },
           e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'What they’ll pay'), e('div', { className: 'rc-kv-k' }, r.wtp.band), e('div', { className: 'rc-kv-v' }, r.wtp.note)),
-          e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'Mindset'), e('ul', { className: 'rc-list' }, r.psychographics.map(function (x, i) { return e('li', { key: i }, x); })))),
+          e('div', { className: 'rc-block' }, e('div', { className: 'rc-subhead' }, 'Mindset'), e('ul', { className: 'rc-list' }, r.psychographics.map(function (x, i) { return e('li', { key: i }, x); }))))) },
+      { id: 'trust', label: 'How solid is this?', node: e('div', { className: 'rc-trust' },
+        e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } }, e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
+        e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'), ' Built from ' + r.evidence.length + ' independent sources across behaviour, willingness-to-pay and channel reach — the “High confidence” items are the ones to act on first.')) },
+      { id: 'sources', label: 'Sources', node: e('div', { className: 'rc-sources' }, r.evidence.map(function (ev, i) {
+        return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' }, e('span', { className: 'rc-source-d' }, ev.domain), e('span', { className: 'rc-source-t' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
+      })) }
+    ] : [];
 
-        e('div', { className: 'rc-sec' }, 'How solid is this?'),
-        e('div', { className: 'rc-trust' },
-          e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } }, e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
-          e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'), ' Built from ' + r.evidence.length + ' independent sources across behaviour, willingness-to-pay and channel reach — the “High confidence” items are the ones to act on first.')),
+    return shell(e(React.Fragment, null,
+      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ Roster'),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Target Profiled'), e('span', { className: 'mm-acq-xp' }, '+ ', XP, ' XP')),
+      capcom('Dossier complete — the plain read is up top, the full profile sits underneath. Download it or build another.'),
 
-        e('div', { className: 'rc-sec' }, 'Sources'),
-        e('div', { className: 'rc-sources' }, r.evidence.map(function (ev, i) {
-          return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' }, e('span', { className: 'rc-source-d' }, ev.domain), e('span', { className: 'rc-source-t' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
-        }))
+      r && e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },
+        e('div', { className: 'rc-bar' },
+          e('div', { className: 'rc-bar-cat' }, e('span', { className: 'rc-dot' }), CATEGORY.name),
+          e('div', { className: 'rc-bar-tools' },
+            e('button', { className: 'rc-tool', onClick: toggleTheme, title: 'Toggle reading mode' }, e(Icon, { name: theme === 'light' ? 'Moon' : 'Sun', size: 14 }), theme === 'light' ? 'Night' : 'Day'),
+            e('button', { className: 'rc-tool rc-tool-dl', onClick: function () { downloadAudience(p, profile, theme); } }, e(Icon, { name: 'Download', size: 14 }), 'Download'))),
+
+        e('div', { className: 'rc-mast' },
+          e('div', { className: 'rc-eyebrow' }, CATEGORY.eyebrow),
+          e('h1', { className: 'rc-h1' }, p.name + ', ' + p.age),
+          e('div', { className: 'rc-mast-meta' }, p.archetype + '  ·  ' + p.fit + '% fit  ·  ' + r.date)),
+        e('div', { className: 'rc-rule' }),
+
+        /* sections rendered as accordion / tabs by the shared viewer */
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: [
+          { value: p.fit + '%', label: 'ICP fit — ' + p.name, note: p.fit >= 80 ? 'Best match' : 'Good match', tone: p.fit >= 80 ? 'good' : 'neutral' },
+          { value: r.wtp.band, label: 'Willingness to pay', note: 'per purchase', tone: 'good' },
+          { value: (p.channels && p.channels[0]) || '—', label: 'Top channel', note: 'best reach', tone: 'good' },
+          { value: '' + r.dq, label: 'Confidence score', note: r.dq >= 80 ? 'Solid read' : 'Workable', tone: r.dq >= 80 ? 'good' : 'neutral' }
+        ], storeKey: 'customers:' + ((p && p.name) || 'persona') })
       ),
 
       e('div', { className: 'mm-row', style: { marginTop: 16 } },

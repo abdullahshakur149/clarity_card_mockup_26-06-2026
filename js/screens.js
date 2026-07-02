@@ -280,7 +280,8 @@ function ContentEngineScreen({
 function StudioLaunchpad({
   studioKey,
   intelDone,
-  onBack
+  onBack,
+  onPublish
 }) {
   const s = D.STUDIOS.find(x => x.key === studioKey) || D.STUDIOS[0];
   const [tab, setTab] = React.useState('create');
@@ -295,6 +296,7 @@ function StudioLaunchpad({
     setTab('library');
     setToast(piece.toast);
     setTimeout(() => setToast(null), 2600);
+    if (onPublish) onPublish(piece);
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {

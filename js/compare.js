@@ -25,8 +25,8 @@
   function primaryPersona(cust) { if (!cust || !cust.sketches) return null; return cust.sketches.filter(function (s) { return s.name === cust.primary; })[0] || cust.sketches[0]; }
   function clampV(v) { return Math.max(20, Math.min(96, Math.round(v))); }
   function categoryScores(idea) {
-    var mi = idea.missions || {};
-    var market = mi.market, comp = mi.competition, plan = mi.plan, persona = primaryPersona(mi.customers);
+    var mi = idea.missions || {}, RP = window.ClarityReports;
+    var market = RP ? RP.primary(mi.market) : mi.market, comp = RP ? RP.primary(mi.competition) : mi.competition, plan = mi.plan, persona = primaryPersona(mi.customers);
     var rivals = (comp && comp.competitors) || [];
     var top = rivals.filter(function (c) { return c.threat === 'High'; })[0] || rivals[0] || { sov: 35 };
     var topSoV = (typeof top.sov === 'number') ? top.sov : 35;
@@ -47,7 +47,8 @@
 
   /* the real number behind each category score — shown under every row */
   function evidence(idea) {
-    var mi = idea.missions || {}, market = mi.market || {}, comp = mi.competition || {}, plan = mi.plan || {};
+    var mi = idea.missions || {}, RP = window.ClarityReports;
+    var market = (RP ? RP.primary(mi.market) : mi.market) || {}, comp = (RP ? RP.primary(mi.competition) : mi.competition) || {}, plan = mi.plan || {};
     var p = primaryPersona(mi.customers) || {}, sc = categoryScores(idea);
     var rivals = comp.competitors || [];
     var top = rivals.filter(function (c) { return c.threat === 'High'; })[0] || rivals[0] || { sov: 35 };

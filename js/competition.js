@@ -194,11 +194,20 @@
     var profile = props.profile || {}, onComplete = props.onComplete, onBack = props.onBack;
     var WorldMap = kit().WorldMap, REGIONS = kit().REGIONS || [];
 
-    var vw = React.useState(props.result ? 'result' : 'brief'); var view = vw[0], setView = vw[1];
+    /* report history: seed from the saved mission state (backward-compatible) */
+    var RP = window.ClarityReports;
+    var seed = (RP ? RP.list(props.result) : (props.result ? [props.result] : []))
+      .map(function (rep, i) { return rep.id ? rep : Object.assign({}, rep, { id: 'seed_' + i }); });
+    var initPrimary = (props.result && props.result.primaryId) || (seed[0] && seed[0].id) || null;
+
+    var rsL = React.useState(seed);          var reports = rsL[0], setReports = rsL[1];
+    var pmS = React.useState(initPrimary);   var primaryId = pmS[0], setPrimaryId = pmS[1];
+    var vw = React.useState(seed.length ? 'roster' : 'brief'); var view = vw[0], setView = vw[1];
+    var slS = React.useState(initPrimary);   var sel = slS[0], setSel = slS[1];
+    var idRef = React.useRef(1);
     var sp = React.useState(0);   var step = sp[0], setStep = sp[1];
     var rg = React.useState([]);  var regions = rg[0], setRegions = rg[1];
     var fo = React.useState(['rivals', 'positioning', 'sov']); var foci = fo[0], setFoci = fo[1];
-    var rs = React.useState(props.result || null); var result = rs[0], setResult = rs[1];
     var rv = React.useState(0);   var revealed = rv[0], setRevealed = rv[1];
     var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
@@ -210,7 +219,13 @@
       if (view !== 'running') return;
       var n = 0; setRevealed(0);
       var iv = setInterval(function () { n++; setRevealed(n); if (n >= SCAN_LOG.length) clearInterval(iv); }, 440);
-      var t = setTimeout(function () { var r = buildReport(profile, regions); setResult(r); setView('result'); if (onComplete) onComplete(r); }, 2900);
+      var t = setTimeout(function () {
+        var rep = buildReport(profile, regions);
+        rep.id = 'cmp_' + (idRef.current++); rep.status = 'ready';
+        var next = reports.concat([rep]);
+        setReports(next); setPrimaryId(rep.id); setSel(rep.id); setView('result');
+        if (onComplete) onComplete({ xp: rep.xp, reports: next, primaryId: rep.id });  /* new scout → primary */
+      }, 2900);
       return function () { clearInterval(iv); clearTimeout(t); };
     }, [view]);
 
@@ -283,11 +298,56 @@
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
+    /* ── ROSTER — browse past competitor scouts ── */
+    if (view === 'roster') {
+      return shell(e(React.Fragment, null,
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
+        capcom('Your competitor scouts, operator. Open one, run another, or set which read feeds your plan.'),
+        window.ClarityReportRoster && e(window.ClarityReportRoster, {
+          eyebrow: 'Recon mission · Competition', title: 'Your competitor scouts', accent: CATEGORY.accent,
+          reports: reports, primaryId: primaryId, fallbackTitle: 'Competitor scan', newLabel: 'Run another scout →',
+          onOpen: function (id) { setSel(id); setView('result'); },
+          onNew: function () { setRegions([]); setStep(0); setView('scan'); },
+          onSetPrimary: function (id) { setPrimaryId(id); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: id }); }
+        })
+      ));
+    }
+
     /* ── RESULT — clean-document competitor report (verdict-first) ── */
-    var r = result || buildReport(profile, regions);
+    var r = reports.filter(function (x) { return x.id === sel; })[0] || (RP && RP.primary({ reports: reports, primaryId: primaryId })) || buildReport(profile, regions);
     function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
+
+    /* report sections handed to the shared viewer (accordion / tabs) */
+    var sections = [
+      { id: 'verdict', label: 'The verdict', node: e('p', { className: 'rc-verdict' }, r.verdict) },
+      { id: 'found', label: 'What we found', node: e('ul', { className: 'rc-takeaways' }, r.takeaways.map(function (t, i) {
+        return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
+      })) },
+      { id: 'detail', label: 'The detail', node: e('div', { className: 'rc-block' },
+        e('div', { className: 'rc-subhead' }, 'Threat board'),
+        r.competitors.map(function (c, i) {
+          return e('div', { key: i, className: 'rc-comp' },
+            e('div', { className: 'rc-comp-head' },
+              e('span', { className: 'rc-comp-name' }, c.name),
+              e('span', { className: 'rc-threat ' + c.threat.toLowerCase() }, c.threat + ' threat'),
+              e('span', { className: 'rc-comp-price' }, c.price)),
+            e('div', { className: 'rc-bar-row' },
+              e('span', { className: 'rc-bar-l' }, 'Share of voice'),
+              e('div', { className: 'rc-bar-track' }, e('i', { style: { width: c.sov + '%' } })),
+              e('span', { className: 'rc-bar-v' }, c.sov + '%')),
+            e('div', { className: 'rc-comp-pos' }, c.positioning),
+            e('div', { className: 'rc-comp-note' }, c.note));
+        })) },
+      { id: 'trust', label: 'How solid is this?', node: e('div', { className: 'rc-trust' },
+        e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } }, e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
+        e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'), ' Built from ' + r.evidence.length + ' independent sources across category structure, share of voice and pricing.')) },
+      { id: 'sources', label: 'Sources', node: e('div', { className: 'rc-sources' }, r.evidence.map(function (ev, i) {
+        return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' }, e('span', { className: 'rc-source-d' }, ev.domain), e('span', { className: 'rc-source-t' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
+      })) }
+    ];
+
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: onBack }, '‹ Back to deck'),
+      e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
       e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Intel Acquired'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
       capcom('Scout complete — the plain read is up top, the full threat board sits underneath.'),
 
@@ -304,45 +364,18 @@
           e('div', { className: 'rc-mast-meta' }, r.date + '  ·  ' + r.region + '  ·  ' + r.competitors.length + ' competitors mapped')),
         e('div', { className: 'rc-rule' }),
 
-        e('div', { className: 'rc-kicker' }, 'The verdict'),
-        e('p', { className: 'rc-verdict' }, r.verdict),
-
-        e('div', { className: 'rc-sec' }, 'What we found'),
-        e('ul', { className: 'rc-takeaways' }, r.takeaways.map(function (t, i) {
-          return e('li', { key: i, className: 'rc-take', style: { animationDelay: (0.06 * i + 0.05) + 's' } }, e('span', { className: 'rc-take-mk' }), e('span', { className: 'rc-take-t' }, t));
-        })),
-
-        e('div', { className: 'rc-sec' }, 'The detail'),
-        e('div', { className: 'rc-block' },
-          e('div', { className: 'rc-subhead' }, 'Threat board'),
-          r.competitors.map(function (c, i) {
-            return e('div', { key: i, className: 'rc-comp' },
-              e('div', { className: 'rc-comp-head' },
-                e('span', { className: 'rc-comp-name' }, c.name),
-                e('span', { className: 'rc-threat ' + c.threat.toLowerCase() }, c.threat + ' threat'),
-                e('span', { className: 'rc-comp-price' }, c.price)),
-              e('div', { className: 'rc-bar-row' },
-                e('span', { className: 'rc-bar-l' }, 'Share of voice'),
-                e('div', { className: 'rc-bar-track' }, e('i', { style: { width: c.sov + '%' } })),
-                e('span', { className: 'rc-bar-v' }, c.sov + '%')),
-              e('div', { className: 'rc-comp-pos' }, c.positioning),
-              e('div', { className: 'rc-comp-note' }, c.note));
-          })),
-
-        e('div', { className: 'rc-sec' }, 'How solid is this?'),
-        e('div', { className: 'rc-trust' },
-          e('div', { className: 'rc-dq', style: { background: 'conic-gradient(var(--rc-accent) ' + (r.dq * 3.6) + 'deg, var(--rc-hair) 0)' } }, e('div', { className: 'rc-dq-in' }, e('b', null, r.dq + '%'))),
-          e('p', { className: 'rc-trust-t' }, e('b', null, 'Solid read.'), ' Built from ' + r.evidence.length + ' independent sources across category structure, share of voice and pricing.')),
-
-        e('div', { className: 'rc-sec' }, 'Sources'),
-        e('div', { className: 'rc-sources' }, r.evidence.map(function (ev, i) {
-          return e('a', { key: i, className: 'rc-source', href: ev.url, target: '_blank', rel: 'noreferrer' }, e('span', { className: 'rc-source-d' }, ev.domain), e('span', { className: 'rc-source-t' }, ev.topic), e(Icon, { name: 'ExternalLink', size: 12 }));
-        }))
+        /* sections rendered as accordion / tabs by the shared viewer */
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: [
+          { value: '' + r.competitors.length, label: 'Direct competitors', note: r.competitors.filter(function (c) { return c.threat === 'High'; }).length + ' high threat', tone: r.competitors.filter(function (c) { return c.threat === 'High'; }).length >= 2 ? 'warn' : 'neutral' },
+          { value: r.competitors[0] ? r.competitors[0].sov + '%' : '—', label: 'Top rival share', note: r.competitors[0] ? r.competitors[0].name : '—', tone: 'warn' },
+          { value: '' + r.dq, label: 'Confidence score', note: r.dq >= 80 ? 'Solid read' : 'Workable', tone: r.dq >= 80 ? 'good' : 'neutral' }
+        ], storeKey: 'competition:' + ((profile && profile.name) || 'idea') + ':' + (r.id || 'r') })
       ),
 
       e('div', { className: 'mm-row' },
-        e('button', { className: 'id-back', onClick: function () { setResult(null); setView('scan'); setStep(0); } }, '↻ Re-scan'),
-        e('button', { className: 'pf-cta mm-cta', onClick: onBack }, 'Back to Command Deck →'))
+        e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All scans'),
+        (sel !== primaryId) && e('button', { className: 'id-back', onClick: function () { setPrimaryId(sel); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: sel }); } }, '★ Make primary'),
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run another scout →'))
     ));
   }
 

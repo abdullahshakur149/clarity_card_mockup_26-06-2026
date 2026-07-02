@@ -199,7 +199,8 @@
     var sector = profile.sector || 'other';
     var bank = STRATPLAN[sector] || STRATPLAN.other;
     var m = missions || {};
-    var mkt = m.market, comp = m.competition, cust = m.customers;
+    var RP = window.ClarityReports;
+    var mkt = RP ? RP.primary(m.market) : m.market, comp = RP ? RP.primary(m.competition) : m.competition, cust = m.customers;
 
     /* real primary persona + real rivals when the recon has been run */
     var persona = null;

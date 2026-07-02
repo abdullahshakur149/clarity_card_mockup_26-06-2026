@@ -16,8 +16,9 @@
   var PILLARS = [
     { id: 'strategic', label: 'Strategic Planning', icon: 'Radar', accent: 'var(--clr-cat-market)', dim: 'var(--clr-cat-market-dim)', desc: 'Scan the market, sketch your customer, scout rivals — then synthesise the plan.', active: true },
     { id: 'persona', label: 'Persona', icon: 'Users', accent: 'var(--clr-persona)', dim: 'var(--clr-persona-dim)', desc: 'Meet your customers as living characters — get to know them and hear them out.', active: true },
-    { id: 'tasks', label: 'Tasks', icon: 'ListChecks', accent: 'var(--clr-cat-gtm)', dim: 'var(--clr-cat-gtm-dim)', desc: 'Turn the plan into a prioritised action board.' },
-    { id: 'content', label: 'Content Engine', icon: 'Sparkles', accent: 'var(--clr-cat-positioning)', dim: 'var(--clr-cat-positioning-dim)', desc: 'Generate on-brand content and campaigns for the winner.' }
+    { id: 'gtm', label: 'Go-To-Market', icon: 'Rocket', accent: 'var(--clr-cat-gtm)', dim: 'var(--clr-cat-gtm-dim)', desc: 'Price your play and get your go-to-market moves — then turn them into tasks.', active: true },
+    { id: 'tasks', label: 'My Tasks', icon: 'ListChecks', accent: 'var(--clr-cat-customer)', dim: 'var(--clr-cat-customer-dim)', desc: 'Your GTM moves, broken into scheduled, checkable tasks — plus your own.' },
+    { id: 'content', label: 'Content Engine', icon: 'Sparkles', accent: 'var(--clr-cat-positioning)', dim: 'var(--clr-cat-positioning-dim)', desc: 'Generate on-brand content and campaigns for the winner.', active: true }
   ];
 
   function progress(idea) {
@@ -91,11 +92,18 @@
         capcom('This is ' + idea.name + '. Start with Strategic Planning — the other pillars unlock as the concept firms up.'),
         e('div', { className: 'hub-pillars' },
           PILLARS.map(function (p) {
-            var active = !!p.active;
+            var gtmDone = !!(idea.missions && idea.missions.gtm);
+            var active = p.id === 'tasks' ? gtmDone : !!p.active;
             var chip = p.id === 'strategic'
               ? (pr.hasPlan ? 'Plan ready' : pr.recon >= 3 ? 'Ready' : pr.recon > 0 ? ('Recon ' + pr.recon + '/3') : 'Start here')
               : p.id === 'persona'
               ? ((idea.personas && idea.personas.length) ? (idea.personas.length + ' in your circle') : 'Meet them')
+              : p.id === 'gtm'
+              ? (gtmDone ? 'Plan set' : 'Suggest plays')
+              : p.id === 'tasks'
+              ? (gtmDone ? ((idea.tasks || []).filter(function (t) { return t.done; }).length + '/' + (idea.tasks || []).length + ' done') : 'After GTM')
+              : p.id === 'content'
+              ? ((idea.content && idea.content.length) ? (idea.content.length + ' made') : 'Make content')
               : 'Soon';
             return e('button', { key: p.id, className: 'hub-pillar' + (active ? '' : ' locked'), style: { '--pl': p.accent, '--pl-dim': p.dim }, onClick: active ? function () { onPillar(p.id); } : undefined },
               e('div', { className: 'hub-pillar-top' },

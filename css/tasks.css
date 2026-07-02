@@ -1,0 +1,109 @@
+/* ============================================================================
+   tasks.css — "My Tasks" pillar. Board (checkable, grouped) + Calendar, on the
+   dark mission-control canvas. Tasks are colour-coded by kind (--k). Prefix: tk-
+   ========================================================================== */
+
+/* ---- header: title + view toggle + progress ------------------------------- */
+.tk-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 6px 0 14px; }
+.tk-title-h { font-family: var(--font-display); font-size: 40px; font-weight: 700; color: var(--clr-text); margin: 4px 0 0; line-height: 1.05; }
+
+.tk-seg { display: inline-flex; border: 1px solid var(--clr-border); border-radius: 999px; overflow: hidden; background: var(--clr-card); flex-shrink: 0; }
+.tk-vt { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--clr-muted); background: transparent; border: none; padding: 7px 15px; cursor: pointer; transition: color 0.15s ease, background 0.15s ease; }
+.tk-vt + .tk-vt { border-left: 1px solid var(--clr-border); }
+.tk-vt:hover:not(.on) { color: var(--clr-text); }
+.tk-vt.on { color: var(--clr-cat-customer); background: var(--clr-cat-customer-dim); font-weight: 600; }
+
+.tk-progress { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.tk-progress-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--clr-card-2); overflow: hidden; }
+.tk-progress-fill { height: 100%; border-radius: 3px; background: var(--clr-cat-customer); transition: width 0.5s var(--ease); }
+.tk-progress-l { font-family: var(--font-mono); font-size: 11px; color: var(--clr-muted); white-space: nowrap; }
+
+.tk-celebrate { display: flex; align-items: center; gap: 9px; margin-bottom: 16px; padding: 12px 15px; border-radius: 12px; background: color-mix(in srgb, var(--clr-reward) 12%, transparent); border: 1px solid color-mix(in srgb, var(--clr-reward) 35%, transparent); color: var(--clr-reward); font-size: 13.5px; font-weight: 500; animation: tk-pop 0.4s var(--ease) both; }
+@keyframes tk-pop { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: none; } }
+
+/* ---- quick-add (light inline composer) ------------------------------------ */
+.tk-add { display: inline-flex; align-items: center; gap: 7px; margin-bottom: 16px; padding: 9px 15px; border-radius: 10px; background: var(--clr-card); border: 1px dashed var(--clr-border); color: var(--clr-muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease; }
+.tk-add:hover { color: var(--clr-cat-customer); border-color: color-mix(in srgb, var(--clr-cat-customer) 45%, var(--clr-border)); }
+.tk-add-open { margin-bottom: 16px; padding: 14px 16px; border-radius: 12px; background: var(--clr-card); border: 1px solid color-mix(in srgb, var(--clr-cat-customer) 40%, var(--clr-border)); animation: tk-pop 0.2s var(--ease) both; }
+.tk-add-input { width: 100%; box-sizing: border-box; background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 9px; padding: 11px 13px; font-family: var(--font-body); font-size: 14px; color: var(--clr-text); outline: none; margin-bottom: 12px; }
+.tk-add-input:focus { border-color: var(--clr-cat-customer); }
+.tk-add-when { display: flex; gap: 7px; margin-bottom: 14px; }
+.tk-when { font-size: 12px; color: var(--clr-muted); background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 999px; padding: 5px 12px; cursor: pointer; transition: all 0.15s ease; }
+.tk-when.on { color: var(--clr-cat-customer); background: var(--clr-cat-customer-dim); border-color: color-mix(in srgb, var(--clr-cat-customer) 40%, transparent); }
+.tk-add-row { display: flex; justify-content: flex-end; gap: 10px; align-items: center; }
+.tk-cta { padding: 9px 18px; }
+.tk-cta:disabled { opacity: 0.5; cursor: default; }
+
+/* ---- groups + task cards -------------------------------------------------- */
+.tk-group { margin-bottom: 22px; }
+.tk-group-h { display: flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 11px; }
+.tk-group-n { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--clr-card-2); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0; color: var(--clr-muted); }
+.tk-empty { font-size: 13px; color: var(--clr-muted); padding: 4px 2px 8px; }
+
+.tk-card { display: flex; align-items: flex-start; gap: 12px; background: var(--clr-card); border: 1px solid var(--clr-border); border-left: 3px solid var(--k); border-radius: 12px; padding: 13px 14px; margin-bottom: 9px; transition: border-color 0.15s ease, opacity 0.2s ease; }
+.tk-card:hover { border-color: color-mix(in srgb, var(--k) 40%, var(--clr-border)); }
+.tk-card.done { opacity: 0.6; }
+.tk-check { flex-shrink: 0; width: 22px; height: 22px; margin-top: 1px; border-radius: 7px; border: 2px solid var(--clr-border); background: transparent; color: #04140f; display: grid; place-items: center; cursor: pointer; transition: all 0.15s ease; }
+.tk-check:hover { border-color: var(--k); }
+.tk-card.done .tk-check { background: var(--clr-cat-customer); border-color: var(--clr-cat-customer); }
+.tk-body { flex: 1; min-width: 0; }
+.tk-title { font-size: 14.5px; font-weight: 500; color: var(--clr-text); line-height: 1.4; }
+.tk-card.done .tk-title { text-decoration: line-through; color: var(--clr-muted); }
+.tk-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.tk-kind { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--k); background: color-mix(in srgb, var(--k) 14%, transparent); border-radius: 999px; padding: 2px 8px; }
+.tk-imp { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--clr-muted); }
+.tk-imp.high { color: var(--clr-accent); }
+.tk-own { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clr-primary-hover); background: color-mix(in srgb, var(--clr-primary) 14%, transparent); border-radius: 999px; padding: 2px 8px; }
+.tk-due { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 10.5px; color: var(--clr-muted); }
+.tk-x { flex-shrink: 0; background: transparent; border: none; color: var(--clr-muted); opacity: 0; cursor: pointer; padding: 2px; border-radius: 6px; transition: opacity 0.15s ease, color 0.15s ease; }
+.tk-card:hover .tk-x { opacity: 0.6; }
+.tk-x:hover { opacity: 1; color: var(--clr-ember); }
+
+/* ---- calendar ------------------------------------------------------------- */
+.tk-cal { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 16px; padding: 16px 18px; margin-bottom: 18px; }
+.tk-cal-head { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 14px; }
+.tk-cal-title { font-family: var(--font-display); font-size: 19px; font-weight: 600; color: var(--clr-text); min-width: 130px; text-align: center; }
+.tk-cal-nav { width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; background: var(--clr-card-2); border: 1px solid var(--clr-border); color: var(--clr-muted); cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease; }
+.tk-cal-nav:hover { color: var(--clr-text); border-color: var(--clr-cat-customer); }
+.tk-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.tk-cal-dow { text-align: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--clr-muted); padding-bottom: 6px; }
+.tk-cal-cell { position: relative; aspect-ratio: 1 / 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border-radius: 9px; background: transparent; border: 1px solid transparent; color: var(--clr-text); font-family: var(--font-body); cursor: pointer; transition: background 0.15s ease, border-color 0.15s ease; }
+.tk-cal-cell.empty { cursor: default; }
+.tk-cal-cell:not(.empty):hover { background: var(--clr-card-2); }
+.tk-cal-cell.today { border-color: color-mix(in srgb, var(--clr-cat-customer) 45%, transparent); }
+.tk-cal-cell.sel { background: var(--clr-cat-customer-dim); border-color: var(--clr-cat-customer); }
+.tk-cal-d { font-size: 13px; }
+.tk-cal-dots { display: flex; gap: 3px; height: 5px; }
+.tk-cal-dots i { width: 5px; height: 5px; border-radius: 50%; }
+.tk-cal-dots.alldone i { opacity: 0.4; }
+.tk-day-h { font-family: var(--font-body); font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--clr-cat-customer); text-transform: uppercase; margin: 4px 0 12px; }
+
+/* ---- kanban board --------------------------------------------------------- */
+.kb-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
+.kb-col { background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 14px; padding: 10px; min-height: 130px; transition: background 0.15s ease, border-color 0.15s ease; }
+.kb-col.over { border-color: var(--clr-cat-customer); background: color-mix(in srgb, var(--clr-cat-customer) 9%, var(--clr-card-2)); }
+.kb-col-h { display: flex; align-items: center; justify-content: space-between; padding: 4px 6px 11px; font-family: var(--font-body); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.kb-col-l { color: var(--clr-muted); }
+.kb-doing .kb-col-l { color: var(--clr-cat-gtm); }
+.kb-done .kb-col-l { color: var(--clr-cat-customer); }
+.kb-col-n { display: inline-grid; place-items: center; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--clr-card); font-family: var(--font-mono); font-size: 10px; letter-spacing: 0; color: var(--clr-muted); }
+.kb-col-body { display: flex; flex-direction: column; gap: 9px; min-height: 44px; }
+.kb-drop { border: 1px dashed var(--clr-border); border-radius: 10px; padding: 18px 12px; text-align: center; font-size: 11.5px; color: var(--clr-muted); opacity: 0.65; }
+
+.kb-card { background: var(--clr-card); border: 1px solid var(--clr-border); border-left: 3px solid var(--k); border-radius: 11px; padding: 11px 12px; cursor: grab; transition: box-shadow 0.15s ease, opacity 0.15s ease, transform 0.1s ease; }
+.kb-card:hover { box-shadow: 0 5px 16px rgba(0, 0, 0, 0.32); transform: translateY(-1px); }
+.kb-card:active { cursor: grabbing; }
+.kb-card.dragging { opacity: 0.4; }
+.kb-card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+.kb-card-title { font-size: 13.5px; font-weight: 500; color: var(--clr-text); line-height: 1.4; }
+.kb-done .kb-card-title { text-decoration: line-through; color: var(--clr-muted); }
+.kb-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 11px; }
+.kb-actions { display: flex; align-items: center; gap: 4px; }
+.kb-adv { width: 25px; height: 25px; display: grid; place-items: center; border-radius: 7px; background: var(--clr-card-2); border: 1px solid var(--clr-border); color: var(--clr-muted); cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
+.kb-adv:hover { color: var(--clr-cat-customer); border-color: var(--clr-cat-customer); background: var(--clr-cat-customer-dim); }
+.kb-card .tk-x { opacity: 0.45; }
+.kb-card:hover .tk-x { opacity: 0.75; }
+
+@media (max-width: 720px) { .kb-board { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 80%; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 6px; } .kb-col { scroll-snap-align: start; } }
+@media (max-width: 560px) { .tk-head { flex-direction: column; align-items: flex-start; gap: 12px; } .tk-title-h { font-size: 32px; } }
+@media (prefers-reduced-motion: reduce) { .tk-celebrate, .tk-add-open { animation: none; } .tk-progress-fill { transition: none; } .kb-card:hover { transform: none; } }

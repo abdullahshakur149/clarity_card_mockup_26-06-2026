@@ -541,36 +541,46 @@ function ClarityRoot() {
       onComplete: (profile) => { makeIdea(profile || {}); setCreating(false); setView('strategic'); }
     });
   }
+  /* in-game screens — all share the always-on player HUD (global level + XP) */
+  let content;
   if (view === 'strategic' && idea && window.ClarityIntel) {
-    return e(window.ClarityIntel, {
+    content = e(window.ClarityIntel, {
       key: idea.id, profile: idea.profile, idea: idea,
       onChange: (patch) => updateIdea(idea.id, patch),
       onExit: () => setView('hub')
     });
-  }
-  if (view === 'tools' && window.ClarityCompare) {
-    return e(window.ClarityCompare, { ideas: ideas, currentId: currentId, onBack: () => setView('hub') });
-  }
-  if (view === 'persona' && idea && window.ClarityPersona) {
-    return e(window.ClarityPersona, { key: idea.id, idea: idea, onChange: (patch) => updateIdea(idea.id, patch), onBack: () => setView('hub') });
-  }
-  if (view === 'hub' && idea && window.ClarityHub) {
-    return e(window.ClarityHub, {
+  } else if (view === 'tools' && window.ClarityCompare) {
+    content = e(window.ClarityCompare, { ideas: ideas, currentId: currentId, onBack: () => setView('hub') });
+  } else if (view === 'persona' && idea && window.ClarityPersona) {
+    content = e(window.ClarityPersona, { key: idea.id, idea: idea, onChange: (patch) => updateIdea(idea.id, patch), onBack: () => setView('hub') });
+  } else if (view === 'gtm' && idea && window.ClarityGTM) {
+    content = e(window.ClarityGTM, { key: idea.id, idea: idea, onChange: (patch) => updateIdea(idea.id, patch), onBack: () => setView('hub') });
+  } else if (view === 'tasks' && idea && window.ClarityMyTasks) {
+    content = e(window.ClarityMyTasks, { key: idea.id, idea: idea, onChange: (patch) => updateIdea(idea.id, patch), onBack: () => setView('hub') });
+  } else if (view === 'content' && idea && window.ClarityContent) {
+    content = e(window.ClarityContent, { key: idea.id, idea: idea, onChange: (patch) => updateIdea(idea.id, patch), onBack: () => setView('hub') });
+  } else if (view === 'hub' && idea && window.ClarityHub) {
+    content = e(window.ClarityHub, {
       idea: idea,
-      onPillar: (p) => { if (p === 'strategic') setView('strategic'); else if (p === 'persona') setView('persona'); },
+      onPillar: (p) => { if (p === 'strategic') setView('strategic'); else if (p === 'persona') setView('persona'); else if (p === 'gtm') setView('gtm'); else if (p === 'tasks') setView('tasks'); else if (p === 'content') setView('content'); },
       onCompare: () => setView('tools'),
       onBack: () => { setCurrentId(null); setView('home'); }
     });
-  }
-  /* default: Your Ideas home */
-  if (window.ClarityIdeasHome) {
-    return e(window.ClarityIdeasHome, {
+  } else if (window.ClarityIdeasHome) {
+    /* default: Your Ideas home */
+    content = e(window.ClarityIdeasHome, {
       ideas: ideas,
       onOpen: (id) => { setCurrentId(id); setView('hub'); },
       onNew: () => setCreating(true)
     });
+  } else {
+    content = e(ClarityApp);
   }
-  return e(ClarityApp);
+
+  return e(React.Fragment, null,
+    content,
+    window.ClarityXPHud && e(window.ClarityXPHud, { ideas: ideas, currentId: currentId })
+  );
 }
 
 window.ClarityApp = ClarityRoot;
