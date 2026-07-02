@@ -1,0 +1,168 @@
+/* ============================================================================
+   xphud.css — the always-on player HUD (global level + XP). A fixed glass pill
+   top-right on every screen, with an expandable breakdown panel. Overlays the
+   view like a game HUD, so it reads as intentional regardless of what's behind.
+   ========================================================================== */
+
+.xph-root {
+  position: fixed;
+  top: 12px;
+  right: 18px;
+  z-index: 9000;
+  font-family: var(--font-body);
+  user-select: none;
+}
+
+/* ── collapsed pill ─────────────────────────────────────────────────────── */
+.xph-pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px 5px 6px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--clr-card) 82%, transparent);
+  border: 1px solid var(--clr-border);
+  backdrop-filter: blur(10px) saturate(1.2);
+  -webkit-backdrop-filter: blur(10px) saturate(1.2);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  color: var(--clr-text);
+  transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+  overflow: visible;
+}
+.xph-pill:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--clr-primary) 40%, var(--clr-border)); }
+.xph-pill:active { transform: translateY(0); }
+
+.xph-ring-wrap { position: relative; width: 30px; height: 30px; flex-shrink: 0; }
+.xph-ring { display: block; }
+.xph-ico {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.xph-meta { display: flex; flex-direction: column; gap: 1px; line-height: 1.1; }
+.xph-top { display: flex; align-items: center; gap: 6px; }
+.xph-lvl { font-size: 10px; font-weight: 800; letter-spacing: 0.03em; color: var(--clr-muted); font-family: var(--font-mono); }
+.xph-rank { font-size: 11px; font-weight: 800; letter-spacing: 0.06em; }
+.xph-xp { font-size: 11px; font-weight: 600; color: var(--clr-text); font-family: var(--font-mono); }
+
+.xph-caret { display: flex; color: var(--clr-muted); margin-left: 2px; }
+
+/* ── earn-XP feedback ───────────────────────────────────────────────────── */
+.xph-glow {
+  position: absolute; inset: -2px;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--clr-primary) 55%, transparent),
+              0 0 22px 4px color-mix(in srgb, var(--clr-primary) 45%, transparent);
+  animation: xph-glow-pulse 0.85s ease forwards;
+}
+.xph-glow.up {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--clr-reward) 70%, transparent),
+              0 0 30px 6px color-mix(in srgb, var(--clr-reward) 55%, transparent);
+  animation: xph-glow-pulse 1.6s ease forwards;
+}
+@keyframes xph-glow-pulse {
+  0%   { opacity: 0; }
+  25%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.xph-mote {
+  position: absolute;
+  top: 4px; right: 14px;
+  font-size: 12px; font-weight: 800;
+  font-family: var(--font-mono);
+  color: var(--clr-primary-hover);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  white-space: nowrap;
+  animation: xph-mote-rise 1.4s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+.xph-mote.up {
+  color: var(--clr-reward);
+  font-size: 11px; letter-spacing: 0.06em;
+  animation-duration: 1.9s;
+}
+@keyframes xph-mote-rise {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.9); }
+  20%  { opacity: 1; transform: translateY(-2px) scale(1); }
+  70%  { opacity: 1; transform: translateY(-16px); }
+  100% { opacity: 0; transform: translateY(-30px); }
+}
+
+/* ── backdrop (click-away) + panel ──────────────────────────────────────── */
+.xph-backdrop { position: fixed; inset: 0; z-index: 1; background: transparent; }
+
+.xph-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 3;
+  width: 288px;
+  max-width: calc(100vw - 32px);
+  padding: 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--clr-card) 94%, transparent);
+  border: 1px solid var(--clr-border);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  animation: xph-panel-in 0.24s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+@keyframes xph-panel-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.xph-panel-head { display: flex; align-items: center; gap: 11px; }
+.xph-panel-ico { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.xph-panel-id { flex: 1; min-width: 0; }
+.xph-panel-rank { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; }
+.xph-panel-lvl { font-size: 11px; color: var(--clr-muted); margin-top: 1px; }
+.xph-panel-xp { font-size: 17px; font-weight: 800; color: var(--clr-text); font-family: var(--font-mono); }
+.xph-panel-xp span { font-size: 11px; font-weight: 600; color: var(--clr-muted); }
+
+.xph-prog { margin-top: 14px; }
+.xph-prog-bar { height: 6px; border-radius: 3px; background: var(--clr-card-2); overflow: hidden; }
+.xph-prog-fill { height: 100%; border-radius: 3px; transition: width 0.6s var(--ease); }
+.xph-prog-label { font-size: 10.5px; color: var(--clr-muted); margin-top: 7px; font-family: var(--font-mono); }
+
+.xph-break { margin-top: 16px; border-top: 1px solid var(--clr-border); padding-top: 12px; }
+.xph-break-h { font-size: 9.5px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 8px; }
+.xph-prow { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+.xph-prow-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--clr-border); flex-shrink: 0; }
+.xph-prow-name { flex: 1; min-width: 0; font-size: 12.5px; color: var(--clr-text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xph-prow-xp { font-size: 11px; font-weight: 700; color: var(--clr-muted); font-family: var(--font-mono); }
+.xph-prow.cur .xph-prow-dot { background: var(--clr-primary); box-shadow: 0 0 6px var(--clr-primary); }
+.xph-prow.cur .xph-prow-name { font-weight: 700; }
+.xph-prow.cur .xph-prow-xp { color: var(--clr-primary-hover); }
+.xph-prow-empty { font-size: 12px; color: var(--clr-muted); padding: 4px 0; }
+
+.xph-hint {
+  display: flex; align-items: flex-start; gap: 7px;
+  margin-top: 14px;
+  padding: 10px 11px;
+  border-radius: 10px;
+  background: var(--clr-card-2);
+  font-size: 11.5px; line-height: 1.5; color: var(--clr-muted);
+}
+.xph-hint svg { flex-shrink: 0; margin-top: 2px; color: var(--clr-reward); }
+
+/* reserve the top-right corner for the fixed HUD so each screen's telemetry
+   ("Guidance: CAPCOM · Live") tucks to its left instead of sliding underneath.
+   Desktop only — leaves the existing narrow-width top-bar padding alone. */
+@media (min-width: 561px) {
+  .pf-topbar { padding-right: 220px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xph-glow, .xph-mote, .xph-panel, .xph-prog-fill { animation: none !important; transition: none !important; }
+}
+
+/* narrow screens — trim to icon + XP */
+@media (max-width: 560px) {
+  .xph-root { top: 10px; right: 12px; }
+  .xph-lvl, .xph-caret { display: none; }
+}

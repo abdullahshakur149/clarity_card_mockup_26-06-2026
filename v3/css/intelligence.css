@@ -1,0 +1,112 @@
+/* ============================================================================
+   intelligence.css — "Command Deck" (Intelligence layer). Dark mission-control,
+   teal, CAPCOM. Reuses .pf-bg*, .pf-topbar, .pf-wordmark, .pf-tele, .pf-live,
+   .capcom from auth.css. Prefix: id-
+   ========================================================================== */
+
+.id-root {
+  height: 100%; overflow-y: auto; position: relative;
+  background: var(--clr-bg); color: var(--clr-text); font-family: var(--font-body);
+}
+.id-root .pf-bg { position: fixed; }
+.id-root .pf-topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(11,15,14,0.82); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--clr-border); z-index: 10;
+}
+
+.id-main {
+  position: relative; z-index: 1; max-width: 1060px; margin: 0 auto;
+  padding: 78px 28px 64px; animation: pf-rise 0.5s cubic-bezier(0.2,0.8,0.3,1) both;
+}
+
+/* operator rank chip (topbar) */
+.id-rank {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 11px; border-radius: var(--radius-pill, 99px);
+  background: var(--clr-primary-dim); border: 1px solid var(--clr-primary-border);
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; color: var(--clr-primary-hover);
+}
+.id-rank-xp { color: var(--clr-muted); }
+
+/* head */
+.id-head { margin-bottom: 18px; }
+.id-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clr-muted); }
+.id-title { font-family: var(--font-display); font-size: 42px; font-weight: 700; color: var(--clr-text); margin: 6px 0 4px; line-height: 1.05; }
+.id-sub { font-size: 14px; color: var(--clr-muted); margin: 0; }
+
+.id-root .capcom { margin: 18px 0 20px; }
+
+/* primary directive banner */
+.id-directive {
+  display: flex; align-items: center; gap: 11px; margin-bottom: 22px;
+  background: var(--clr-card-2); border: 1px solid var(--clr-border); border-left: 3px solid var(--clr-primary-hover);
+  border-radius: 10px; padding: 12px 16px;
+}
+.id-directive > svg { color: var(--clr-primary-hover); flex-shrink: 0; }
+.id-directive-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clr-muted); flex-shrink: 0; }
+.id-directive-val { font-size: 13.5px; font-weight: 600; color: var(--clr-text); }
+
+/* journey tracker */
+.id-journey { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; }
+.id-journey-head { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-muted); margin-bottom: 14px; }
+.id-journey-phase { color: var(--clr-primary-hover); }
+.id-phases { display: flex; gap: 12px; }
+.id-phase { flex: 1; }
+.id-phase-bar { height: 5px; border-radius: 3px; background: var(--clr-border); transition: all 0.3s var(--ease, ease); }
+.id-phase.active .id-phase-bar { background: var(--clr-primary-hover); box-shadow: 0 0 12px var(--clr-primary-dim); }
+.id-phase-label { display: block; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-faint); margin-top: 8px; text-align: center; }
+.id-phase.active .id-phase-label { color: var(--clr-text); }
+
+/* intel readouts */
+.id-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.id-stat { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; }
+.id-stat-top { display: flex; align-items: center; gap: 7px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-muted); }
+.id-stat-top svg { color: var(--clr-primary-hover); flex-shrink: 0; }
+.id-stat-num { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: var(--clr-text); margin-top: 6px; }
+
+.id-section-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-muted); margin: 4px 0 12px; }
+
+/* recon missions */
+.id-missions { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 28px; }
+.id-mission {
+  text-align: left; background: var(--clr-card); border: 1px solid var(--clr-border-strong); border-radius: 14px;
+  padding: 18px 18px 16px; cursor: pointer; display: flex; flex-direction: column; gap: 5px; position: relative;
+  transition: transform var(--dur-fast,0.16s) var(--ease,ease), border-color var(--dur-fast,0.16s) var(--ease,ease), box-shadow var(--dur-fast,0.16s) var(--ease,ease);
+}
+.id-mission:hover { transform: translateY(-2px); border-color: var(--clr-primary-border); box-shadow: 0 16px 36px -20px rgba(0,0,0,0.75); }
+.id-mission.rec { border-color: var(--clr-primary-border); }
+.id-mission-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.id-mission-ic { width: 44px; height: 44px; border-radius: 11px; background: var(--clr-primary-dim); display: flex; align-items: center; justify-content: center; color: var(--clr-primary-hover); }
+.id-mission-chip { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--clr-faint); border: 1px solid var(--clr-border); border-radius: var(--radius-pill, 99px); padding: 3px 9px; }
+.id-mission-chip.rec { color: var(--clr-primary-hover); border-color: var(--clr-primary-border); background: var(--clr-primary-dim); }
+.id-mission-chip.ok { color: var(--clr-accent); border-color: var(--clr-accent); background: var(--clr-accent-dim); }
+
+/* recent ops list */
+.id-opslist { display: flex; flex-direction: column; gap: 8px; }
+.id-opsrow { display: flex; align-items: center; gap: 11px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 13px 16px; }
+.id-ops-ic { display: flex; color: var(--clr-accent); flex-shrink: 0; }
+.id-ops-title { font-size: 13.5px; font-weight: 600; color: var(--clr-text); flex: 1; }
+.id-ops-status { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clr-accent); }
+.id-mission-title { font-family: var(--font-display); font-size: 21px; font-weight: 700; color: var(--clr-text); }
+.id-mission-sub { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clr-primary-hover); }
+.id-mission-desc { font-size: 13px; color: var(--clr-muted); line-height: 1.5; flex: 1; margin-top: 2px; }
+.id-mission-cta { font-size: 13px; font-weight: 700; color: var(--clr-primary-hover); margin-top: 10px; }
+
+/* recent ops */
+.id-ops { display: flex; align-items: center; gap: 11px; background: var(--clr-card); border: 1px dashed var(--clr-border-strong); border-radius: 12px; padding: 16px 18px; font-size: 13px; color: var(--clr-muted); }
+.id-ops svg { color: var(--clr-faint); flex-shrink: 0; }
+
+/* mission briefing placeholder */
+.id-back { background: none; border: 0; color: var(--clr-muted); font-family: var(--font-body); font-size: 13px; cursor: pointer; margin-bottom: 18px; padding: 4px 0; }
+.id-back:hover { color: var(--clr-primary-hover); }
+.id-briefing { background: var(--clr-card); border: 1px solid var(--clr-border-strong); border-radius: 16px; padding: 32px; max-width: 540px; margin: 12px auto; text-align: center; }
+.id-brief-ic { width: 60px; height: 60px; border-radius: 15px; background: var(--clr-primary-dim); color: var(--clr-primary-hover); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; }
+.id-brief-title { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--clr-text); margin: 4px 0 14px; }
+.id-briefing .capcom { text-align: left; margin: 0 0 16px; }
+.id-brief-note { font-size: 13px; color: var(--clr-muted); }
+
+@media (max-width: 720px) {
+  .id-stats { grid-template-columns: repeat(2, 1fr); }
+  .id-missions { grid-template-columns: 1fr; }
+  .id-title { font-size: 34px; }
+}

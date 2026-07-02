@@ -1,0 +1,21 @@
+/* ============================================================================
+   competition.css — Competition "threat board". Reuses id-*/pf-*/mm-* + capcom
+   + the shared world-map (market.css). Prefix: co-
+   ========================================================================== */
+
+.co-board { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.co-comp { background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; }
+.co-comp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.co-name { font-size: 15px; font-weight: 700; color: var(--clr-text); flex: 1; min-width: 0; }
+.co-threat { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: var(--radius-pill, 99px); white-space: nowrap; flex-shrink: 0; }
+.co-threat.high { color: var(--clr-danger); background: var(--clr-danger-dim); border: 1px solid var(--clr-danger); }
+.co-threat.medium { color: var(--clr-warning); background: var(--clr-warning-dim); border: 1px solid var(--clr-warning); }
+.co-threat.low { color: var(--clr-accent); background: var(--clr-accent-dim); border: 1px solid var(--clr-accent); }
+.co-price { font-family: var(--font-mono); font-size: 12px; color: var(--clr-muted); flex-shrink: 0; }
+.co-sov { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.co-sov-l { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--clr-faint); white-space: nowrap; flex-shrink: 0; }
+.co-sov-bar { flex: 1; height: 6px; border-radius: 3px; background: var(--clr-border); overflow: hidden; }
+.co-sov-bar i { display: block; height: 100%; background: var(--clr-primary-hover); border-radius: 3px; }
+.co-sov-p { font-family: var(--font-mono); font-size: 11px; color: var(--clr-muted); width: 34px; text-align: right; flex-shrink: 0; }
+.co-pos { font-size: 13px; color: var(--clr-text); margin-bottom: 4px; line-height: 1.45; }
+.co-note { font-size: 12.5px; color: var(--clr-muted); line-height: 1.45; }

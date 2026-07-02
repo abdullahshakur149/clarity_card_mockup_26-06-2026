@@ -1,0 +1,433 @@
+/* aria.css — Aria AI companion character, dialogue cloud, briefing */
+
+/* ── Particle animation ─────────────────────────────────────────────── */
+@keyframes aria-particle {
+  0%   { transform: translate(0, 0);                        opacity: 1; }
+  60%  { opacity: 1; }
+  100% { transform: translate(var(--ap-dx), var(--ap-dy)); opacity: 0; }
+}
+
+/* ── Character body animations ──────────────────────────────────────── */
+@keyframes aria-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-5px); }
+}
+@keyframes aria-bounce {
+  0%   { transform: translateY(0)    scale(1); }
+  35%  { transform: translateY(-16px) scale(1.07); }
+  65%  { transform: translateY(-8px)  scale(1.03); }
+  100% { transform: translateY(0)    scale(1); }
+}
+
+/* ── Dialogue cloud animations ──────────────────────────────────────── */
+@keyframes aria-cloud-in {
+  from { opacity: 0; transform: translateX(10px) scale(0.94); }
+  to   { opacity: 1; transform: translateX(0)    scale(1);    }
+}
+@keyframes aria-cloud-out {
+  from { opacity: 1; transform: translateX(0)    scale(1);    }
+  to   { opacity: 0; transform: translateX(10px) scale(0.94); }
+}
+
+/* ── Briefing entry ─────────────────────────────────────────────────── */
+@keyframes aria-backdrop-in  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes aria-backdrop-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes aria-row-in  {
+  from { transform: translateY(52px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+@keyframes aria-row-out {
+  from { transform: translateY(0);    opacity: 1; }
+  to   { transform: translateY(28px); opacity: 0; }
+}
+@keyframes aria-cursor-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+/* ════════════════════════════════════════════════════════════════════
+   PERSISTENT WIDGET
+════════════════════════════════════════════════════════════════════ */
+.aria-widget {
+  position: fixed;
+  z-index: 8500;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+/* ── Character wrapper ── */
+.aria-char-wrap {
+  flex-shrink: 0;
+  pointer-events: auto;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  animation: aria-breathe 3.2s ease-in-out infinite;
+  filter: drop-shadow(0 10px 24px rgba(0,0,0,0.55));
+  transition: filter 140ms ease;
+}
+.aria-char-wrap:hover {
+  filter: drop-shadow(0 14px 32px rgba(0,0,0,0.7));
+}
+.aria-char-wrap.aria-dragging {
+  cursor: grabbing;
+  animation: none;
+  filter: drop-shadow(0 18px 42px rgba(0,0,0,0.78));
+  transform: scale(1.06);
+  transition: none;
+}
+
+/* Expression: excited → bounce */
+.aria-excited .aria-char-wrap:not(.aria-dragging) {
+  animation:
+    aria-bounce  0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+    aria-breathe 3.2s  ease-in-out 0.55s infinite;
+}
+/* Expression: celebrating → double bounce */
+.aria-celebrating .aria-char-wrap:not(.aria-dragging) {
+  animation:
+    aria-bounce  0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0s    forwards,
+    aria-bounce  0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.45s forwards,
+    aria-breathe 3.2s  ease-in-out 0.9s infinite;
+}
+/* Expression: thinking → slight tilt via filter */
+.aria-thinking .aria-char-wrap:not(.aria-dragging) {
+  animation: aria-breathe 3.2s ease-in-out infinite;
+  transform: rotate(-4deg);
+  transition: transform 300ms ease;
+}
+
+/* ── Face expression visibility ── */
+.aria-idle        .aria-face-excited,
+.aria-idle        .aria-face-thinking,
+.aria-idle        .aria-face-celebrating { display: none; }
+
+.aria-excited     .aria-face-idle,
+.aria-excited     .aria-face-thinking,
+.aria-excited     .aria-face-celebrating { display: none; }
+
+.aria-thinking    .aria-face-idle,
+.aria-thinking    .aria-face-excited,
+.aria-thinking    .aria-face-celebrating { display: none; }
+
+.aria-celebrating .aria-face-idle,
+.aria-celebrating .aria-face-excited,
+.aria-celebrating .aria-face-thinking   { display: none; }
+
+/* ── Dialogue cloud ── */
+.aria-cloud-wrap { pointer-events: auto; position: relative; }
+
+.aria-cloud {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  padding: 10px 14px 12px;
+  max-width: 248px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 6px rgba(0,0,0,0.1);
+  position: relative;
+  animation: aria-cloud-in 280ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.aria-cloud.aria-cloud-hiding {
+  animation: aria-cloud-out 220ms ease forwards;
+}
+
+/* Left-pointing tail */
+.aria-cloud::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  bottom: 18px;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid #ffffff;
+}
+
+.aria-cloud-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  font-family: var(--font-body);
+}
+.aria-cloud-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: #1a1a1a;
+  font-family: var(--font-body);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   BRIEFING — pre-studio mission card (IGI-style bottom row)
+════════════════════════════════════════════════════════════════════ */
+.aria-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(0, 0, 0, 0.68);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 48px;
+  animation: aria-backdrop-in 200ms ease forwards;
+}
+.aria-backdrop.aria-exiting {
+  animation: aria-backdrop-out 240ms ease forwards;
+}
+
+.aria-briefing-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  animation: aria-row-in 420ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+.aria-exiting .aria-briefing-row {
+  animation: aria-row-out 240ms ease forwards;
+}
+
+/* White dialogue card — IGI-style */
+.aria-briefing-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 22px 24px 20px;
+  min-width: 268px;
+  max-width: 320px;
+  box-shadow: 0 20px 64px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+/* Tail pointing left toward Aria */
+.aria-briefing-card::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  bottom: 36px;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-right: 12px solid #ffffff;
+}
+
+.aria-card-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+}
+.aria-card-text {
+  font-size: 16px;
+  line-height: 1.65;
+  color: #1a1a1a;
+  font-family: var(--font-body);
+  margin-bottom: 20px;
+  min-height: 54px;
+}
+.aria-cursor {
+  animation: aria-cursor-blink 0.7s step-end infinite;
+}
+.aria-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.aria-btn-primary {
+  width: 100%;
+  padding: 13px 0;
+  border: none;
+  border-radius: 10px;
+  color: #0b0f0e;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  letter-spacing: 0.01em;
+  transition: opacity 150ms ease;
+}
+.aria-btn-primary:hover { opacity: 0.87; }
+.aria-btn-skip {
+  background: none;
+  border: none;
+  color: #666666;
+  font-size: 12px;
+  font-family: var(--font-body);
+  cursor: pointer;
+  padding: 4px;
+  text-align: center;
+  transition: color 120ms ease;
+}
+.aria-btn-skip:hover { color: #333333; }
+
+/* ════════════════════════════════════════════════════════════════════
+   DIRECTOR'S CALL — cinematic full-screen moment
+════════════════════════════════════════════════════════════════════ */
+
+/* Override backdrop to center (briefing is flex-end) */
+.aria-backdrop.aria-dc {
+  align-items: center;
+  background: rgba(0, 0, 0, 0.88);
+}
+
+.aria-dc-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 28px;
+  animation: aria-row-in 460ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  max-width: 680px;
+  width: 100%;
+  padding: 0 24px;
+}
+.aria-exiting .aria-dc-row {
+  animation: aria-row-out 260ms ease forwards;
+}
+
+/* Director's Call card — wider and taller than briefing card */
+.aria-dc-card {
+  background: #ffffff;
+  border-radius: 22px;
+  padding: 28px 28px 24px;
+  min-width: 340px;
+  max-width: 400px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 4px 12px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+.aria-dc-card::before {
+  content: '';
+  position: absolute;
+  left: -13px;
+  bottom: 52px;
+  border-top: 13px solid transparent;
+  border-bottom: 13px solid transparent;
+  border-right: 13px solid #ffffff;
+}
+
+.aria-dc-eyebrow {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--clr-primary);
+  margin-bottom: 8px;
+  font-family: var(--font-body);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.aria-dc-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 18px;
+  height: 2px;
+  background: var(--clr-primary);
+  border-radius: 1px;
+}
+
+.aria-dc-title {
+  margin: 0 0 16px;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #0b0f0e;
+  font-family: var(--font-body);
+}
+
+/* Strategy proof-points */
+.aria-dc-proof {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: #f8f8f8;
+  border-radius: 12px;
+}
+.aria-dc-proof-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+.aria-dc-proof-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.aria-dc-proof-text {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #333;
+  font-family: var(--font-body);
+}
+.aria-dc-proof-label {
+  font-weight: 700;
+  color: #111;
+}
+.aria-dc-proof-val {
+  color: #555;
+}
+
+/* Aria's typewriter quote */
+.aria-dc-line {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #f0f4ff;
+  border-radius: 10px;
+  border-left: 3px solid var(--clr-primary);
+}
+.aria-dc-line-name {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--clr-primary);
+  margin-bottom: 5px;
+  font-family: var(--font-body);
+}
+.aria-dc-line-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #1a1a1a;
+  font-family: var(--font-body);
+  min-height: 42px;
+}
+
+/* Points progress strip */
+.aria-dc-pts {
+  background: #f8f8f8;
+  border-radius: 10px;
+  padding: 10px 13px;
+  margin-bottom: 4px;
+}
+.aria-dc-pts-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 11px;
+  color: #555;
+  font-family: var(--font-body);
+  margin-bottom: 7px;
+}
+.aria-dc-pts-num {
+  font-weight: 700;
+  color: #111;
+  font-family: var(--font-mono, monospace);
+}
+.aria-dc-bar {
+  height: 5px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.aria-dc-bar-fill {
+  height: 100%;
+  background: var(--clr-primary);
+  border-radius: 3px;
+  transition: width 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .aria-char-wrap,
+  .aria-excited .aria-char-wrap,
+  .aria-celebrating .aria-char-wrap,
+  .aria-thinking .aria-char-wrap    { animation: none !important; transform: none !important; }
+  .aria-cloud, .aria-cloud.aria-cloud-hiding { animation: none !important; }
+  .aria-briefing-row { animation: none !important; }
+}

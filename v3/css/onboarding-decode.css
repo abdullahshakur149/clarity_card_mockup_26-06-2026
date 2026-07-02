@@ -1,0 +1,95 @@
+/* ============================================================================
+   onboarding-decode.css — "Decode the Transmission" intake.
+   Mission-control dark, CAPCOM-led. One open prompt (speak / type / link) →
+   decode cinematic → auto-filled dossier. Reuses pf-* (auth.css) + .capcom.
+   Prefix: dt-
+   ========================================================================== */
+
+.dt-root { position: relative; min-height: 100vh; width: 100%; overflow: hidden; color: var(--clr-text); }
+.dt-main { position: relative; z-index: 2; max-width: 600px; margin: 0 auto; padding: 92px 24px 64px; }
+@media (max-width: 640px) { .dt-main { padding: 82px 18px 48px; } }
+
+.dt-eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--clr-primary-hover); margin-bottom: 10px; }
+.dt-title { font-family: var(--font-display); font-weight: 600; font-size: 40px; line-height: 1.05; letter-spacing: -0.01em; color: var(--clr-text); margin: 0 0 14px; }
+.dt-sub { font-size: 14.5px; line-height: 1.6; color: var(--clr-muted); margin: 12px 0 20px; max-width: 460px; }
+@media (max-width: 640px) { .dt-title { font-size: 32px; } }
+
+/* mode switch */
+.dt-modes { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
+.dt-mode { display: inline-flex; align-items: center; gap: 7px; font-family: var(--font-body); font-size: 12.5px; font-weight: 500; color: var(--clr-muted); background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 99px; padding: 8px 14px; cursor: pointer; transition: color .15s ease, border-color .15s ease, background .15s ease; }
+.dt-mode:hover { color: var(--clr-text); border-color: var(--clr-border-strong); }
+.dt-mode.on { color: var(--clr-primary-hover); border-color: var(--clr-primary-border); background: var(--clr-primary-dim); }
+
+.dt-panel { animation: dt-fade .32s ease both; }
+@keyframes dt-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+/* ── speak (the hero) ── */
+.dt-speak { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 16px 0 4px; }
+.dt-mic { position: relative; width: 108px; height: 108px; border-radius: 50%; border: 1px solid var(--clr-primary-border); background: radial-gradient(circle at 50% 38%, var(--clr-primary-dim), var(--clr-card)); color: var(--clr-primary-hover); display: grid; place-items: center; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; transition: transform .12s ease, box-shadow .2s ease, color .2s ease; }
+.dt-mic:hover { transform: translateY(-1px); }
+.dt-mic:active { transform: scale(.96); }
+.dt-mic.live { color: #fff; background: radial-gradient(circle at 50% 38%, var(--clr-primary), var(--clr-primary-dim)); box-shadow: 0 0 44px -6px var(--clr-primary); }
+.dt-mic-rings { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
+.dt-mic.live .dt-mic-rings::before, .dt-mic.live .dt-mic-rings::after { content: ''; position: absolute; inset: -1px; border-radius: 50%; border: 2px solid var(--clr-primary-hover); animation: dt-ring 1.5s ease-out infinite; }
+.dt-mic.live .dt-mic-rings::after { animation-delay: .55s; }
+@keyframes dt-ring { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(1.7); opacity: 0; } }
+.dt-mic-hint { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; color: var(--clr-muted); margin-top: 16px; }
+.dt-transcript { margin-top: 16px; width: 100%; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 14px 16px; font-size: 15px; line-height: 1.5; color: var(--clr-text); text-align: left; min-height: 54px; }
+.dt-note { margin-top: 10px; font-size: 12px; color: var(--clr-warning); }
+
+/* ── type ── */
+.dt-type { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.dt-textarea { width: 100%; resize: vertical; min-height: 118px; font-size: 15px; line-height: 1.55; padding: 15px 17px; }
+
+/* ── link ── */
+.dt-link { display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.dt-linkinput { width: 100%; font-size: 15px; padding: 14px 16px; }
+.dt-file { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--clr-muted); cursor: pointer; padding: 2px 0; }
+.dt-file:hover { color: var(--clr-primary-hover); }
+
+/* cta */
+.dt-cta { margin-top: 6px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; }
+.dt-speak .dt-cta { margin-top: 18px; }
+
+/* ── decode cinematic ── */
+.dt-decode { position: relative; margin-top: 20px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; padding: 22px; overflow: hidden; }
+.dt-decode-scan { position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--clr-primary-hover), transparent); animation: dt-scanline 1.5s ease-in-out infinite; }
+@keyframes dt-scanline { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { transform: translateY(200px); opacity: 0; } }
+.dt-decode-src { font-size: 13.5px; line-height: 1.6; color: var(--clr-faint); font-style: italic; max-height: 92px; overflow: hidden; margin-bottom: 16px; border-left: 2px solid var(--clr-primary-border); padding-left: 12px; }
+.dt-log { font-family: var(--font-mono); font-size: 12px; line-height: 1.95; color: var(--clr-muted); }
+.dt-log .live { color: var(--clr-primary-hover); }
+
+/* ── name follow-up ── */
+.dt-namewrap { display: flex; gap: 10px; margin-top: 8px; }
+.dt-nameinput { flex: 1; font-size: 16px; padding: 14px 16px; }
+.dt-skip { margin-top: 14px; background: none; border: none; color: var(--clr-faint); font-size: 12.5px; cursor: pointer; }
+.dt-skip:hover { color: var(--clr-muted); }
+
+/* ── dossier ── */
+.dt-acq { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.dt-acq-stamp { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--clr-primary-hover); border: 1px solid var(--clr-primary-border); background: var(--clr-primary-dim); border-radius: 99px; padding: 5px 12px; }
+.dt-acq-xp { font-family: var(--font-mono); font-size: 12px; color: var(--clr-reward); }
+.dt-dossier { display: flex; flex-direction: column; gap: 10px; margin: 18px 0 24px; }
+.dt-card { display: flex; align-items: center; gap: 14px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 13px; padding: 14px 16px; animation: dt-cardin .42s ease both; }
+@keyframes dt-cardin { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+.dt-card-ic { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--clr-primary-dim); color: var(--clr-primary-hover); display: grid; place-items: center; }
+.dt-card-body { flex: 1; min-width: 0; }
+.dt-card-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--clr-faint); margin-bottom: 4px; }
+.dt-card-val { font-size: 15.5px; color: var(--clr-text); line-height: 1.4; }
+.dt-cardinput { width: 100%; font-size: 15px; padding: 9px 12px; }
+.dt-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.dt-chip { font-size: 12px; color: var(--clr-muted); background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 99px; padding: 6px 11px; cursor: pointer; transition: color .14s ease, border-color .14s ease, background .14s ease; }
+.dt-chip.on, .dt-chip:hover { color: var(--clr-primary-hover); border-color: var(--clr-primary-border); background: var(--clr-primary-dim); }
+.dt-edit { flex-shrink: 0; width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid var(--clr-border); color: var(--clr-muted); display: grid; place-items: center; cursor: pointer; transition: color .14s ease, border-color .14s ease; }
+.dt-edit:hover { color: var(--clr-primary-hover); border-color: var(--clr-primary-border); }
+.dt-card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.dt-save, .dt-cancel { width: 32px; height: 32px; border-radius: 8px; display: grid; place-items: center; cursor: pointer; border: 1px solid var(--clr-border); }
+.dt-save { background: var(--clr-primary); border-color: var(--clr-primary); color: #05302a; }
+.dt-cancel { background: transparent; color: var(--clr-muted); }
+.dt-cancel:hover { color: var(--clr-text); }
+
+/* ── confirm ── */
+.dt-confirm { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.dt-enter { font-size: 15px; padding: 14px 22px; }
+.dt-restart { background: none; border: none; color: var(--clr-faint); font-size: 13px; cursor: pointer; }
+.dt-restart:hover { color: var(--clr-muted); }
