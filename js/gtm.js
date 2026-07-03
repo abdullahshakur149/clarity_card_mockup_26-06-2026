@@ -100,6 +100,11 @@
           patch.xp = (idea.xp || 0) + XP_GTM;
           /* auto-build the task plan from these moves (the My Tasks pillar) */
           if (window.ClarityMakeTasks && !(idea.tasks && idea.tasks.length)) patch.tasks = window.ClarityMakeTasks(gtmObj, profile);
+          /* draft a few starter pieces so the Content Engine is never empty */
+          if (window.ClarityMakeStarterContent && !(idea.content && idea.content.length)) {
+            patch.content = window.ClarityMakeStarterContent(gtmObj, profile);
+            patch.starterContentSeeded = true;
+          }
           firstRef.current = false;
         }
         if (onChange) onChange(patch);

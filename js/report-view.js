@@ -49,9 +49,10 @@
   function ClarityReportBody(props) {
     var sections = props.sections || [];
     var storeKey = props.storeKey || 'report';
+    var accordionOnly = !!props.accordionOnly;   /* Strategic Plan: accordion, no toggle */
     var firstId = sections.length ? sections[0].id : null;
 
-    var vv = React.useState(loadView()); var view = vv[0], setView = vv[1];
+    var vv = React.useState(accordionOnly ? 'accordion' : loadView()); var view = vv[0], setView = vv[1];
     var oo = React.useState(function () { var o = {}; if (firstId) o[firstId] = true; return o; }); var open = oo[0], setOpen = oo[1];  /* accordion — verdict open */
     var aa = React.useState(firstId); var active = aa[0], setActive = aa[1];  /* tabs — verdict first */
     var wv = React.useState(function () { return loadViewed(storeKey); }); var viewed = wv[0], setViewed = wv[1];
@@ -82,7 +83,7 @@
         e('span', { className: 'rc-seen-count' + (allSeen ? ' done' : '') },
           allSeen ? e(React.Fragment, null, e(Icon, { name: 'CheckCheck', size: 13 }), 'All ' + total + ' read')
                   : (seen + ' of ' + total + ' read')),
-        e('div', { className: 'rc-seg', role: 'tablist', 'aria-label': 'Report layout' },
+        !accordionOnly && e('div', { className: 'rc-seg', role: 'tablist', 'aria-label': 'Report layout' },
           e('button', { className: 'rc-vt' + (view === 'accordion' ? ' on' : ''), onClick: function () { pickView('accordion'); } },
             e(Icon, { name: 'Rows3', size: 13 }), 'Accordion'),
           e('button', { className: 'rc-vt' + (view === 'tabs' ? ' on' : ''), onClick: function () { pickView('tabs'); } },

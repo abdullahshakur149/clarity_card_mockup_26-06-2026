@@ -482,7 +482,7 @@
           e('div', { className: 'rc-mast-meta' }, plan.category + '  ·  ' + plan.date + '  ·  Prepared by Clarity')),
         e('div', { className: 'rc-rule' }),
 
-        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: stats, storeKey: storeKey })
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: stats, storeKey: storeKey, accordionOnly: true })
       ),
 
       e('button', { className: 'id-back', style: { marginTop: 16 }, onClick: onBack }, 'Back to the groundwork →')

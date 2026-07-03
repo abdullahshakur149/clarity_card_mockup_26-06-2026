@@ -83,12 +83,22 @@
   function ClarityHub(props) {
     var idea = props.idea || {}, onPillar = props.onPillar, onBack = props.onBack, onCompare = props.onCompare;
     var pr = progress(idea);
+    var nd = React.useState(false); var nudgeDismissed = nd[0], setNudgeDismissed = nd[1];
+    var starterN = (idea.content || []).filter(function (p) { return p && p.starter; }).length;
+    var showStarterNudge = starterN > 0 && !idea.starterContentSeen;
     return e('div', { className: 'iq-root' }, bg(), topbar('Your journey · ' + (idea.name || 'Home base')),
       e('div', { className: 'iq-main' },
         e('button', { className: 'id-back', onClick: onBack }, '‹ Your ideas'),
         e('div', { className: 'id-eyebrow' }, 'Home base'),
         e('h1', { className: 'iq-title' }, idea.name),
         voice('This is ' + idea.name + '’s home base. Start with Strategic Planning — everything else builds on it.'),
+        showStarterNudge && !nudgeDismissed && e('div', { className: 'hub-nudge' },
+          e('div', { className: 'hub-nudge-ic' }, e(Icon, { name: 'Sparkles', size: 16 })),
+          e('div', { className: 'hub-nudge-body' },
+            e('div', { className: 'hub-nudge-t' }, starterN + ' pieces are drafted from your strategy'),
+            e('div', { className: 'hub-nudge-s' }, 'A head start is waiting in the Content Engine — take a look.')),
+          e('button', { className: 'hub-nudge-cta', onClick: function () { onPillar('content'); } }, 'Open →'),
+          e('button', { className: 'hub-nudge-x', 'aria-label': 'Dismiss', onClick: function () { setNudgeDismissed(true); } }, e(Icon, { name: 'X', size: 14 }))),
         e('div', { className: 'hub-pillars' },
           PILLARS.map(function (p) {
             var mi = idea.missions || {};
@@ -112,12 +122,13 @@
               : p.id === 'tasks'
               ? (!gtmDone ? 'After GTM' : ((idea.tasks || []).filter(function (t) { return t.done; }).length + ' of ' + (idea.tasks || []).length + ' done'))
               : p.id === 'content'
-              ? (!personaDone ? 'After Persona' : (idea.content && idea.content.length) ? (idea.content.length + ' made') : 'Make content')
+              ? (!personaDone ? 'After Persona' : (showStarterNudge ? (starterN + ' drafts ready') : (idea.content && idea.content.length) ? (idea.content.length + ' made') : 'Make content'))
               : 'Soon';
-            return e('button', { key: p.id, className: 'hub-pillar' + (active ? '' : ' locked'), style: { '--pl': p.accent, '--pl-dim': p.dim }, onClick: active ? function () { onPillar(p.id); } : undefined },
+            var chipHot = p.id === 'content' && showStarterNudge;
+            return e('button', { key: p.id, className: 'hub-pillar' + (active ? '' : ' locked') + (chipHot ? ' hot' : ''), style: { '--pl': p.accent, '--pl-dim': p.dim }, onClick: active ? function () { onPillar(p.id); } : undefined },
               e('div', { className: 'hub-pillar-top' },
                 e('div', { className: 'hub-pillar-ic' }, e(Icon, { name: active ? p.icon : 'Lock', size: 20 })),
-                e('span', { className: 'hub-pillar-chip' + (active ? ' on' : '') }, chip)),
+                e('span', { className: 'hub-pillar-chip' + (active ? ' on' : '') + (chipHot ? ' hot' : '') }, chip)),
               e('div', { className: 'hub-pillar-label' }, p.label),
               e('div', { className: 'hub-pillar-desc' }, p.desc),
               e('div', { className: 'hub-pillar-cta' }, active ? 'Enter →' : 'Locked'));

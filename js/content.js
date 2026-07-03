@@ -40,6 +40,52 @@
     return (content || []).filter(function (p) { return pieceStudioKey(p) === studioKey; });
   }
 
+  /* Starter content — a few strategy-aligned drafts Aria makes the moment the
+     plan compiles, so the Content Engine is never an empty room. Shaped like
+     real published pieces (motif/status/angle) but flagged `starter`. */
+  function makeStarterContent(gtm, profile) {
+    return [
+      { id: 'starter_text', starter: true, studioKey: 'text', motif: 'FileText',
+        title: 'Sourdough Saturday — pre-order email', status: 'review', platform: 'Email',
+        date: 'Draft', angle: 'Story-led open', fit: 91, views: 0, likes: 0, shares: 0 },
+      { id: 'starter_image', starter: true, studioKey: 'image', motif: 'Image',
+        title: 'The Artisan’s Table — feed set', status: 'review', platform: 'Instagram',
+        date: 'Draft', angle: 'Craft close-up', fit: 88, views: 0, likes: 0, shares: 0 },
+      { id: 'starter_video', starter: true, studioKey: 'video', motif: 'Clapperboard',
+        title: 'Why we proof for 24 hours', status: 'review', platform: 'Reel',
+        date: 'Draft', angle: 'Behind-the-craft', fit: 86, views: 0, likes: 0, shares: 0 },
+    ];
+  }
+  window.ClarityMakeStarterContent = makeStarterContent;
+
+  /* Warm one-time welcome — the drafts Aria prepared, shown as openable cards. */
+  function ContentHeadStart(props) {
+    var pieces = props.pieces || [];
+    var onOpen = props.onOpen, onCreate = props.onCreate, onBack = props.onBack;
+    var Button = ds().Button;
+    return e('div', { className: 'ct-headstart' },
+      e('button', { type: 'button', className: 'id-back', onClick: onBack }, '‹ Home base'),
+      e('div', { className: 'ct-hs-head' },
+        e('div', { className: 'ct-hs-eyebrow' }, 'Content Engine'),
+        e('h1', { className: 'ct-hs-title' }, 'I made you a head start.'),
+        e('p', { className: 'ct-hs-sub' }, 'While your plan came together, I drafted ' + pieces.length + ' pieces straight from your strategy. Open one to shape it, or start something new.')),
+      e('div', { className: 'ct-hs-grid' },
+        pieces.map(function (p) {
+          var sk = pieceStudioKey(p);
+          var s = (SData.STUDIOS || []).filter(function (x) { return x.key === sk; })[0] || {};
+          return e('button', { type: 'button', key: p.id || p.title, className: 'ct-hs-card', style: { '--acc': s.accent || 'var(--clr-primary)' }, onClick: function () { onOpen(p); } },
+            e('div', { className: 'ct-hs-thumb' }, e(Icon, { name: p.motif || s.icon || 'Sparkles', size: 24 })),
+            e('div', { className: 'ct-hs-card-b' },
+              e('div', { className: 'ct-hs-card-kind' }, s.name || 'Content'),
+              e('div', { className: 'ct-hs-card-title' }, p.title),
+              e('div', { className: 'ct-hs-card-status' }, 'Draft · ready for your review')));
+        })),
+      e('div', { className: 'ct-hs-cta' },
+        Button ? e(Button, { onClick: onCreate }, 'Create your own →')
+               : e('button', { className: 'pf-cta', onClick: onCreate }, 'Create your own →')));
+  }
+  window.ContentHeadStart = ContentHeadStart;
+
   /* Self-contained start card — never embeds StudioFlow */
   function ContentStudioStart(props) {
     var studioKey = props.studioKey;
@@ -104,9 +150,15 @@
     var idea = props.idea || {}, onChange = props.onChange, onBack = props.onBack;
     var mi = idea.missions || {};
     var intelDone = !!((mi.market && mi.customers && mi.competition) || mi.plan);
-    var returning = !!idea.contentEngineVisited;
+    /* freeze the first-visit decision for this session so marking "visited"
+       below doesn't flip the view mid-session */
+    var rv = React.useState(function () { return !!idea.contentEngineVisited; }); var returning = rv[0];
+    var starterPieces = (idea.content || []).filter(function (p) { return p && p.starter; });
+    /* freeze the head-start decision too — the mount effect below sets
+       starterContentSeen, so we can't recompute it live */
+    var hs = React.useState(function () { return !idea.contentEngineVisited && starterPieces.length > 0 && !idea.starterContentSeen; }); var openHeadStart = hs[0];
 
-    var vw = React.useState(returning ? 'engine' : 'create'); var view = vw[0], setView = vw[1];
+    var vw = React.useState(returning ? 'engine' : (openHeadStart ? 'headstart' : 'create')); var view = vw[0], setView = vw[1];
     var sk = React.useState(null); var studioKey = sk[0], setStudioKey = sk[1];
     var ci = React.useState(null); var campaignId = ci[0], setCampaignId = ci[1];
     var cf = React.useState(false); var campFlow = cf[0], setCampFlow = cf[1];
@@ -119,6 +171,14 @@
     function markVisited() {
       if (!idea.contentEngineVisited && onChange) onChange({ contentEngineVisited: true });
     }
+    /* on first entry: mark the engine visited (so return visits open the hub) and,
+       if starter drafts are waiting, mark them seen (clears the Home Base nudge) */
+    React.useEffect(function () {
+      var patch = {};
+      if (!idea.contentEngineVisited) patch.contentEngineVisited = true;
+      if (starterPieces.length && !idea.starterContentSeen) patch.starterContentSeen = true;
+      if (Object.keys(patch).length && onChange) onChange(patch);
+    }, []);
     function leaveContentEngine() {
       markVisited();
       onBack();
@@ -139,7 +199,7 @@
     }
     function directorDone() {
       setDirectorSeen(true);
-      if (!returning) setView('create');
+      if (!returning) setView(openHeadStart ? 'headstart' : 'create');
     }
     function openWizard() {
       setBriefOpen(false);
@@ -231,6 +291,16 @@
         e('button', { className: 'id-back', onClick: function () { setView('engine'); } }, '‹ Content Engine'),
         e(window.CampaignsHomeScreen, { onNew: function () { setCampFlow(true); }, onOpen: function (id) { setCampaignId(id); setView('campaign-detail'); } }),
         overlay));
+    }
+
+    /* head start — the drafts Aria prepared (one-time warm welcome) */
+    if (view === 'headstart' && window.ContentHeadStart && starterPieces.length) {
+      return shell(e(window.ContentHeadStart, {
+        pieces: starterPieces,
+        onOpen: function (p) { setStudioKey(pieceStudioKey(p)); setSelPiece(p); setView('detail'); },
+        onCreate: function () { setView('create'); },
+        onBack: leaveContentEngine
+      }));
     }
 
     /* create landing — pick a format */
