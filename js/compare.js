@@ -72,7 +72,7 @@
     var loseBest = diffs.filter(function (x) { return x.d < 0; }).sort(function (x, y) { return x.d - y.d; })[0];
     var text;
     if (tie) {
-      text = 'It is dead level. ' + a.name + ' and ' + b.name + ' score the same overall — split the difference on which risk you would rather take, or run more recon to break the tie.';
+      text = 'It is dead level. ' + a.name + ' and ' + b.name + ' score the same overall — split the difference on which risk you would rather take, or dig a little deeper to break the tie.';
     } else {
       text = win.name + ' is the stronger concept';
       text += winAdv.length ? ' — ' + winAdv.join(' and ') + '.' : '.';
@@ -136,7 +136,6 @@
     if (eligible.length < 2) {
       return shell(e(React.Fragment, null,
         e('button', { className: 'id-back', onClick: onBack }, '‹ Hub'),
-        e('div', { className: 'id-eyebrow' }, 'Tools · Concept Comparison'),
         e('h1', { className: 'iq-title' }, 'Head-to-head'),
         e('div', { className: 'cmp-empty' },
           e('div', { className: 'cmp-empty-ic' }, e(Icon, { name: 'Scale', size: 26 })),
@@ -164,7 +163,6 @@
 
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: onBack }, '‹ Hub'),
-      e('div', { className: 'id-eyebrow' }, 'Tools · Concept Comparison'),
       e('h1', { className: 'iq-title' }, 'Head-to-head'),
 
       e('div', { className: 'cmp-pickers' }, picker('Concept A', selA, pickA), picker('Concept B', selB, pickB)),
@@ -175,7 +173,7 @@
           e('div', { className: 'cmp-side-name' }, A.name),
           e('div', { className: 'cmp-side-score' }, verdict.ca),
           verdict.winnerId === A.id && e('div', { className: 'cmp-side-tag' }, 'Winner')),
-        e('div', { className: 'cmp-vs' }, 'VS'),
+        e('div', { className: 'cmp-vs' }, 'vs'),
         e('div', { className: 'cmp-side' + (verdict.winnerId === B.id ? ' win' : '') },
           e('div', { className: 'cmp-side-name' }, B.name),
           e('div', { className: 'cmp-side-score' }, verdict.cb),
@@ -194,7 +192,7 @@
             e('span', { className: 'cmp-cell-v' }, va), winA && e('span', { className: 'cmp-arrow' }, '▲')),
           e('div', { className: 'cmp-cat', style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 } },
             e('div', { style: { display: 'flex', alignItems: 'center', gap: 8 } }, e('span', { className: 'cmp-cat-dot' }), c.title),
-            e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 10.5, fontFamily: '"DM Mono", ui-monospace, monospace' } },
+            e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, fontFamily: 'var(--font-body)' } },
               e('span', { style: { color: winA ? c.hex : 'rgba(230,240,238,.5)' } }, evA[c.id]),
               e('span', { style: { opacity: .3 } }, '·'),
               e('span', { style: { color: winB ? c.hex : 'rgba(230,240,238,.5)' } }, evB[c.id]))),

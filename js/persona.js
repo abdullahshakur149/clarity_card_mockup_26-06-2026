@@ -206,7 +206,17 @@
       var n = 0; setGreveal(0);
       var iv = setInterval(function () { n++; setGreveal(n); if (n >= 4) clearInterval(iv); }, 520);
       var ts = setTimeout(function () { var np = newRef.current; if (np) speak((bankFor(np.archetype, idea) || {}).greeting || np.greet); }, 1750);
-      var td = setTimeout(function () { if (newRef.current) { addPersona(newRef.current); newRef.current = null; } setGstep('pick'); setView('circle'); }, 3500);
+      var td = setTimeout(function () {
+        var np = newRef.current;
+        setGstep('pick');
+        if (np) {
+          addPersona(np); newRef.current = null;
+          /* land straight in the new persona's conversation, not back on the roster */
+          setCurId(np.id); setMsgs([]); setTab('talk'); setReturning(false); setView('conversation');
+        } else {
+          setView('circle');
+        }
+      }, 3500);
       return function () { clearInterval(iv); clearTimeout(ts); clearTimeout(td); };
     }, [view, gstep]);
 
@@ -361,7 +371,7 @@
       personas.length > 0 && e('div', { className: 'pn-hearth' },
         e('div', { className: 'pn-hearth-ring', style: { '--ring': warmth(avgTrust) } }, e('span', null, avgTrust + '%')),
         e('div', null,
-          e('div', { className: 'pn-hearth-l' }, 'The circle’s warmth'),
+          e('div', { className: 'pn-hearth-l' }, 'The Circle’s warmth'),
           e('div', { className: 'pn-hearth-s' }, hearthLine))),
       e('div', { className: 'pn-grid' },
         roster.map(function (p, i) {

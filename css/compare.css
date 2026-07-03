@@ -5,23 +5,23 @@
 
 .cmp-pickers { display: flex; flex-wrap: wrap; gap: 10px 26px; margin: 18px 0 22px; }
 .cmp-picker { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.cmp-picker-l { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .03em; color: var(--clr-faint); }
+.cmp-picker-l { font-family: var(--font-body); font-size: 10.5px; letter-spacing: .03em; color: var(--clr-faint); }
 .cmp-picker-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .cmp-chip { font-size: 12.5px; color: var(--clr-muted); background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 99px; padding: 6px 12px; cursor: pointer; transition: color .14s ease, border-color .14s ease, background .14s ease; }
 .cmp-chip.on, .cmp-chip:hover { color: var(--clr-primary-hover); border-color: var(--clr-primary-border); background: var(--clr-primary-dim); }
 
 .cmp-board { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; margin-bottom: 16px; }
-.cmp-side { text-align: center; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; padding: 18px 14px; position: relative; }
+.cmp-side { text-align: center; background: color-mix(in srgb, var(--clr-card) 55%, transparent); border: 1px solid color-mix(in srgb, var(--clr-border) 55%, transparent); border-radius: 14px; padding: 18px 14px; position: relative; }
 .cmp-side.win { border-color: var(--clr-reward); }
 .cmp-side-name { font-family: var(--font-display); font-size: 17px; letter-spacing: -0.01em; font-weight: 600; color: var(--clr-text); line-height: 1.15; }
 .cmp-side-score { font-family: var(--font-mono); font-size: 40px; color: var(--clr-primary-hover); line-height: 1; margin-top: 6px; }
 .cmp-side.win .cmp-side-score { color: var(--clr-reward); }
-.cmp-side-tag { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: .02em; color: #05302a; background: var(--clr-reward); border-radius: 99px; padding: 3px 10px; }
+.cmp-side-tag { position: absolute; top: -9px; left: 50%; transform: translateX(-50%); font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: .02em; color: #05302a; background: var(--clr-reward); border-radius: 99px; padding: 3px 10px; }
 .cmp-vs { font-family: var(--font-display); font-size: 17px; font-weight: 700; color: var(--clr-faint); }
 
 .cmp-verdict { display: flex; gap: 12px; background: var(--clr-card-2); border: 1px solid var(--clr-border); border-left: 3px solid var(--clr-primary); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; }
 .cmp-verdict-ic { width: 30px; height: 30px; border-radius: 8px; background: var(--clr-primary-dim); color: var(--clr-primary-hover); display: grid; place-items: center; flex-shrink: 0; }
-.cmp-verdict-l { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .03em; color: var(--clr-primary-hover); margin-bottom: 3px; }
+.cmp-verdict-l { font-family: var(--font-body); font-size: 10.5px; letter-spacing: .03em; color: var(--clr-primary-hover); margin-bottom: 3px; }
 .cmp-verdict-t { font-size: 14px; line-height: 1.5; color: var(--clr-text); }
 
 .cmp-rows { display: flex; flex-direction: column; gap: 4px; }
@@ -32,12 +32,12 @@
 .cmp-cell { display: flex; align-items: center; gap: 6px; }
 .cmp-cell.a { justify-content: flex-end; }
 .cmp-cell.b { justify-content: flex-start; }
-.cmp-cell-v { font-family: var(--font-mono); font-size: 16px; color: var(--clr-muted); }
+.cmp-cell-v { font-family: var(--font-body); font-size: 16px; color: var(--clr-muted); }
 .cmp-cell.win .cmp-cell-v { color: var(--clr-text); font-weight: 600; }
 .cmp-arrow { color: var(--clr-accent); font-size: 10px; }
 .cmp-tally { text-align: center; margin-top: 16px; font-size: 14px; color: var(--clr-muted); }
 .cmp-tally b { color: var(--clr-text); }
-.cmp-tally-n { font-family: var(--font-mono); font-size: 18px; color: var(--clr-primary-hover); }
+.cmp-tally-n { font-family: var(--font-body); font-size: 18px; color: var(--clr-primary-hover); }
 
 .cmp-empty { text-align: center; max-width: 460px; margin: 30px auto 0; }
 .cmp-empty-ic { width: 60px; height: 60px; border-radius: 16px; background: var(--clr-primary-dim); color: var(--clr-primary-hover); display: grid; place-items: center; margin: 0 auto 16px; }

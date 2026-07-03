@@ -35,8 +35,7 @@ function CEyebrow({
   return /*#__PURE__*/React.createElement("div", {
     style: {
       font: 'var(--type-label)',
-      textTransform: 'uppercase',
-      letterSpacing: 'var(--label-tracking-wide)',
+      letterSpacing: '0.01em',
       color: 'var(--clr-muted)',
       marginBottom: 14
     }
@@ -139,7 +138,7 @@ function CampaignsHomeScreen({
       margin: '14px auto 0',
       maxWidth: 580
     }
-  }, "A campaign sits on top of the Content Engine \u2014 one goal, many pieces, coordinated across channels and tracked to a KPI.")), behind.length ? /*#__PURE__*/React.createElement(Card, {
+  }, "A campaign sits on top of the Content Engine \u2014 one goal, many pieces, coordinated across channels and tracked against a single target.")), behind.length ? /*#__PURE__*/React.createElement(Card, {
     inset: true,
     style: {
       display: 'flex',
@@ -226,8 +225,7 @@ function CampaignsHomeScreen({
   }, "New campaign \u2192")), /*#__PURE__*/React.createElement("div", {
     style: {
       font: 'var(--type-label)',
-      textTransform: 'uppercase',
-      letterSpacing: 'var(--label-tracking-wide)',
+      letterSpacing: '0.01em',
       color: 'var(--clr-muted)',
       marginBottom: 14
     }
@@ -280,7 +278,7 @@ function CampaignsHomeScreen({
       }
     }, /*#__PURE__*/React.createElement("span", null, c.kpiLabel, " \xB7 ", onTrack ? 'on track' : 'behind pace'), /*#__PURE__*/React.createElement("span", {
       style: {
-        fontFamily: 'var(--font-mono)'
+        fontFamily: 'var(--font-body)'
       }
     }, c.pace, "% of goal")), /*#__PURE__*/React.createElement(ProgressMeter, {
       value: c.pace,
@@ -292,7 +290,7 @@ function CampaignsHomeScreen({
         gap: 6,
         marginTop: planned ? 16 : 0
       }
-    }, /*#__PURE__*/React.createElement(Tag, null, `${c.series} series`), /*#__PURE__*/React.createElement(Tag, null, `${c.pieces} pieces`), c.chips.map(x => /*#__PURE__*/React.createElement(Tag, {
+    }, c.series > 0 && /*#__PURE__*/React.createElement(Tag, null, `${c.series} series`), c.pieces > 0 && /*#__PURE__*/React.createElement(Tag, null, `${c.pieces} pieces`), c.chips.map(x => /*#__PURE__*/React.createElement(Tag, {
       key: x
     }, x))));
   })));
@@ -828,9 +826,9 @@ function CampaignFlow({
         fontSize: 12,
         color: 'var(--clr-muted)',
         marginBottom: 8,
-        fontFamily: 'var(--font-mono)'
+        fontFamily: 'var(--font-body)'
       }
-    }, /*#__PURE__*/React.createElement("span", null, Math.min(Math.round(progress / 100 * totalPieces), totalPieces), " / ", totalPieces, " pieces"), /*#__PURE__*/React.createElement("span", null, Math.min(progress, 100), "%")), /*#__PURE__*/React.createElement(ProgressMeter, {
+    }, /*#__PURE__*/React.createElement("span", null, Math.min(Math.round(progress / 100 * totalPieces), totalPieces), " of ", totalPieces, " pieces"), /*#__PURE__*/React.createElement("span", null, Math.min(progress, 100), "%")), /*#__PURE__*/React.createElement(ProgressMeter, {
       value: Math.min(progress, 100),
       tone: "indigo",
       height: 8
@@ -1128,7 +1126,7 @@ function CampaignFlow({
     }, r.title), /*#__PURE__*/React.createElement(Tag, null, r.channel), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 12,
-        fontFamily: 'var(--font-mono)',
+        fontFamily: 'var(--font-body)',
         color: r.clash ? 'var(--clr-warning)' : 'var(--clr-muted)',
         whiteSpace: 'nowrap'
       }
@@ -1241,7 +1239,7 @@ function Stepper({
     onClick: onMinus
   }, "\u2212"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'var(--font-mono)',
+      fontFamily: 'var(--font-body)',
       fontSize: 15,
       color: 'var(--clr-text)',
       width: 18,
@@ -1344,7 +1342,7 @@ function CampaignDetailScreen({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontFamily: 'var(--font-mono)',
+      fontFamily: 'var(--font-body)',
       fontSize: 11,
       color: 'var(--clr-muted)',
       width: 28
@@ -1370,6 +1368,31 @@ function CampaignDetailScreen({
     p,
     i
   }));
+  /* only stat tiles with real data render — no placeholder dashes or zeros */
+  const kpiTiles = [c.published > 0 && /*#__PURE__*/React.createElement(KpiStat, {
+    key: "published",
+    label: "Pieces published",
+    value: c.published,
+    mono: true,
+    delta: `${c.pieces - c.published} in progress`
+  }), !planned && c.reach !== '—' && /*#__PURE__*/React.createElement(KpiStat, {
+    key: "reach",
+    label: "Reach",
+    value: c.reach,
+    delta: '▲ this window'
+  }), c.pfAvg > 0 && /*#__PURE__*/React.createElement(KpiStat, {
+    key: "fit",
+    label: "Avg persona fit",
+    value: c.pfAvg,
+    mono: true,
+    deltaTone: c.pfAvg < 80 ? 'amber' : undefined,
+    delta: "minimum 65"
+  }), c.series > 0 && /*#__PURE__*/React.createElement(KpiStat, {
+    key: "series",
+    label: "Series",
+    value: c.series,
+    delta: "in this campaign"
+  })].filter(Boolean);
   return /*#__PURE__*/React.createElement("div", {
     style: {
       maxWidth: 1040,
@@ -1458,7 +1481,7 @@ function CampaignDetailScreen({
   }, "Edit campaign"), /*#__PURE__*/React.createElement(Button, {
     size: "sm",
     onClick: onAddSeries
-  }, "+ Add pieces"))), /*#__PURE__*/React.createElement(Card, {
+  }, "+ Add pieces"))), !planned && /*#__PURE__*/React.createElement(Card, {
     padding: 22,
     radius: "var(--radius-lg)",
     style: {
@@ -1474,8 +1497,7 @@ function CampaignDetailScreen({
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       font: 'var(--type-label)',
-      textTransform: 'uppercase',
-      letterSpacing: 'var(--label-tracking)',
+      letterSpacing: '0.01em',
       color: 'var(--clr-muted)'
     }
   }, c.kpiLabel, " \xB7 pace to goal"), /*#__PURE__*/React.createElement("div", {
@@ -1490,7 +1512,7 @@ function CampaignDetailScreen({
       fontSize: 18,
       color: 'var(--clr-muted)'
     }
-  }, "/ ", fmt(c.kpiGoal || 100)))), /*#__PURE__*/React.createElement(Pill, {
+  }, "of ", fmt(c.kpiGoal || 100)))), /*#__PURE__*/React.createElement(Pill, {
     tone: planned ? 'muted' : onTrack ? 'green' : 'amber',
     dot: true
   }, planned ? 'Not started' : onTrack ? 'On track' : 'Behind pace', !planned && ` · ${c.daysLeft}d left`)), /*#__PURE__*/React.createElement(ProgressMeter, {
@@ -1503,33 +1525,14 @@ function CampaignDetailScreen({
       color: 'var(--clr-muted)',
       marginTop: 10
     }
-  }, c.pace, "% of goal reached \xB7 target pace marker at ", c.target, "%", onTrack || planned ? '' : ' — Maker suggests adding pieces to catch up')), /*#__PURE__*/React.createElement("div", {
+  }, c.pace, "% of goal reached \xB7 target pace marker at ", c.target, "%", onTrack || planned ? '' : ' — Maker suggests adding pieces to catch up')), kpiTiles.length ? /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(4,1fr)',
+      gridTemplateColumns: `repeat(${kpiTiles.length},1fr)`,
       gap: 14,
       marginBottom: 20
     }
-  }, /*#__PURE__*/React.createElement(KpiStat, {
-    label: "Pieces published",
-    value: c.published,
-    mono: true,
-    delta: `${c.pieces - c.published} in progress`
-  }), /*#__PURE__*/React.createElement(KpiStat, {
-    label: "Reach",
-    value: c.reach,
-    delta: planned ? 'Not started' : '▲ this window'
-  }), /*#__PURE__*/React.createElement(KpiStat, {
-    label: "Avg persona fit",
-    value: c.pfAvg || '—',
-    mono: true,
-    deltaTone: c.pfAvg && c.pfAvg < 80 ? 'amber' : undefined,
-    delta: "gate: 65 min"
-  }), /*#__PURE__*/React.createElement(KpiStat, {
-    label: "Series",
-    value: c.series,
-    delta: "in this campaign"
-  })), /*#__PURE__*/React.createElement(Card, {
+  }, kpiTiles) : null, /*#__PURE__*/React.createElement(Card, {
     inset: true,
     padding: 14,
     radius: "var(--radius-md)",
@@ -1557,7 +1560,7 @@ function CampaignDetailScreen({
     style: {
       color: 'var(--clr-text)'
     }
-  }, "Guardrails active"), " \u2014 persona-fit gate (min 65 to schedule) \xB7 frequency cap 2 / channel / day \xB7 same-day clash alerts on."), /*#__PURE__*/React.createElement("span", {
+  }, "Guardrails on"), " \u2014 pieces need a persona fit of 65 or better to schedule \xB7 no more than two posts per channel a day \xB7 same-day clash warnings on."), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       color: 'var(--clr-primary-hover)',
@@ -1573,8 +1576,7 @@ function CampaignDetailScreen({
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       font: 'var(--type-label)',
-      textTransform: 'uppercase',
-      letterSpacing: 'var(--label-tracking)',
+      letterSpacing: '0.01em',
       color: 'var(--clr-muted)'
     }
   }, "Pieces in this campaign"), /*#__PURE__*/React.createElement(SegmentedTabs, {
@@ -1626,7 +1628,7 @@ function CampaignDetailScreen({
         fontSize: 11.5,
         color: 'var(--clr-muted)'
       }
-    }, s.pattern), /*#__PURE__*/React.createElement(Tag, null, done, "/", items.length, " published")), /*#__PURE__*/React.createElement("div", {
+    }, s.pattern), /*#__PURE__*/React.createElement(Tag, null, done, " of ", items.length, " published")), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         flexDirection: 'column',

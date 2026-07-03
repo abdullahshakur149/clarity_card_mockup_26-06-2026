@@ -142,14 +142,13 @@
         e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
         e('div', { className: 'tk-head' },
           e('div', null,
-            e('div', { className: 'id-eyebrow' }, 'Your journey · My Tasks'),
             e('h1', { className: 'tk-title-h' }, 'Your launch plan')),
           e('div', { className: 'tk-seg' },
             e('button', { className: 'tk-vt' + (view === 'board' ? ' on' : ''), onClick: function () { setView('board'); } }, e(Icon, { name: 'ListChecks', size: 13 }), 'Board'),
             e('button', { className: 'tk-vt' + (view === 'calendar' ? ' on' : ''), onClick: function () { setView('calendar'); } }, e(Icon, { name: 'CalendarDays', size: 13 }), 'Calendar'))),
-        e('div', { className: 'tk-progress' },
+        total > 0 && e('div', { className: 'tk-progress' },
           e('div', { className: 'tk-progress-bar' }, e('div', { className: 'tk-progress-fill', style: { width: pct + '%' } })),
-          e('div', { className: 'tk-progress-l' }, doneN + ' / ' + total + ' done')),
+          e('div', { className: 'tk-progress-l' }, doneN + ' of ' + total + ' done')),
         allDone && e('div', { className: 'tk-celebrate' }, e(Icon, { name: 'PartyPopper', size: 15 }), 'Plan complete — every move is live. Beautifully done.'));
     }
 

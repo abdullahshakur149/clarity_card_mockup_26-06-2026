@@ -63,7 +63,7 @@
       e('div', { className: 'sp-lu-card', onClick: function (ev) { ev.stopPropagation(); } },
         e('div', { className: 'sp-lu-glow' }),
         [0, 1, 2, 3, 4, 5, 6, 7].map(function (i) { return e('span', { key: i, className: 'sp-lu-spark s' + i }); }),
-        e('div', { className: 'sp-lu-eyebrow' }, 'Milestone'),
+        e('div', { className: 'sp-lu-eyebrow' }, 'A milestone'),
         e('div', { className: 'sp-lu-badge' }, e(Icon, { name: 'Trophy', size: 32 })),
         e('div', { className: 'sp-lu-title' }, 'Level up'),
         e('div', { className: 'sp-lu-sub' }, 'The groundwork is done — you know your ground. Your ', e('b', null, 'Strategic Plan'), ' is ready to come together.'),
@@ -141,7 +141,8 @@
       return e(window.ClarityStrategicPlan, {
         profile: profile, missions: done, result: done.plan || null,
         onComplete: function (r) { missionDone('plan', 'Strategic Plan', r); },
-        onBack: function () { setSel(null); }
+        onBack: function () { setSel(null); },
+        onPersona: props.onPersona
       });
     }
 
@@ -163,42 +164,18 @@
     }
 
     /* ── The groundwork (home) ── */
-    var greet = (op ? 'So — ' + op + '. ' : '') + 'Before we build anything, let’s understand the ground you’re standing on.';
     return e('div', { className: 'id-root' }, deckBg(), deckTopbar(),
       e('div', { className: 'id-main' },
         props.onExit && e('button', { className: 'id-back', onClick: props.onExit }, '‹ Home base'),
         e('div', { className: 'id-head' },
-          e('div', { className: 'id-eyebrow' }, 'Your journey'),
           e('h1', { className: 'id-title' }, 'The groundwork'),
           e('p', { className: 'id-sub' }, 'Get to know your market, your customers and the landscape — then your plan writes itself.')
         ),
-
-        e(Voice, { line: greet }),
 
         goal && e('div', { className: 'id-directive' },
           e(Icon, { name: 'Target', size: 15 }),
           e('span', { className: 'id-directive-label' }, 'Your goal'),
           e('span', { className: 'id-directive-val' }, goal)
-        ),
-
-        /* journey tracker */
-        e('div', { className: 'id-journey' },
-          e('div', { className: 'id-journey-head' }, e('span', null, 'The road ahead'), e('span', { className: 'id-journey-phase' }, 'You are here · Plan')),
-          e('div', { className: 'id-phases' },
-            PHASES.map(function (p, i) {
-              return e('div', { key: p, className: 'id-phase' + (i === 0 ? ' active' : '') },
-                e('div', { className: 'id-phase-bar' }), e('span', { className: 'id-phase-label' }, p));
-            })
-          )
-        ),
-
-        /* intel readouts */
-        e('div', { className: 'id-stats' },
-          STATS.map(function (s) {
-            return e('div', { key: s.id, className: 'id-stat' },
-              e('div', { className: 'id-stat-top' }, e(Icon, { name: s.icon, size: 14 }), e('span', null, s.label)),
-              e('div', { className: 'id-stat-num' }, counts[s.id] || 0));
-          })
         ),
 
         /* the three groundwork steps */
@@ -226,7 +203,7 @@
           return e('button', { className: 'id-mission id-capstone' + (unlocked ? '' : ' locked'), onClick: unlocked ? function () { setSel('plan'); } : undefined },
             e('div', { className: 'id-mission-top' },
               e('div', { className: 'id-mission-ic' }, e(Icon, { name: unlocked ? 'FileText' : 'Lock', size: 20 })),
-              e('span', { className: 'id-mission-chip' + (done.plan ? ' ok' : unlocked ? ' rec' : '') }, done.plan ? 'Done ✓' : unlocked ? 'Ready' : 'Opens at 3/3 · now ' + n)),
+              e('span', { className: 'id-mission-chip' + (done.plan ? ' ok' : unlocked ? ' rec' : '') }, done.plan ? 'Done ✓' : unlocked ? 'Ready' : 'Opens after the three steps')),
             e('div', { className: 'id-mission-title' }, 'Strategic Plan'),
             e('div', { className: 'id-mission-sub' }, unlocked ? 'Your one combined report' : 'Finish the three steps above and this opens'),
             e('div', { className: 'id-mission-desc' }, unlocked

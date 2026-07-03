@@ -73,7 +73,7 @@
           e('span', { className: 'xph-ico', style: { color: cur.color } }, e(Icon, { name: cur.icon, size: 14 }))),
         e('span', { className: 'xph-meta' },
           e('span', { className: 'xph-top' },
-            e('span', { className: 'xph-lvl' }, 'Lv.' + cur.lvl),
+            e('span', { className: 'xph-lvl' }, 'Level ' + cur.lvl),
             e('span', { className: 'xph-rank', style: { color: cur.color } }, cur.label)),
           e('span', { className: 'xph-xp' }, fmt(shown), ' XP')),
         e('span', { className: 'xph-caret' }, e(Icon, { name: open ? 'ChevronUp' : 'ChevronDown', size: 13 })),

@@ -23,14 +23,6 @@
     welcome:    "You're in. Let's pick your journey back up."
   };
 
-  /* Lines Clarity thinks aloud while it signs you in */
-  var SEQ = [
-    { t: 'Checking your details…',  c: 'dim' },
-    { t: 'Everything checks out ✓', c: 'ok'  },
-    { t: 'Setting your space up…',  c: 'dim' },
-    { t: 'Almost there…',           c: 'dim' }
-  ];
-
   /* Google "G" mark */
   function GoogleG() {
     return e('svg', { width: 17, height: 17, viewBox: '0 0 48 48', 'aria-hidden': true },
@@ -107,14 +99,11 @@
       say(m === 'signin' ? LINES.hailSignin : LINES.hailEnlist, false);
     }
 
-    /* Sign-in sequence */
-    var sq = React.useState(0); var revealed = sq[0], setRevealed = sq[1];
+    /* Sign-in sequence — a single filling progress line, no checklist */
     React.useEffect(function () {
       if (phase !== 'seq') return;
-      var n = 0; setRevealed(0);
-      var iv = setInterval(function () { n++; setRevealed(n); if (n >= SEQ.length) clearInterval(iv); }, 360);
       var t = setTimeout(function () { setPhase('granted'); say(LINES.welcome, true); }, 1950);
-      return function () { clearInterval(iv); clearTimeout(t); };
+      return function () { clearTimeout(t); };
     }, [phase]);
 
     React.useEffect(function () {
@@ -228,8 +217,8 @@
             e('button', { className: 'pf-reveal', onClick: function () { setShowPass(!showPass); } },
               showPass ? 'Hide' : 'Show')
           ),
-          /* strength meter */
-          e('div', { className: 'pf-enc' },
+          /* strength meter — only when choosing a new password */
+          mode === 'enlist' && e('div', { className: 'pf-enc' },
             e('span', { className: 'pf-enc-label' }, 'Strength'),
             e('div', { className: 'pf-enc-bars' },
               [0, 1, 2, 3, 4].map(function (i) {
@@ -258,13 +247,8 @@
                 e('b', { onClick: function () { switchMode('signin'); } }, 'Sign in'))
         ),
 
-        /* thinking-aloud overlay */
+        /* signing-in overlay — just the line that fills, no checklist */
         phase === 'seq' && e('div', { className: 'pf-seq' },
-          e('div', { className: 'pf-seq-log' },
-            SEQ.slice(0, revealed).map(function (l, i) {
-              return e('div', { key: i, className: l.c }, l.t);
-            })
-          ),
           e('div', { className: 'pf-seq-bar' }, e('i', null))
         ),
 

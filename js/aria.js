@@ -2,6 +2,13 @@
 (function () {
   'use strict';
 
+  function ariaPortal(node) {
+    if (typeof document !== 'undefined' && window.ReactDOM && window.ReactDOM.createPortal) {
+      return window.ReactDOM.createPortal(node, document.body);
+    }
+    return node;
+  }
+
   /* ── Briefing copy per modality ─────────────────────────────────── */
   var BRIEFS = {
     text:  { opener: 'One post. One idea.',         rest: " Let's write something worth reading."              },
@@ -354,7 +361,7 @@
       );
     }
 
-    return React.createElement('div', { className: 'aria-backdrop' + (exiting ? ' aria-exiting' : '') },
+    return ariaPortal(React.createElement('div', { className: 'aria-backdrop' + (exiting ? ' aria-exiting' : '') },
       React.createElement('div', { className: 'aria-briefing-row' },
         /* Character */
         React.createElement('div', { className: 'aria-' + expr },
@@ -374,7 +381,7 @@
           )
         )
       )
-    );
+    ));
   }
 
   /* ═══════════════════════════════════════════════════════════════════
@@ -595,7 +602,7 @@
 
     var pct = Math.min(100, Math.round(earned / goal * 100));
 
-    return React.createElement('div', {
+    return ariaPortal(React.createElement('div', {
       className: 'aria-backdrop aria-dc' + (exiting ? ' aria-exiting' : '')
     },
       React.createElement('div', { className: 'aria-dc-row' },
@@ -639,7 +646,7 @@
           React.createElement('div', { className: 'aria-dc-pts' },
             React.createElement('div', { className: 'aria-dc-pts-row' },
               React.createElement('span', null, 'Progress to free Aria access'),
-              React.createElement('span', { className: 'aria-dc-pts-num' }, earned, ' / ', goal, ' pts')
+              React.createElement('span', { className: 'aria-dc-pts-num' }, earned, ' of ', goal, ' points')
             ),
             React.createElement('div', { className: 'aria-dc-bar' },
               React.createElement('div', { className: 'aria-dc-bar-fill', style: { width: pct + '%' } })
@@ -653,7 +660,7 @@
           }, "Create first piece →")
         )
       )
-    );
+    ));
   }
 
   /* Check localStorage so the call never fires twice */

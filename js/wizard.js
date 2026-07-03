@@ -492,6 +492,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   const k    = studioKey;
   const flow = k ? SFD.STUDIO_FLOW[k] : null;
   const rec  = flow ? flow.platforms.find(p => p.rec) || flow.platforms[0] : null;
+  const lockedStudio = !!studioProp;
 
   /* ── Navigation ── */
   const [step, setStep] = React.useState(0);
@@ -605,6 +606,15 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   }
   function regenerate() { setRegen(r => r + 1); startGenerate(); }
 
+  function leaveStudio() {
+    if (lockedStudio) { onExit(); return; }
+    setStudioKey(null);
+    setStep(0);
+    setVariations(null);
+    setSelected(null);
+    setGenerating(false);
+  }
+
   function next() {
     if (step === GEN_STEP - 1) {
       setStep(GEN_STEP);
@@ -615,20 +625,34 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   }
   function back() {
     if (step === GEN_STEP) setGenerating(false);
-    if (step <= 1) { setStudioKey(null); return; }
+    if (step <= 1) { leaveStudio(); return; }
     setStep(s => s - 1);
   }
   function doPublish(mode, campName) {
     const v = variations[selected];
+    const published = mode === 'publish';
+    const stats = published
+      ? { views: 1200 + Math.floor(Math.random() * 2800), likes: 64 + Math.floor(Math.random() * 180), shares: 8 + Math.floor(Math.random() * 42), clickRate: (2.2 + Math.random() * 3.2).toFixed(1) + '%' }
+      : { views: Math.floor(Math.random() * 90), likes: 0, shares: 0, clickRate: '—' };
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const d = new Date();
     onPublish({
+      id:       'c_' + Date.now(),
+      studioKey: k,
       title:    v.angle + ' — Sourdough Saturday',
       angle:    v.angle,
       platform: curPlatform ? curPlatform.label : null,
       motif:    SF_MOTIF[k],
-      status:   mode === 'publish' ? 'published' : mode === 'draft' ? 'draft' : 'review',
-      toast:    mode === 'publish'  ? `Published to ${curPlatform ? curPlatform.label : 'library'} — added to My Library`
+      status:   published ? 'published' : mode === 'draft' ? 'draft' : 'review',
+      fit:      v.fit,
+      date:     months[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear(),
+      toast:    published  ? `Published to ${curPlatform ? curPlatform.label : 'library'} — added to My Library`
               : mode === 'draft'    ? 'Saved as draft — find it in My Library'
-              : `Added to "${campName}" — Aria is briefing the remaining pieces`
+              : `Added to "${campName}" — Aria is briefing the remaining pieces`,
+      views: stats.views,
+      likes: stats.likes,
+      shares: stats.shares,
+      clickRate: stats.clickRate
     });
   }
   function canNext() {
@@ -643,8 +667,8 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
 
   /* ════ STEP BODIES ════ */
 
-  /* ── STEP 0: Modality picker (no wizard chrome) ── */
-  if (!studioKey) {
+  /* ── STEP 0: Modality picker (standalone wizard entry only) ── */
+  if (!studioKey && !lockedStudio) {
     return React.createElement('div', {
       style: { height: '100%', overflowY: 'auto' }
     },
@@ -707,7 +731,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
           })
         )),
         React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: () => setStudioKey(null) }, '← Change format'),
+          left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change format'),
           right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
         })
       );
@@ -728,14 +752,8 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
             onClick: () => setPlatform(p.type)
           })
         )),
-        k === 'video' && React.createElement('div', {
-          style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 16 }
-        },
-          React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Aspect ratio'), React.createElement(SFSelect, { value: vAspect, onChange: setVAspect, opts: flow.specs[0].opts })),
-          React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Resolution'), React.createElement(SFSelect, { value: undefined, onChange: () => {}, opts: flow.specs[1].opts }))
-        ),
         React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: () => setStudioKey(null) }, '← Change format'),
+          left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change format'),
           right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
         })
       );
@@ -1001,6 +1019,13 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     } else {
       /* video production */
       body = React.createElement(React.Fragment, null,
+        React.createElement(SFHead, { title: 'Set the specs', sub: "Aspect ratio and production settings for this piece." }),
+        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 14, marginBottom: 14 } },
+          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
+            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Aspect ratio'), React.createElement(SFSelect, { value: vAspect, onChange: setVAspect, opts: flow.specs[0].opts })),
+            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Resolution'), React.createElement(SFSelect, { value: flow.specs[1].opts[0], onChange: () => {}, opts: flow.specs[1].opts }))
+          )
+        ),
         React.createElement(SFHead, { title: 'Production', sub: "Style, voice and pacing — make it feel like your brand." }),
         React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 14 } },
           React.createElement(SFLabel, { hint: true }, 'Visual style'),
@@ -1218,9 +1243,9 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
         React.createElement('span', { style: { fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--clr-text)', marginRight: 8 } }, 'Studio ', studio ? studio.name : ''),
         React.createElement('em', { style: { fontStyle: 'normal', color: a } }, 'New ', studio ? studio.name.toLowerCase() : '')
       ),
-      React.createElement(SFButton, { variant: 'ghost', size: 'sm', onClick: () => { setStudioKey(null); setStep(1); setVariations(null); setSelected(null); setGenerating(false); } },
+      React.createElement(SFButton, { variant: 'ghost', size: 'sm', onClick: leaveStudio },
         React.createElement('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 5 } },
-          React.createElement(SFIcon, { name: 'RotateCcw', size: 13 }), 'Start over'
+          React.createElement(SFIcon, { name: 'RotateCcw', size: 13 }), lockedStudio ? 'Exit wizard' : 'Start over'
         )
       )
     ),
@@ -1230,9 +1255,9 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
       React.createElement('div', { style: { position: 'sticky', top: 0, flexShrink: 0, paddingTop: 28 } },
         React.createElement(PersonaFitBar, { step, studioKey, platform, rec, variations, selected })
       ),
-      /* Right: wizard content */
-      React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-        React.createElement('div', { style: { maxWidth: 760, margin: '0 auto', padding: '28px 24px 56px' } },
+      /* Right: wizard content — one step per screen */
+      React.createElement('div', { style: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' } },
+        React.createElement('div', { style: { flex: 1, maxWidth: 760, margin: '0 auto', padding: '28px 24px 56px', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: step < GEN_STEP && !generating && selected == null ? 'center' : 'flex-start' } },
           /* Wizard steps bar */
           !(!intelOk && step === 1) && React.createElement('div', { style: { marginBottom: 30 } },
             React.createElement(SFWizard, { steps: STEPS, current: step + 1 })

@@ -30,7 +30,7 @@
     var p = progress(idea);
     if (p.hasPlan) return { label: 'Plan ready', cls: 'ok' };
     if (p.recon >= 3) return { label: 'Ready to assemble', cls: 'rec' };
-    if (p.recon > 0) return { label: 'Groundwork ' + p.recon + '/3', cls: '' };
+    if (p.recon > 0) return { label: 'Groundwork ' + p.recon + ' of 3', cls: '' };
     return { label: 'New', cls: '' };
   }
 
@@ -67,8 +67,8 @@
               e('div', { className: 'iq-card-name' }, idea.name),
               e('div', { className: 'iq-card-meta' }, (SECTOR_NAME[idea.profile && idea.profile.sector] || 'Business') + '  ·  ' + (idea.createdLabel || '')),
               e('div', { className: 'iq-card-foot' },
-                e('div', { className: 'iq-prog' }, [0, 1, 2].map(function (n) { return e('span', { key: n, className: 'iq-dot' + (pr.recon > n ? ' on' : '') }); }), e('span', { className: 'iq-prog-l' }, 'groundwork')),
-                (score != null && pr.hasPlan) ? e('div', { className: 'iq-score' }, e('b', null, score), e('span', null, 'score')) : e('div', { className: 'iq-open' }, 'Open →')));
+                e('div', { className: 'iq-prog' }, [0, 1, 2].map(function (n) { return e('span', { key: n, className: 'iq-dot' + (pr.recon > n ? ' on' : '') }); }), e('span', { className: 'iq-prog-l' }, 'Groundwork')),
+                (score != null && pr.hasPlan) ? e('div', { className: 'iq-score' }, e('b', null, score), e('span', null, 'Score')) : e('div', { className: 'iq-open' }, 'Open →')));
           }),
           e('button', { className: 'iq-card iq-new', onClick: onNew },
             e('span', { className: 'iq-new-ic' }, e(Icon, { name: 'Plus', size: 24 })),
@@ -91,18 +91,28 @@
         voice('This is ' + idea.name + '’s home base. Start with Strategic Planning — everything else builds on it.'),
         e('div', { className: 'hub-pillars' },
           PILLARS.map(function (p) {
-            var gtmDone = !!(idea.missions && idea.missions.gtm);
-            var active = p.id === 'tasks' ? gtmDone : !!p.active;
+            var mi = idea.missions || {};
+            /* unlock chain: Strategic → Persona → GTM → Tasks; Content opens with Persona */
+            var planDone = !!mi.plan;
+            var personaDone = (idea.personas || []).some(function (x) { return x && x.met; });
+            var gtmDone = !!mi.gtm;
+            var active =
+                p.id === 'strategic' ? true
+              : p.id === 'persona'   ? planDone
+              : p.id === 'gtm'       ? personaDone
+              : p.id === 'content'   ? personaDone
+              : p.id === 'tasks'     ? gtmDone
+              : !!p.active;
             var chip = p.id === 'strategic'
-              ? (pr.hasPlan ? 'Plan ready' : pr.recon >= 3 ? 'Ready' : pr.recon > 0 ? ('Groundwork ' + pr.recon + '/3') : 'Start here')
+              ? (pr.hasPlan ? 'Plan ready' : pr.recon >= 3 ? 'Ready' : pr.recon > 0 ? ('Groundwork ' + pr.recon + ' of 3') : 'Start here')
               : p.id === 'persona'
-              ? ((idea.personas && idea.personas.length) ? (idea.personas.length + ' in your circle') : 'Meet them')
+              ? (!planDone ? 'After the plan' : (idea.personas && idea.personas.length) ? (idea.personas.length + ' in your circle') : 'Meet them')
               : p.id === 'gtm'
-              ? (gtmDone ? 'Plan set' : 'Suggest plays')
+              ? (!personaDone ? 'After Persona' : gtmDone ? 'Plan set' : 'Suggest plays')
               : p.id === 'tasks'
-              ? (gtmDone ? ((idea.tasks || []).filter(function (t) { return t.done; }).length + '/' + (idea.tasks || []).length + ' done') : 'After GTM')
+              ? (!gtmDone ? 'After GTM' : ((idea.tasks || []).filter(function (t) { return t.done; }).length + ' of ' + (idea.tasks || []).length + ' done'))
               : p.id === 'content'
-              ? ((idea.content && idea.content.length) ? (idea.content.length + ' made') : 'Make content')
+              ? (!personaDone ? 'After Persona' : (idea.content && idea.content.length) ? (idea.content.length + ' made') : 'Make content')
               : 'Soon';
             return e('button', { key: p.id, className: 'hub-pillar' + (active ? '' : ' locked'), style: { '--pl': p.accent, '--pl-dim': p.dim }, onClick: active ? function () { onPillar(p.id); } : undefined },
               e('div', { className: 'hub-pillar-top' },

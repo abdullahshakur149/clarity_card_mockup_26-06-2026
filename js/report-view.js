@@ -6,7 +6,7 @@
    Each section earns a "Viewed" badge once the reader reaches its END — an
    IntersectionObserver watches an end-of-section sentinel, so a short section
    counts after a brief dwell while a long one counts only when you scroll to the
-   bottom. A "N / M read" counter tracks the whole report. Viewed + layout state
+   bottom. A "N of M read" counter tracks the whole report. Viewed + layout state
    is session-level (survives navigation, resets on reload). Lives inside .rc-doc,
    so it inherits the report's accent + Day/Night theme. Exposes ClarityReportBody.
      props: { sections: [{ id, label, node }], storeKey }
@@ -81,7 +81,7 @@
       e('div', { className: 'rc-view-bar' },
         e('span', { className: 'rc-seen-count' + (allSeen ? ' done' : '') },
           allSeen ? e(React.Fragment, null, e(Icon, { name: 'CheckCheck', size: 13 }), 'All ' + total + ' read')
-                  : (seen + ' / ' + total + ' read')),
+                  : (seen + ' of ' + total + ' read')),
         e('div', { className: 'rc-seg', role: 'tablist', 'aria-label': 'Report layout' },
           e('button', { className: 'rc-vt' + (view === 'accordion' ? ' on' : ''), onClick: function () { pickView('accordion'); } },
             e(Icon, { name: 'Rows3', size: 13 }), 'Accordion'),

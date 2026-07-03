@@ -547,7 +547,8 @@ function ClarityRoot() {
     content = e(window.ClarityIntel, {
       key: idea.id, profile: idea.profile, idea: idea,
       onChange: (patch) => updateIdea(idea.id, patch),
-      onExit: () => setView('hub')
+      onExit: () => setView('hub'),
+      onPersona: () => setView('persona')
     });
   } else if (view === 'tools' && window.ClarityCompare) {
     content = e(window.ClarityCompare, { ideas: ideas, currentId: currentId, onBack: () => setView('hub') });

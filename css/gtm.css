@@ -8,7 +8,7 @@
 
 /* ---- auto-loaded context (from recon + onboarding) ------------------------- */
 .gtm-ctx { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 10px; }
-.gtm-pill { display: flex; flex-direction: column; gap: 3px; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 12px; padding: 10px 14px; min-width: 150px; }
+.gtm-pill { display: flex; flex-direction: column; gap: 3px; background: color-mix(in srgb, var(--clr-card) 55%, transparent); border: 1px solid color-mix(in srgb, var(--clr-border) 55%, transparent); border-radius: 12px; padding: 10px 14px; min-width: 150px; }
 .gtm-pill-l { font-family: var(--font-body); font-size: 10.5px; font-weight: 500; letter-spacing: 0.02em; color: var(--clr-muted); }
 .gtm-pill-v { font-size: 13.5px; color: var(--clr-text); font-weight: 500; }
 .gtm-prio { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
@@ -22,7 +22,7 @@
 .gtm-dial-v { font-family: var(--font-mono); font-size: 22px; font-weight: 700; color: var(--clr-cat-gtm); }
 
 .gtm-track { position: relative; padding: 12px 0 2px; }
-.gtm-track-mid { position: absolute; top: -4px; transform: translateX(-50%); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.03em; color: var(--clr-muted); white-space: nowrap; }
+.gtm-track-mid { position: absolute; top: -4px; transform: translateX(-50%); font-family: var(--font-body); font-size: 11px; letter-spacing: 0.03em; color: var(--clr-muted); white-space: nowrap; }
 .gtm-track-mid::after { content: ''; display: block; width: 1px; height: 8px; background: var(--clr-muted); margin: 2px auto 0; opacity: 0.6; }
 
 .gtm-range { -webkit-appearance: none; appearance: none; width: 100%; height: 8px; border-radius: 999px; background: linear-gradient(90deg, var(--clr-cat-market), var(--clr-cat-gtm) 52%, var(--clr-ember)); outline: none; cursor: pointer; }
@@ -60,12 +60,12 @@
 .gtm-move { background: var(--clr-card); border: 1px solid var(--clr-border); border-left: 3px solid var(--k); border-radius: 14px; padding: 16px 18px; animation: gtm-rise 0.4s ease both; }
 @keyframes gtm-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .gtm-move-h { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.gtm-move-n { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.04em; color: var(--k); font-weight: 700; }
-.gtm-move-kind { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.02em; color: var(--clr-muted); background: var(--clr-card-2); border-radius: 999px; padding: 2px 9px; }
+.gtm-move-n { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; color: var(--k); font-weight: 700; }
+.gtm-move-kind { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.02em; color: var(--clr-muted); background: var(--clr-card-2); border-radius: 999px; padding: 2px 9px; }
 .gtm-move-title { font-size: 16px; font-weight: 700; color: var(--clr-text); margin-bottom: 5px; }
 .gtm-move-why { font-size: 13.5px; line-height: 1.55; color: var(--clr-muted); margin-bottom: 12px; }
 .gtm-move-badges { display: flex; gap: 8px; }
-.gtm-badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.02em; border-radius: 999px; padding: 3px 10px; background: var(--clr-card-2); color: var(--clr-muted); }
+.gtm-badge { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-body); font-size: 10.5px; letter-spacing: 0.02em; border-radius: 999px; padding: 3px 10px; background: var(--clr-card-2); color: var(--clr-muted); }
 .gtm-badge b { font-weight: 400; opacity: 0.7; }
 .gtm-badge.high { color: var(--clr-accent); background: color-mix(in srgb, var(--clr-accent) 14%, transparent); }
 .gtm-badge.medium { color: var(--clr-cat-gtm); background: var(--clr-cat-gtm-dim); }

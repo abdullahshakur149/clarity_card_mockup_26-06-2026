@@ -26,7 +26,7 @@
 .iq-prog-l { font-size: 10px; color: var(--clr-faint); margin-left: 3px; letter-spacing: .02em; }
 .iq-score { text-align: right; line-height: 1; }
 .iq-score b { font-family: var(--font-mono); font-size: 18px; color: var(--clr-primary-hover); }
-.iq-score span { display: block; font-size: 8.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--clr-faint); }
+.iq-score span { display: block; font-size: 11px; letter-spacing: .01em; color: var(--clr-faint); }
 .iq-open { font-size: 12px; color: var(--clr-primary-hover); }
 .iq-new { align-items: flex-start; justify-content: center; border-style: dashed; background: transparent; gap: 6px; }
 .iq-new:hover { border-color: var(--clr-primary-border); }

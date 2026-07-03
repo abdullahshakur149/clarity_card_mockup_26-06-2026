@@ -22,15 +22,6 @@
     { id: 'sov',         label: 'Share of voice' },
     { id: 'gaps',        label: 'Gaps & openings' }
   ];
-  /* what Clarity thinks aloud while it researches */
-  var SCAN_LOG = [
-    'Looking around your market…',
-    'Naming the players…',
-    'Reading how they position themselves…',
-    'Checking their prices…',
-    'Measuring who gets heard…',
-    'Mapping the landscape for you…'
-  ];
   /* warm labels for how strongly a competitor plays (keys match report data) */
   var PLAYER_LABEL = { High: 'Strong player', Medium: 'In the mix', Low: 'On the edges' };
   var EVIDENCE = [
@@ -212,7 +203,6 @@
     var sp = React.useState(0);   var step = sp[0], setStep = sp[1];
     var rg = React.useState([]);  var regions = rg[0], setRegions = rg[1];
     var fo = React.useState(['rivals', 'positioning', 'sov']); var foci = fo[0], setFoci = fo[1];
-    var rv = React.useState(0);   var revealed = rv[0], setRevealed = rv[1];
     var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
     var soldWhat = (profile.desc || 'your product').trim();
@@ -221,8 +211,6 @@
 
     React.useEffect(function () {
       if (view !== 'running') return;
-      var n = 0; setRevealed(0);
-      var iv = setInterval(function () { n++; setRevealed(n); if (n >= SCAN_LOG.length) clearInterval(iv); }, 440);
       var t = setTimeout(function () {
         var rep = buildReport(profile, regions);
         rep.id = 'cmp_' + (idRef.current++); rep.status = 'ready';
@@ -230,7 +218,7 @@
         setReports(next); setPrimaryId(rep.id); setSel(rep.id); setView('result');
         if (onComplete) onComplete({ xp: rep.xp, reports: next, primaryId: rep.id });  /* new scout → primary */
       }, 2900);
-      return function () { clearInterval(iv); clearTimeout(t); };
+      return function () { clearTimeout(t); };
     }, [view]);
 
     function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
@@ -253,7 +241,6 @@
         e('div', { className: 'id-eyebrow' }, 'The groundwork · Competition'),
         e('h1', { className: 'mm-title' }, 'See who’s already out there'),
         voice('You haven’t met the competition yet. Give me a minute and I’ll map the landscape around you.'),
-        e('div', { className: 'mm-statgrid' }, [['Competitors', '—'], ['Strongest player', '—'], ['Avg pricing', '—'], ['Open gaps', '0']].map(function (s, i) { return e('div', { key: i, className: 'mm-stat' }, e('div', { className: 'mm-stat-l' }, s[0]), e('div', { className: 'mm-stat-v dim' }, s[1])); })),
         e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Start the research →')));
     }
 
@@ -264,8 +251,7 @@
         node = e(React.Fragment, null,
           voice('First — where should I look? Tap the parts of the world you serve.'),
           e('div', { className: 'mm-sec' }, 'Where you operate'),
-          WorldMap ? e(WorldMap, { selected: regions, onToggle: toggleRegion, scanning: false }) : e('div', { className: 'mm-chosen-empty' }, 'Map unavailable.'),
-          e('div', { className: 'mm-chosen' }, regions.length === 0 ? e('span', { className: 'mm-chosen-empty' }, 'Nothing picked yet.') : regions.map(function (id) { var r = REGIONS.filter(function (x) { return x.id === id; })[0] || {}; return e('span', { key: id, className: 'mm-tag' }, r.label, e('button', { onClick: function () { toggleRegion(id); } }, '×')); })),
+          e('div', { className: 'mm-foci' }, REGIONS.map(function (r) { var on = regions.indexOf(r.id) >= 0; return e('button', { key: r.id, className: 'ob-opt' + (on ? ' sel' : ''), onClick: function () { toggleRegion(r.id); } }, r.label); })),
           e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
           e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Next →'));
       } else if (step === 1) {
@@ -296,8 +282,6 @@
       return shell(e(React.Fragment, null,
         e('div', { className: 'id-eyebrow' }, 'The groundwork · Competition'),
         e('h1', { className: 'mm-title' }, 'Looking around…'),
-        WorldMap && e(WorldMap, { selected: regions, onToggle: function () {}, scanning: true }),
-        e('div', { className: 'mm-log' }, SCAN_LOG.slice(0, revealed).map(function (l, i) { return e('div', { key: i, className: i === revealed - 1 ? 'live' : '' }, l); })),
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
@@ -351,7 +335,7 @@
 
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know the landscape now'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know the landscape now'), e('span', { className: 'mm-acq-xp' }, '+' + r.xp + ' XP')),
       voice('Done — the plain read is up top, and the full landscape sits underneath.'),
 
       e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': CATEGORY.accent, '--rc-accent-dim': CATEGORY.accentDim } },

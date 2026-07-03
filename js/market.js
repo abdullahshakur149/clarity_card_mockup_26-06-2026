@@ -26,15 +26,6 @@
     { id: 'pricing', label: 'Pricing benchmarks' },
     { id: 'trends',  label: 'Local trends' }
   ];
-  /* what Clarity thinks aloud while it researches */
-  var SCAN_LOG = [
-    'Reading your market…',
-    'Walking the areas you picked…',
-    'Seeing who’s already there…',
-    'Listening for what people want…',
-    'Pulling it all together…',
-    'Writing you the plain answer…'
-  ];
   var XP = 60;
   /* per-report category identity (signature accent for quick visual scanning) */
   var CATEGORY = { name: 'My Market', eyebrow: 'Market report', accent: 'var(--clr-cat-market)', accentDim: 'var(--clr-cat-market-dim)' };
@@ -264,7 +255,6 @@
     var sp = React.useState(0);   var step = sp[0], setStep = sp[1];
     var rg = React.useState([]);  var regions = rg[0], setRegions = rg[1];
     var fo = React.useState(['demand', 'competitors', 'pricing']); var foci = fo[0], setFoci = fo[1];
-    var rv = React.useState(0);   var revealed = rv[0], setRevealed = rv[1];
     var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
     var soldWhat = (profile.desc || 'your product').trim();
@@ -274,8 +264,6 @@
 
     React.useEffect(function () {
       if (view !== 'running') return;
-      var n = 0; setRevealed(0);
-      var iv = setInterval(function () { n++; setRevealed(n); if (n >= SCAN_LOG.length) clearInterval(iv); }, 440);
       var t = setTimeout(function () {
         var rep = buildReport(profile, regions);
         rep.id = 'mkt_' + (idRef.current++); rep.status = 'ready';
@@ -283,7 +271,7 @@
         setReports(next); setPrimaryId(rep.id); setSel(rep.id); setView('result');
         if (onComplete) onComplete({ xp: rep.xp, reports: next, primaryId: rep.id });  /* new scan → primary */
       }, 2900);
-      return function () { clearInterval(iv); clearTimeout(t); };
+      return function () { clearTimeout(t); };
     }, [view]);
 
     function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
@@ -309,10 +297,6 @@
         e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
         e('h1', { className: 'mm-title' }, 'Understand your market'),
         voice('You haven’t looked at your market yet. Give me a minute and I’ll come back with answers — not a pile of links.'),
-        e('div', { className: 'mm-statgrid' },
-          [['Category', '—'], ['Competitors', '—'], ['Avg price', '—'], ['Signals', '0']].map(function (s, i) {
-            return e('div', { key: i, className: 'mm-stat' }, e('div', { className: 'mm-stat-l' }, s[0]), e('div', { className: 'mm-stat-v dim' }, s[1]));
-          })),
         e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Start the research →')
       ));
     }
@@ -322,13 +306,10 @@
       var stepNode;
       if (step === 0) {
         stepNode = e(React.Fragment, null,
-          voice('First — where do you operate? Tap the parts of the world you serve.'),
+          voice('First — where do you operate? Pick the parts of the world you serve.'),
           e('div', { className: 'mm-sec' }, 'Where you operate'),
-          e(WorldMap, { selected: regions, onToggle: toggleRegion, scanning: false }),
-          e('div', { className: 'mm-chosen' },
-            regions.length === 0
-              ? e('span', { className: 'mm-chosen-empty' }, 'Nothing picked yet.')
-              : regions.map(function (id) { var r = REGIONS.filter(function (x) { return x.id === id; })[0]; return e('span', { key: id, className: 'mm-tag' }, r.label, e('button', { onClick: function () { toggleRegion(id); } }, '×')); })),
+          e('div', { className: 'mm-foci' },
+            REGIONS.map(function (r) { var on = regions.indexOf(r.id) >= 0; return e('button', { key: r.id, className: 'ob-opt' + (on ? ' sel' : ''), onClick: function () { toggleRegion(r.id); } }, r.label); })),
           e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
           e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Next →'));
       } else if (step === 1) {
@@ -359,13 +340,11 @@
         e('div', { className: 'mm-panel', key: step }, stepNode)));
     }
 
-    /* ── RESEARCHING ── */
+    /* ── RESEARCHING — just the line that fills, no scan list or map ── */
     if (view === 'running') {
       return shell(e(React.Fragment, null,
         e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
         e('h1', { className: 'mm-title' }, 'Having a look around…'),
-        e(WorldMap, { selected: regions, onToggle: function () {}, scanning: true }),
-        e('div', { className: 'mm-log' }, SCAN_LOG.slice(0, revealed).map(function (l, i) { return e('div', { key: i, className: i === revealed - 1 ? 'live' : '' }, l); })),
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
 
@@ -426,7 +405,7 @@
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
       /* the milestone moment wraps the document */
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know your market now'), e('span', { className: 'mm-acq-xp' }, '+ ', r.xp, ' XP')),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'You know your market now'), e('span', { className: 'mm-acq-xp' }, '+', r.xp, ' XP')),
       voice('Done — here’s the read on your market. The plain version is up top; the detail sits underneath if you want it.'),
 
       /* ── the report document ── */
@@ -453,7 +432,7 @@
           { value: '' + r.dq, label: 'Confidence score', note: r.dq >= 80 ? 'Strong opportunity' : r.dq >= 65 ? 'Workable' : 'Proceed with care', tone: r.dq >= 80 ? 'good' : r.dq >= 65 ? 'neutral' : 'warn' },
           { value: '' + r.stats.competitors, label: 'Competitors mapped', note: 'in your space', tone: 'neutral' },
           { value: r.stats.avg, label: 'Average price', note: 'market rate', tone: 'neutral' },
-          { value: '' + r.stats.signals, label: 'Live demand signals', note: r.stats.signals >= 3 ? 'Active demand' : 'Some demand', tone: r.stats.signals >= 3 ? 'good' : 'neutral' }
+          { value: '' + r.stats.signals, label: 'Demand signals', note: r.stats.signals >= 3 ? 'Active demand' : 'Some demand', tone: r.stats.signals >= 3 ? 'good' : 'neutral' }
         ], storeKey: 'market:' + ((profile && profile.name) || 'idea') + ':' + (r.id || 'r') })
       ),
 

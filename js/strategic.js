@@ -177,7 +177,7 @@
         'Niche challengers are loyal but small.',
         'No one owns a clear position.' ] },
       customer: { summary: 'Your most repeatable segment — start narrow, then widen.', detail: [
-        { k: 'Fit', v: '—', ctx: 'sharpen this by running the My Customers recon' },
+        'Run My Customers to put a real fit score on this — it sharpens fast.',
         'Lead with one clearly-defined buyer, not everyone.',
         'Reach them where they already gather — owned channels first.' ] },
       gtm: { summary: 'Build an owned audience and lead with one simple, repeatable offer.', detail: [
@@ -282,6 +282,51 @@
     } catch (err) {}
   }
 
+  function catById(plan, id) {
+    return plan.cats.filter(function (c) { return c.id === id; })[0] || null;
+  }
+  function detailVal(cat, key) {
+    if (!cat) return null;
+    for (var i = 0; i < cat.detail.length; i++) {
+      var d = cat.detail[i];
+      if (typeof d === 'object' && d.k === key) return d.v;
+    }
+    return null;
+  }
+  function planOverviewStats(plan) {
+    var market = catById(plan, 'market');
+    var customer = catById(plan, 'customer');
+    var gtm = catById(plan, 'gtm');
+    var fit = customer && customer.chart ? customer.chart.fit : null;
+    var growth = market && market.chart ? market.chart.growth : detailVal(market, 'Demand');
+    var topChan = gtm && gtm.chart && gtm.chart.bars && gtm.chart.bars[0] ? gtm.chart.bars[0].label : detailVal(gtm, 'Best channel');
+    return [
+      { value: plan.dq + '%', label: 'Overall confidence', note: plan.dq >= 80 ? 'Solid read' : 'Workable', tone: plan.dq >= 80 ? 'good' : 'neutral' },
+      fit ? { value: fit + '%', label: 'Customer fit', note: fit >= 80 ? 'Strong match' : 'Good match', tone: fit >= 80 ? 'good' : 'neutral' } : null,
+      growth ? { value: growth, label: 'Market demand', note: '12-month trend', tone: 'good' } : null,
+      topChan ? { value: topChan, label: 'Top channel', note: 'best reach', tone: 'good' } : null
+    ].filter(Boolean);
+  }
+  function renderCatDetail(c) {
+    return c.detail.map(function (d, i) {
+      if (typeof d === 'string') return e('div', { key: i, className: 'sp-bullet' }, d);
+      return e('div', { key: i, className: 'sp-stat' }, e('b', null, d.k + ': '), e('span', { className: 'v' }, d.v), ' — ' + d.ctx);
+    });
+  }
+  function planSections(plan) {
+    return plan.cats.map(function (c) {
+      return {
+        id: c.id,
+        label: c.title,
+        node: e(React.Fragment, null,
+          e('p', { className: 'rc-verdict' }, c.summary),
+          e('div', { className: 'sp-cat-in-doc', style: { '--sp-accent': c.accent, '--sp-accent-dim': c.dim } },
+            e(PlanChart, { chart: c.chart }),
+            renderCatDetail(c)))
+      };
+    });
+  }
+
   /* the voice of Clarity — unattributed typewriter line (reuses .capcom styles) */
   function Voice(props) {
     var line = props.line;
@@ -360,15 +405,14 @@
   }
 
   function ClarityStrategicPlan(props) {
-    var profile = props.profile || {}, missions = props.missions, onComplete = props.onComplete, onBack = props.onBack;
+    var profile = props.profile || {}, missions = props.missions, onComplete = props.onComplete, onBack = props.onBack, onPersona = props.onPersona;
     var initial = props.result || null;
     var planRef = React.useRef(initial);
     if (!planRef.current) planRef.current = buildPlan(profile, missions);
     var plan = planRef.current;
 
     var vw = React.useState(initial ? 'plan' : 'compiling'); var view = vw[0], setView = vw[1];
-    var rv = React.useState(0); var revealed = rv[0], setRevealed = rv[1];
-    var ex = React.useState({}); var expanded = ex[0], setExpanded = ex[1];
+    var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];
     var firedRef = React.useRef(false);
 
     var INPUTS = [
@@ -379,15 +423,12 @@
 
     React.useEffect(function () {
       if (view !== 'compiling') return;
-      var n = 0; setRevealed(0);
-      var iv = setInterval(function () { n++; setRevealed(n); if (n >= INPUTS.length) clearInterval(iv); }, 900);
       var to = setTimeout(function () { setView('plan'); if (onComplete && !firedRef.current) { firedRef.current = true; onComplete(plan); } }, INPUTS.length * 900 + 1000);
-      return function () { clearInterval(iv); clearTimeout(to); };
+      return function () { clearTimeout(to); };
     }, [view]);
 
-    function toggle(id) { setExpanded(function (x) { var o = Object.assign({}, x); o[id] = !o[id]; return o; }); }
-
     function bg() { return e('div', { className: 'pf-bg' }, e('div', { className: 'pf-bg-glow' }), e('div', { className: 'pf-bg-vignette' })); }
+    function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
     function shell(inner) {
       return e('div', { className: 'id-root' }, bg(),
         e('div', { className: 'pf-topbar' },
@@ -397,68 +438,54 @@
         e('div', { className: 'id-main' }, inner));
     }
 
-    /* ── COMPILING — brainstorm: the three inputs feed the brain, then it "thinks" ── */
+    /* ── COMPILING — just the line that fills while the plan comes together ── */
     if (view === 'compiling') {
-      var insight = revealed >= INPUTS.length;
-      var flash = insight ? '#2bd4bb' : (revealed > 0 ? INPUTS[revealed - 1].hex : '#2bd4bb');
-      var wy = [44, 110, 176], iy = [21, 87, 153];
       return shell(e(React.Fragment, null,
         e('div', { className: 'id-eyebrow' }, 'One moment'),
-        e('h1', { className: 'sp-title' }, insight ? 'Connecting the dots…' : 'Gathering what you’ve learned…'),
-        e(Voice, { line: insight ? 'That’s it — I can see the play. Bringing your plan together now.' : 'Bringing in everything you learned — your market, your customers, the landscape.' }),
-        e('div', { className: 'sp-brainstage' },
-          e('svg', { className: 'sp-wires', viewBox: '0 0 320 220', preserveAspectRatio: 'none' },
-            INPUTS.map(function (inp, i) {
-              var on = i < revealed;
-              var d = i === 1 ? 'M80 110 L212 110' : 'M80 ' + wy[i] + ' C150 ' + wy[i] + ', 168 110, 212 110';
-              return e('path', { key: inp.id, className: 'sp-wire' + (on ? ' on' : '') + (inp.live ? '' : ' est'), d: d, style: { stroke: inp.hex } });
-            })
-          ),
-          INPUTS.map(function (inp, i) {
-            var on = i < revealed;
-            return e('div', { key: inp.id, className: 'sp-input' + (on ? ' fired' : ''), style: { top: iy[i] + 'px', '--in': inp.hex } },
-              e('span', { className: 'sp-input-ic' }, e(Icon, { name: inp.icon, size: 14 })),
-              e('span', { className: 'sp-input-l' }, e('b', null, inp.label), e('em', null, inp.live ? 'live' : 'estimated')));
-          }),
-          e('div', { className: 'sp-brain' + (revealed > 0 ? ' active' : '') + (insight ? ' insight' : ''), style: { '--flash': flash } },
-            e('span', { className: 'sp-brain-halo' }),
-            e(Icon, { name: 'BrainCircuit', size: 58 }),
-            e('span', { className: 'sp-brain-count' }, Math.min(revealed, INPUTS.length) + '/3'))
-        )
+        e('h1', { className: 'sp-title' }, 'Gathering what you’ve learned…'),
+        e(Voice, { line: 'Bringing in everything you learned — your market, your customers, the landscape.' }),
+        e('div', { className: 'mm-bar' }, e('i', null))
       ));
     }
 
     /* ── PLAN ── */
+    var draftSketches = (missions && missions.customers && missions.customers.sketches) || [];
+    var draftN = draftSketches.length;
+    var sections = planSections(plan);
+    var stats = planOverviewStats(plan);
+    var storeKey = 'strategic:' + (plan.biz || plan.category || 'plan');
+
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
-      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your plan has come together'), e('span', { className: 'mm-acq-xp' }, '+ ', plan.xp, ' XP')),
-      e('div', { className: 'sp-planhead' },
-        e('div', null,
-          e('div', { className: 'id-eyebrow' }, 'Strategic Plan'),
-          e('h1', { className: 'sp-title' }, plan.biz || plan.category),
-          e('div', { className: 'sp-planmeta' }, plan.category + '  ·  ' + plan.date)),
-        e('div', { className: 'sp-conf' }, e('span', { className: 'sp-conf-n' }, plan.dq + '%'), e('span', { className: 'sp-conf-l' }, 'Overall confidence'))),
-      e(Voice, { line: 'Here’s the whole play on one screen. Each block is a 5-second read — open any for the detail.' }),
+      e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your plan has come together'), e('span', { className: 'mm-acq-xp' }, '+', plan.xp, ' XP')),
+      e(Voice, { line: 'Done — here’s the read on your plan. The plain version is up top; the detail sits underneath if you want it.' }),
 
-      e('div', { className: 'sp-cats' }, plan.cats.map(function (c) {
-        var open = !!expanded[c.id];
-        return e('div', { key: c.id, className: 'sp-cat' + (open ? ' open' : ''), style: { '--sp-accent': c.accent, '--sp-accent-dim': c.dim } },
-          e('button', { className: 'sp-cat-head', onClick: function () { toggle(c.id); } },
-            e('div', { className: 'sp-cat-ic' }, e(Icon, { name: c.icon, size: 17 })),
-            e('div', { className: 'sp-cat-titles' }, e('div', { className: 'sp-cat-title' }, c.title), e('div', { className: 'sp-cat-tag' }, '5-second read')),
-            e('span', { className: 'sp-cat-chev' }, e(Icon, { name: 'ChevronDown', size: 18 }))),
-          e('div', { className: 'sp-cat-summary' }, c.summary),
-          open && e('div', { className: 'sp-cat-detail' },
-            e(PlanChart, { chart: c.chart }),
-            c.detail.map(function (d, i) {
-              if (typeof d === 'string') return e('div', { key: i, className: 'sp-bullet' }, d);
-              return e('div', { key: i, className: 'sp-stat' }, e('b', null, d.k + ': '), e('span', { className: 'v' }, d.v), ' — ' + d.ctx);
-            })));
-      })),
+      draftN > 0 && e('div', { className: 'sp-persona-cue' },
+        e('div', { className: 'sp-persona-cue-ic' }, e(Icon, { name: 'Sparkles', size: 18 })),
+        e('div', { className: 'sp-persona-cue-body' },
+          e('div', { className: 'sp-persona-cue-t' }, 'We’ve drafted your personas'),
+          e('div', { className: 'sp-persona-cue-s' }, 'From your customer research, ' + draftN + ' ' + (draftN > 1 ? 'people are' : 'person is') + ' ready to meet — talk to them and they come to life.')),
+        onPersona && e('button', { className: 'pf-cta sp-persona-cue-cta', onClick: onPersona }, 'Meet them ', e(Icon, { name: 'ArrowRight', size: 15 }))),
 
-      e('div', { className: 'sp-actions' },
-        e('button', { className: 'pf-cta mm-cta', onClick: function () { downloadPlan(plan); } }, e(Icon, { name: 'Download', size: 15 }), ' Download PDF'),
-        e('button', { className: 'id-back', onClick: onBack }, 'Back to the groundwork →'))
+      e('div', { className: 'rc-doc rc-' + theme, style: { '--rc-accent': 'var(--clr-primary-hover)', '--rc-accent-dim': 'var(--clr-primary-dim)' } },
+        e('div', { className: 'rc-bar' },
+          e('div', { className: 'rc-bar-cat' }, e('span', { className: 'rc-dot' }), 'Strategic Plan'),
+          e('div', { className: 'rc-bar-tools' },
+            e('button', { className: 'rc-tool', onClick: toggleTheme, title: 'Toggle reading mode' },
+              e(Icon, { name: theme === 'light' ? 'Moon' : 'Sun', size: 14 }), theme === 'light' ? 'Night' : 'Day'),
+            e('button', { className: 'rc-tool rc-tool-dl', onClick: function () { downloadPlan(plan); } },
+              e(Icon, { name: 'Download', size: 14 }), 'Download'))),
+
+        e('div', { className: 'rc-mast' },
+          e('div', { className: 'rc-eyebrow' }, 'Strategic Plan'),
+          e('h1', { className: 'rc-h1' }, plan.biz || plan.category),
+          e('div', { className: 'rc-mast-meta' }, plan.category + '  ·  ' + plan.date + '  ·  Prepared by Clarity')),
+        e('div', { className: 'rc-rule' }),
+
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: stats, storeKey: storeKey })
+      ),
+
+      e('button', { className: 'id-back', style: { marginTop: 16 }, onClick: onBack }, 'Back to the groundwork →')
     ));
   }
 

@@ -134,9 +134,6 @@
     };
   }
 
-  /* what Clarity thinks aloud while it reads what you shared */
-  var SCAN = ['Reading what you shared…', 'Picking out what matters…', 'Getting a feel for your world…', 'Placing you among your people…', 'Laying your idea out…'];
-
   /* the voice of Clarity — unattributed, typewriter line */
   function Voice(props) {
     var line = props.line;
@@ -163,7 +160,6 @@
     var nt = React.useState('');                 var micNote = nt[0], setMicNote = nt[1];
     var lk = React.useState('');                 var link = lk[0], setLink = lk[1];
     var dc = React.useState(null);               var dossier = dc[0], setDossier = dc[1];
-    var sc = React.useState(0);                  var scan = sc[0], setScan = sc[1];
     var ed = React.useState(null);               var editing = ed[0], setEditing = ed[1];   /* {key,val} */
     var nm = React.useState('');                 var nameVal = nm[0], setNameVal = nm[1];
 
@@ -207,10 +203,8 @@
     }
     React.useEffect(function () {
       if (view !== 'decoding') return;
-      var n = 0; setScan(0);
-      var iv = setInterval(function () { n++; setScan(n); if (n >= SCAN.length) clearInterval(iv); }, 360);
       var to = setTimeout(function () { var d = decodedRef.current; setView(d && !d.name ? 'name' : 'dossier'); }, 2200);
-      return function () { clearInterval(iv); clearTimeout(to); };
+      return function () { clearTimeout(to); };
     }, [view]);
 
     function submitName() {
@@ -281,7 +275,6 @@
         e('div', { className: 'dt-eyebrow' }, 'The first step'),
         e('h1', { className: 'dt-title' }, 'Tell me about your idea.'),
         e(Voice, { line: SR ? 'This is the easy part — hold the mic and just talk. No forms, I promise.' : 'Tell me about it in a line or two — I’ll take it from there.' }),
-        e('p', { className: 'dt-sub' }, 'What are you building, and who’s it for? One pass — talk it, type it, or drop a link. I’ll pull the rest.'),
         e('div', { className: 'dt-modes' },
           SR && e('button', { className: 'dt-mode' + (mode === 'speak' ? ' on' : ''), onClick: function () { setMode('speak'); } }, e(Icon, { name: 'Mic', size: 14 }), 'Speak'),
           e('button', { className: 'dt-mode' + (mode === 'type' ? ' on' : ''), onClick: function () { stopListening(); setMode('type'); } }, e(Icon, { name: 'Keyboard', size: 14 }), 'Type'),
@@ -296,9 +289,8 @@
         e('div', { className: 'dt-eyebrow' }, 'One moment'),
         e('h1', { className: 'dt-title' }, 'Getting the picture…'),
         e('div', { className: 'dt-decode' },
-          e('div', { className: 'dt-decode-scan' }),
           e('div', { className: 'dt-decode-src' }, (decodedRef.current && decodedRef.current.raw) || text || link),
-          e('div', { className: 'dt-log' }, SCAN.slice(0, scan).map(function (l, i) { return e('div', { key: i, className: i === scan - 1 ? 'live' : '' }, l); }))
+          e('div', { className: 'mm-bar' }, e('i', null))
         )
       ));
     }
@@ -326,11 +318,11 @@
       { key: 'goal', label: 'Your goal', icon: 'Target', value: d.goal || '—' }
     ];
     return shell(e(React.Fragment, null,
-      e('div', { className: 'dt-acq' }, e('span', { className: 'dt-acq-stamp' }, 'Your idea, captured'), e('span', { className: 'dt-acq-xp' }, '+ ', XP_AWARD, ' XP')),
+      e('div', { className: 'dt-acq' }, e('span', { className: 'dt-acq-stamp' }, 'Your idea, captured'), e('span', { className: 'dt-acq-xp' }, '+', XP_AWARD, ' XP')),
       e('h1', { className: 'dt-title' }, d.name || 'Your idea'),
       e(Voice, { line: 'Here’s what I took from that. Fix anything that’s off — otherwise, we’re good to go.' }),
       e('div', { className: 'dt-dossier' },
-        fields.map(function (f, i) {
+        fields.filter(function (f) { return f.value && f.value !== '—'; }).map(function (f, i) {
           var isEd = editing && editing.key === f.key;
           return e('div', { key: f.key, className: 'dt-card', style: { animationDelay: (0.09 * i + 0.05) + 's' } },
             e('div', { className: 'dt-card-ic' }, e(Icon, { name: f.icon, size: 18 })),

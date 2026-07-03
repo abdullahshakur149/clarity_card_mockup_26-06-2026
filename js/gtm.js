@@ -71,7 +71,7 @@
   }
 
   function badge(label, level) {
-    return e('span', { className: 'gtm-badge ' + String(level).toLowerCase() }, e('b', null, label), level);
+    return e('span', { className: 'gtm-badge ' + String(level).toLowerCase() }, level, e('b', null, label));
   }
 
   function ClarityGTM(props) {
@@ -120,16 +120,15 @@
 
       return shell(e(React.Fragment, null,
         e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
-        e('div', { className: 'id-eyebrow' }, 'Your journey · Go-To-Market'),
         e('h1', { className: 'gtm-title' }, 'Price your play'),
         voice(market
           ? 'Your research is in — the market average is loaded. Dial in your price and margin, and I’ll suggest your go-to-market moves.'
           : 'Dial in your price and margin and I’ll suggest your moves. Tip: look at My Market first and I’ll load the market average for you.'),
 
-        /* auto-loaded context */
-        e('div', { className: 'gtm-ctx' },
-          e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Market avg'), e('span', { className: 'gtm-pill-v' }, market ? fmtPrice(market, mk.unit) + ' · from your research' : 'not loaded')),
-          profile.goal && e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Your goal'), e('span', { className: 'gtm-pill-v' }, profile.goal))),
+        /* auto-loaded context (only the pills that have real data) */
+        (market || profile.goal) ? e('div', { className: 'gtm-ctx' },
+          market ? e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Market avg'), e('span', { className: 'gtm-pill-v' }, fmtPrice(market, mk.unit) + ' · from your research')) : null,
+          profile.goal && e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Your goal'), e('span', { className: 'gtm-pill-v' }, profile.goal))) : null,
         (profile.priorities && profile.priorities.length) ? e('div', { className: 'gtm-prio' },
           e('span', { className: 'gtm-prio-l' }, 'Priorities'),
           profile.priorities.map(function (p, i) { return e('span', { key: i, className: 'gtm-prio-chip' }, p); })) : null,
@@ -138,7 +137,7 @@
         e('div', { className: 'gtm-dial' },
           e('div', { className: 'gtm-dial-head' }, e('span', { className: 'gtm-dial-l' }, 'Your average order'), e('span', { className: 'gtm-dial-v' }, fmtPrice(price, mk.unit))),
           e('div', { className: 'gtm-track' },
-            market && e('span', { className: 'gtm-track-mid', style: { left: Math.max(4, Math.min(96, Math.round((market - lo) / (hi - lo) * 100))) + '%' } }, 'market'),
+            market && e('span', { className: 'gtm-track-mid', style: { left: Math.max(4, Math.min(96, Math.round((market - lo) / (hi - lo) * 100))) + '%' } }, 'market avg'),
             e('input', { className: 'gtm-range', type: 'range', min: lo, max: hi, step: step, value: price, onChange: function (ev) { setPrice(parseFloat(ev.target.value)); } })),
           e('div', { className: 'gtm-verdict gtm-' + pos }, e('span', { className: 'gtm-verdict-dot' }), verdict)),
 
@@ -156,7 +155,6 @@
     /* ── RUNNING ── */
     if (view === 'running') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'Your journey · Go-To-Market'),
         e('h1', { className: 'gtm-title' }, 'Calling your plays…'),
         voice('Weighing your price against the market — and against what you said matters most…'),
         e('div', { className: 'gtm-compile' },
@@ -170,20 +168,20 @@
     var moves = gtm.moves || [];
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
-      e('div', { className: 'mm-acq gtm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your go-to-market is set'), e('span', { className: 'mm-acq-xp' }, '+ ', XP_GTM, ' XP')),
+      e('div', { className: 'mm-acq gtm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your go-to-market is set'), e('span', { className: 'mm-acq-xp' }, '+', XP_GTM, ' XP')),
       voice('Here’s your go-to-market play. Each move is a lever — and My Tasks has already turned them into a schedule for you.'),
 
       e('div', { className: 'gtm-summary' },
         e('span', { className: 'gtm-summary-k' }, 'Priced ' + (POS_LABEL[gtm.position] || 'at market')),
         e('span', null, fmtPrice(gtm.avgOrder, gtm.unit) + '  ·  ' + gtm.margin + '% margin'),
-        profile.goal && e('span', { className: 'gtm-summary-goal' }, 'Toward: ' + profile.goal)),
+        profile.goal && e('span', { className: 'gtm-summary-goal' }, 'Working toward ' + profile.goal)),
 
       e('div', { className: 'gtm-moves' }, moves.map(function (m, i) {
         return e('div', { key: m.id, className: 'gtm-move', style: { '--k': KIND[m.kind] || 'var(--clr-cat-gtm)', animationDelay: (0.07 * i) + 's' } },
-          e('div', { className: 'gtm-move-h' }, e('span', { className: 'gtm-move-n' }, 'Move ' + (i + 1)), e('span', { className: 'gtm-move-kind' }, m.kind)),
+          e('div', { className: 'gtm-move-h' }, e('span', { className: 'gtm-move-n' }, 'Move ' + (i + 1)), e('span', { className: 'gtm-move-kind' }, m.kind.charAt(0).toUpperCase() + m.kind.slice(1))),
           e('div', { className: 'gtm-move-title' }, m.title),
           e('div', { className: 'gtm-move-why' }, m.why),
-          e('div', { className: 'gtm-move-badges' }, badge('Impact', m.impact), badge('Effort', m.effort)));
+          e('div', { className: 'gtm-move-badges' }, badge('impact', m.impact), badge('effort', m.effort)));
       })),
 
       e('div', { className: 'gtm-nextnote' }, e(Icon, { name: 'CalendarClock', size: 14 }), 'Next: My Tasks has these moves laid out as a scheduled action plan.'),

@@ -48,7 +48,7 @@
 
 /* ---- toolbar -------------------------------------------------------------- */
 .rc-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 24px; }
-.rc-bar-cat { display: flex; align-items: center; gap: 9px; font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rc-ink-soft); }
+.rc-bar-cat { display: flex; align-items: center; gap: 9px; font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.02em; color: var(--rc-ink-soft); }
 .rc-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--rc-accent); box-shadow: 0 0 0 4px var(--rc-accent-dim); flex-shrink: 0; }
 .rc-bar-tools { display: flex; gap: 8px; }
 .rc-tool { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 12px; font-weight: 500; color: var(--rc-ink-soft); background: transparent; border: 1px solid var(--rc-hair); border-radius: 99px; padding: 6px 13px; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease; }
@@ -57,17 +57,17 @@
 .rc-tool-dl:hover { color: #052b26; filter: brightness(1.07); }
 
 /* ---- masthead ------------------------------------------------------------- */
-.rc-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rc-accent-ink); margin-bottom: 9px; }
+.rc-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 10.5px; letter-spacing: 0.02em; color: var(--rc-accent-ink); margin-bottom: 9px; }
 .rc-h1 { font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.12; letter-spacing: -0.02em; color: var(--rc-ink); margin: 0 0 9px; }
 .rc-mast-meta { font-size: 12.5px; color: var(--rc-ink-faint); }
 .rc-rule { height: 2px; background: linear-gradient(90deg, var(--rc-accent), transparent); border-radius: 2px; margin: 22px 0 24px; }
 
 /* ---- verdict (the hero) --------------------------------------------------- */
-.rc-kicker { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rc-ink-faint); margin-bottom: 11px; }
+.rc-kicker { font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.02em; color: var(--rc-ink-faint); margin-bottom: 11px; }
 .rc-verdict { font-family: var(--font-display); font-weight: 500; font-size: 19px; line-height: 1.55; letter-spacing: -0.005em; color: var(--rc-ink); margin: 0; }
 
 /* ---- section heads -------------------------------------------------------- */
-.rc-sec { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--rc-ink-faint); margin: 30px 0 15px; padding-top: 20px; border-top: 1px solid var(--rc-hair); }
+.rc-sec { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--rc-ink-faint); margin: 30px 0 15px; padding-top: 20px; border-top: 1px solid var(--rc-hair); }
 
 /* ---- takeaways ------------------------------------------------------------ */
 .rc-takeaways { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
@@ -84,7 +84,7 @@
 .rc-findings { display: flex; flex-direction: column; gap: 17px; }
 .rc-finding-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 5px; }
 .rc-finding-q { font-family: var(--font-body); font-size: 14.5px; font-weight: 600; color: var(--rc-ink); }
-.rc-conf { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; flex-shrink: 0; color: var(--rc-ink-faint); }
+.rc-conf { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.01em; white-space: nowrap; flex-shrink: 0; color: var(--rc-ink-faint); }
 .rc-conf.high { color: #12876f; }
 .rc-conf.medium { color: #a9720f; }
 .rc-conf.low { color: #a8532c; }
@@ -105,7 +105,7 @@
 .rc-sources { display: flex; flex-direction: column; gap: 2px; }
 .rc-source { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 8px; text-decoration: none; color: var(--rc-ink-soft); transition: background 0.14s ease, color 0.14s ease; }
 .rc-source:hover { background: var(--rc-panel); color: var(--rc-ink); }
-.rc-source-d { font-family: var(--font-mono); font-size: 12px; color: var(--rc-accent-ink); min-width: 132px; }
+.rc-source-d { font-family: var(--font-body); font-size: 12px; color: var(--rc-accent-ink); min-width: 132px; }
 .rc-source-t { flex: 1; font-size: 12.5px; }
 
 /* ---- responsive ----------------------------------------------------------- */
@@ -130,7 +130,7 @@
 .rc-bar-l { font-size: 12.5px; color: var(--rc-ink-soft); width: 134px; flex-shrink: 0; }
 .rc-bar-track { flex: 1; height: 7px; border-radius: 4px; background: var(--rc-panel); overflow: hidden; border: 1px solid var(--rc-hair); }
 .rc-bar-track i { display: block; height: 100%; background: var(--rc-accent); border-radius: 4px; }
-.rc-bar-v { font-family: var(--font-mono); font-size: 11.5px; color: var(--rc-ink); width: 36px; text-align: right; flex-shrink: 0; }
+.rc-bar-v { font-family: var(--font-body); font-size: 11.5px; color: var(--rc-ink); width: 36px; text-align: right; flex-shrink: 0; }
 @media (max-width: 640px) { .rc-bar-l { width: 104px; } }
 
 /* chip lists — channels, motivations */
@@ -138,7 +138,7 @@
 .rc-tag { font-size: 12px; color: var(--rc-ink-soft); background: var(--rc-panel); border: 1px solid var(--rc-hair); border-radius: 99px; padding: 5px 11px; }
 
 /* key-value + bullet list */
-.rc-kv-k { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--rc-ink-faint); margin-bottom: 4px; }
+.rc-kv-k { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.01em; color: var(--rc-ink-faint); margin-bottom: 4px; }
 .rc-kv-v { font-size: 13.5px; line-height: 1.5; color: var(--rc-ink); }
 .rc-kv-v b { color: var(--rc-ink); font-weight: 600; }
 .rc-list { margin: 0; padding-left: 18px; }
@@ -151,13 +151,13 @@
 .rc-comp:last-child { margin-bottom: 0; }
 .rc-comp-head { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .rc-comp-name { font-size: 14.5px; font-weight: 600; color: var(--rc-ink); flex: 1; min-width: 0; }
-.rc-comp-price { font-family: var(--font-mono); font-size: 12px; color: var(--rc-ink-soft); flex-shrink: 0; }
+.rc-comp-price { font-family: var(--font-body); font-size: 12px; color: var(--rc-ink-soft); flex-shrink: 0; }
 .rc-comp-pos { font-size: 13px; color: var(--rc-ink); margin-bottom: 3px; line-height: 1.45; }
 .rc-comp-note { font-size: 12.5px; color: var(--rc-ink-soft); line-height: 1.45; }
 .rc-comp .rc-bar-row { margin-bottom: 9px; }
 
 /* threat tags — semantic, theme-aware */
-.rc-threat { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+.rc-threat { font-family: var(--font-body); font-size: 11px; letter-spacing: 0.01em; padding: 3px 9px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
 .rc-threat.high { color: #b23a30; background: rgba(242, 104, 95, 0.13); }
 .rc-threat.medium { color: #a9720f; background: rgba(245, 166, 35, 0.13); }
 .rc-threat.low { color: #12876f; background: rgba(52, 211, 158, 0.13); }
@@ -176,8 +176,8 @@
 .rc-vt:hover:not(.on) { color: var(--rc-ink); }
 .rc-vt.on { color: var(--rc-accent-ink); background: var(--rc-accent-dim); font-weight: 600; }
 
-/* "N / M read" progress counter */
-.rc-seen-count { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--rc-ink-faint); transition: color 0.2s ease; }
+/* "N of M read" progress counter */
+.rc-seen-count { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.04em; color: var(--rc-ink-faint); transition: color 0.2s ease; }
 .rc-seen-count.done { color: var(--rc-accent-ink); font-weight: 600; }
 .rc-seen-count svg { color: var(--rc-accent-ink); }
 
@@ -196,7 +196,7 @@
 /* ---- mission report roster (dark landing — browse past scans) --------------- */
 .rr { --rr-accent: var(--clr-primary); }
 .rr-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
-.rr-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--clr-muted); }
+.rr-eyebrow { font-family: var(--font-body); font-weight: 600; font-size: 11px; letter-spacing: 0.02em; color: var(--clr-muted); }
 .rr-title { font-family: var(--font-display); font-size: 26px; font-weight: 700; letter-spacing: -0.02em; color: var(--clr-text); margin: 6px 0 0; line-height: 1.12; }
 .rr-list { display: flex; flex-direction: column; gap: 12px; }
 .rr-card { display: flex; align-items: stretch; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; overflow: hidden; transition: border-color 0.15s ease, transform 0.15s ease; animation: rc-acc-reveal 0.35s var(--ease) both; }
@@ -205,13 +205,13 @@
 .rr-card-main { flex: 1; min-width: 0; text-align: left; background: transparent; border: none; cursor: pointer; padding: 15px 17px; font-family: var(--font-body); }
 .rr-card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 7px; }
 .rr-card-title { font-size: 15px; font-weight: 600; color: var(--clr-text); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.rr-status { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--clr-accent); flex-shrink: 0; }
+.rr-status { display: inline-flex; align-items: center; gap: 5px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.01em; color: var(--clr-accent); flex-shrink: 0; }
 .rr-status i { width: 6px; height: 6px; border-radius: 50%; background: var(--clr-accent); box-shadow: 0 0 6px var(--clr-accent); }
 .rr-status.generating { color: var(--clr-reward); }
 .rr-status.generating i { background: var(--clr-reward); box-shadow: 0 0 6px var(--clr-reward); animation: rr-blink 1s steps(1) infinite; }
 @keyframes rr-blink { 50% { opacity: 0.35; } }
 .rr-card-verdict { font-size: 13px; line-height: 1.5; color: var(--clr-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.rr-card-meta { font-family: var(--font-mono); font-size: 10.5px; color: var(--clr-muted); margin-top: 8px; opacity: 0.85; }
+.rr-card-meta { font-family: var(--font-body); font-size: 10.5px; color: var(--clr-muted); margin-top: 8px; opacity: 0.85; }
 .rr-star { flex-shrink: 0; width: 48px; display: grid; place-items: center; background: transparent; border: none; border-left: 1px solid var(--clr-border); color: var(--clr-muted); cursor: pointer; transition: color 0.15s ease, background 0.15s ease; }
 .rr-star:hover { color: var(--rr-accent); background: color-mix(in srgb, var(--rr-accent) 8%, transparent); }
 .rr-star.on { color: var(--rr-accent); }
