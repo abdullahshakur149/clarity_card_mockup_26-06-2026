@@ -139,9 +139,9 @@
         e('h1', { className: 'iq-title' }, 'Head-to-head'),
         e('div', { className: 'cmp-empty' },
           e('div', { className: 'cmp-empty-ic' }, e(Icon, { name: 'Scale', size: 26 })),
-          e('div', { className: 'cmp-empty-t' }, 'You need two ideas with finished groundwork to compare.'),
+          e('div', { className: 'cmp-empty-t' }, 'You need two ideas with finished strategic planning to compare.'),
           e('div', { className: 'cmp-empty-s' }, eligible.length === 1
-            ? 'One idea is ready. Start another and finish its three groundwork steps, then come back to see them side by side.'
+            ? 'One idea is ready. Start another and finish its three research steps, then come back to see them side by side.'
             : 'Finish the groundwork on at least two ideas, then come back — I’ll tell you which one is stronger.'))
       ));
     }

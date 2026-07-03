@@ -23,8 +23,8 @@
 .pf-bg-glow {
   position: absolute; inset: -20%;
   background:
-    radial-gradient(46% 56% at 16% 10%, rgba(43,212,187,0.12), transparent 70%),
-    radial-gradient(52% 62% at 84% 88%, rgba(255,111,77,0.10), transparent 72%),
+    radial-gradient(46% 56% at 16% 10%, rgba(212,168,83,0.13), transparent 70%),
+    radial-gradient(52% 62% at 84% 88%, rgba(232,138,106,0.09), transparent 72%),
     radial-gradient(40% 48% at 82% 14%, rgba(255,194,75,0.05), transparent 75%);
   animation: pf-glow 14s ease-in-out infinite alternate;
 }
@@ -60,7 +60,7 @@
 /* ── Console card ────────────────────────────────────────────────────────── */
 .pf-console {
   position: relative; width: 468px; max-width: 100%;
-  background: linear-gradient(180deg, rgba(18,24,23,0.92), rgba(11,15,14,0.92));
+  background: linear-gradient(180deg, rgba(28,25,22,0.92), rgba(18,16,14,0.92));
   border: 1px solid var(--clr-border-strong);
   border-radius: 16px;
   padding: 30px 30px 26px;
@@ -85,7 +85,7 @@
    in the display serif, first person. */
 .capcom {
   display: flex; gap: 13px; align-items: flex-start;
-  border-left: 2px solid rgba(43,212,187,0.5);
+  border-left: 2px solid rgba(212,168,83,0.55);
   padding: 3px 0 3px 16px; margin-bottom: 22px;
 }
 .capcom-avatar, .capcom-name { display: none; }
@@ -206,7 +206,7 @@
   letter-spacing: 0.01em; box-shadow: 0 6px 18px -10px rgba(0,0,0,0.6);
   transition: transform var(--dur-fast,0.16s) var(--ease,ease), box-shadow var(--dur-fast,0.16s) var(--ease,ease);
 }
-.pf-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(21,184,160,0.35); }
+.pf-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 22px -10px rgba(212,168,83,0.35); }
 .pf-cta:active { transform: translateY(0); }
 
 .pf-foot {

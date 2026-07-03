@@ -544,6 +544,10 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   const [vCaptions, setVCaptions] = React.useState(true);
   const [vAspect,   setVAspect]   = React.useState('9:16');
 
+  /* ── Step 2: Brief (sajood's exact per-modality questions, keyed by spec.key) ── */
+  const [specVals, setSpecVals] = React.useState({});
+  function setSpecVal(key, val) { setSpecVals(v => ({ ...v, [key]: val })); }
+
   /* ── Advanced ── */
   const [advOpen, setAdvOpen] = React.useState(false);
   const [txLen,   setTxLen]   = React.useState(SFD.ADV.text.length.opts[1]);
@@ -570,9 +574,10 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     if (!flow) return;
     setStep(1);
     setPlatform(flow.platforms.find(p => p.rec)?.type || flow.platforms[0].type);
-    if (flow.specs && flow.specs[0]) {
-      setIRatio(flow.specs[0].opts[0]);
-      setVAspect(flow.specs[0].opts[0]);
+    if (flow.specs) {
+      const sv = {};
+      flow.specs.forEach(s => { sv[s.key] = s.toggle ? (s.default || 'On') : s.opts[0]; });
+      setSpecVals(sv);
     }
   }, [studioKey]);
 
@@ -917,165 +922,29 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
 
   /* ── STEP 2: Format (auto-suggested specs) ── */
   else if (step === 2) {
-    if (k === 'text') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Fine-tune the output', sub: "Set the CTA and hashtag preference — or leave them on auto." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 } },
-            React.createElement('div', null,
-              React.createElement(SFLabel, null, 'Call to action'),
-              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-                React.createElement(SFSwitch, { on: tCtaOn, onClick: () => setTCtaOn(v => !v) }),
-                tCtaOn
-                  ? React.createElement(SFSelect, { value: tCta, onChange: setTCta, opts: SFD.TEXT_BRIEF.ctas })
-                  : React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, 'No CTA')
-              )
-            ),
-            React.createElement('div', null,
-              React.createElement(SFLabel, null, 'Hashtags'),
-              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-                React.createElement(SFSwitch, { on: tTags, onClick: () => setTTags(v => !v) }),
-                React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, tTags ? 'Auto-suggest' : 'Off')
-              )
-            )
+    /* Set the brief — sajood's exact per-modality questions + options */
+    body = React.createElement(React.Fragment, null,
+      React.createElement(SFHead, { title: 'Set the brief', sub: 'A few choices shape this piece — tweak or keep the picks.' }),
+      React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
+        (flow.specs || []).map(spec =>
+          React.createElement('div', { key: spec.key },
+            React.createElement(SFLabel, null, spec.label),
+            spec.toggle
+              ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+                  React.createElement(SFSwitch, { on: (specVals[spec.key] || spec.default || 'On') !== 'Off', onClick: () => setSpecVal(spec.key, (specVals[spec.key] || spec.default || 'On') === 'Off' ? 'On' : 'Off') }),
+                  React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, (specVals[spec.key] || spec.default || 'On') !== 'Off' ? 'On' : 'Off')
+                )
+              : React.createElement(SFSelect, { value: specVals[spec.key] || spec.opts[0], onChange: val => setSpecVal(spec.key, val), opts: spec.opts })
           )
-        ),
-        React.createElement(SFAdvanced, { open: advOpen, onToggle: () => setAdvOpen(v => !v), accent: a },
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 } },
-            React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.text.length.label), React.createElement(SFSelect, { value: txLen, onChange: setTxLen, opts: SFD.ADV.text.length.opts })),
-            React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.text.reading.label), React.createElement(SFSelect, { value: txRead, onChange: setTxRead, opts: SFD.ADV.text.reading.opts }))
-          ),
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.text.pov.label), React.createElement(SFSelect, { value: txPov, onChange: setTxPov, opts: SFD.ADV.text.pov.opts })),
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.text.keywords.label), React.createElement(SFTextarea, { value: txKw, onChange: setTxKw, placeholder: SFD.ADV.text.keywords.placeholder, rows: 2 })),
-          React.createElement(SFToggleRow, { label: 'Use emoji', on: txEmoji, onClick: () => setTxEmoji(v => !v) })
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    } else if (k === 'image') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Set the specs', sub: "Aspect ratio, brand kit lock, and any fine-tuning." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
-          React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Use case'), React.createElement(SFSelect, { value: iUse, onChange: setIUse, opts: SFD.IMAGE_BRIEF.useCase.opts })),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'end' } },
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Aspect ratio'), React.createElement(SFSelect, { value: iRatio, onChange: setIRatio, opts: flow.specs[0].opts })),
-            React.createElement('div', null,
-              React.createElement(SFLabel, null, 'Brand kit lock'),
-              React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-                React.createElement(SFSwitch, { on: iBrand, onClick: () => setIBrand(v => !v) }),
-                React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, iBrand ? 'Colors, logo, type enforced' : 'Off')
-              )
-            )
-          )
-        ),
-        React.createElement(SFAdvanced, { open: advOpen, onToggle: () => setAdvOpen(v => !v), accent: a },
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 } },
-            React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.image.lighting.label), React.createElement(SFSelect, { value: imLight, onChange: setImLight, opts: SFD.ADV.image.lighting.opts })),
-            React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.image.composition.label), React.createElement(SFSelect, { value: imComp, onChange: setImComp, opts: SFD.ADV.image.composition.opts }))
-          ),
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.image.colorDir.label), React.createElement(SFSelect, { value: imColor, onChange: setImColor, opts: SFD.ADV.image.colorDir.opts })),
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.image.negative.label), React.createElement(SFTextarea, { value: imNeg, onChange: setImNeg, placeholder: SFD.ADV.image.negative.placeholder, rows: 2 }))
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    } else if (k === 'audio') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Production', sub: `Maker pre-tuned these for a ${goalCfg.label.toLowerCase()} — override anything.` }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 14 } },
-          React.createElement(SFLabel, { hint: true }, 'Voice · tap to override'),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(180px,1fr))', gap: 10 } },
-            SFD.VOICES.map(v =>
-              React.createElement(SFPickCard, { key: v.id, on: aVoice === v.id, accent: a, recBadge: v.id === goalCfg.voice, title: v.name, sub: v.desc, onClick: () => setAVoice(v.id) })
-            )
-          ),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginTop: 6 } },
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Music'), React.createElement(SFSelect, { value: aMusic, onChange: setAMusic, opts: SFD.AUDIO_PRODUCTION.music })),
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Pacing'), React.createElement(SFSelect, { value: aPace, onChange: setAPace, opts: SFD.AUDIO_PRODUCTION.pace }))
-          ),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 } },
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Acoustics'), React.createElement(SFSelect, { value: aAcou, onChange: setAAcou, opts: SFD.AUDIO_PRODUCTION.acoustics })),
-            React.createElement('div', null,
-              React.createElement(SFLabel, null, 'Expressiveness · ', aExpr),
-              React.createElement('input', { type: 'range', min: '0', max: '100', value: aExpr, onChange: e => setAExpr(+e.target.value), style: { width: '100%', accentColor: a } })
-            )
-          )
-        ),
-        React.createElement(SFAdvanced, { open: advOpen, onToggle: () => setAdvOpen(v => !v), accent: a },
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.audio.speakers.label), React.createElement(SFSelect, { value: auSpk, onChange: setAuSpk, opts: SFD.ADV.audio.speakers.opts })),
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.audio.pronounce.label), React.createElement(SFTextarea, { value: auPron, onChange: setAuPron, placeholder: SFD.ADV.audio.pronounce.placeholder, rows: 2 })),
-          React.createElement(SFToggleRow, { label: 'Intro & outro', on: auIntro, onClick: () => setAuIntro(v => !v) }),
-          React.createElement(SFToggleRow, { label: 'Chapter markers', on: auChap, onClick: () => setAuChap(v => !v) })
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    } else {
-      /* video production */
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Set the specs', sub: "Aspect ratio and production settings for this piece." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 14, marginBottom: 14 } },
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 } },
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Aspect ratio'), React.createElement(SFSelect, { value: vAspect, onChange: setVAspect, opts: flow.specs[0].opts })),
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Resolution'), React.createElement(SFSelect, { value: flow.specs[1].opts[0], onChange: () => {}, opts: flow.specs[1].opts }))
-          )
-        ),
-        React.createElement(SFHead, { title: 'Production', sub: "Style, voice and pacing — make it feel like your brand." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 14 } },
-          React.createElement(SFLabel, { hint: true }, 'Visual style'),
-          React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 8 } },
-            SFD.VIDEO_CONTROLS.style.map(o => {
-              const on = vStyle === o;
-              return React.createElement('span', {
-                key: o, onClick: () => setVStyle(o),
-                style: {
-                  cursor: 'pointer', fontSize: 12.5, padding: '6px 13px', borderRadius: 'var(--radius-pill)',
-                  border: `1px solid ${on ? a : 'var(--clr-border)'}`,
-                  background: on ? `color-mix(in srgb, ${a} 16%, transparent)` : 'var(--clr-card)',
-                  color: on ? 'var(--clr-text)' : 'var(--clr-muted)',
-                  transition: 'all var(--dur-fast) var(--ease)'
-                }
-              }, o);
-            })
-          ),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 } },
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Pacing'), React.createElement(SFSelect, { value: vPacing, onChange: setVPacing, opts: SFD.VIDEO_CONTROLS.pacing })),
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Hook style'), React.createElement(SFSelect, { value: vHook, onChange: setVHook, opts: SFD.VIDEO_CONTROLS.hook })),
-            React.createElement('div', null, React.createElement(SFLabel, { hint: true }, 'Music'), React.createElement(SFSelect, { value: vMusic, onChange: setVMusic, opts: SFD.VIDEO_CONTROLS.music }))
-          ),
-          React.createElement(SFLabel, { hint: true }, 'Voiceover'),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: 10 } },
-            SFD.VOICES.map(v =>
-              React.createElement(SFPickCard, { key: v.id, on: vVoice === v.id, accent: a, recBadge: v.id === 'aria', title: v.name, sub: v.desc, onClick: () => setVVoice(v.id) })
-            )
-          ),
-          React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 } },
-            React.createElement(SFSwitch, { on: vCaptions, onClick: () => setVCaptions(v => !v) }),
-            React.createElement('span', { style: { fontSize: 12.5, color: 'var(--clr-muted)' } }, 'Burn-in captions ', vCaptions ? '· on' : '· off')
-          )
-        ),
-        React.createElement(SFAdvanced, { open: advOpen, onToggle: () => setAdvOpen(v => !v), accent: a },
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 } },
-            React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.video.length.label), React.createElement(SFSelect, { value: viLen, onChange: setViLen, opts: SFD.ADV.video.length.opts })),
-            React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.video.broll.label), React.createElement(SFSelect, { value: viBroll, onChange: setViBroll, opts: SFD.ADV.video.broll.opts }))
-          ),
-          React.createElement('div', null, React.createElement(SFLabel, null, SFD.ADV.video.subtitle.label), React.createElement(SFSelect, { value: viSub, onChange: setViSub, opts: SFD.ADV.video.subtitle.opts })),
-          React.createElement(SFToggleRow, { label: 'On-screen text / lower-thirds', on: viLower, onClick: () => setViLower(v => !v) }),
-          React.createElement(SFToggleRow, { label: 'Brand intro sting', on: viSting, onClick: () => setViSting(v => !v) })
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    }
+        )
+      ),
+      React.createElement(SFFoot, {
+        left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
+        right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
+      })
+    );
   }
+
 
   /* ── STEP 3: Generate ── */
   else if (step === GEN_STEP) {
@@ -1143,7 +1012,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
                 React.createElement(SFIcon, { name: v.motif, size: 34, strokeWidth: 1.75 }),
                 k === 'video' && React.createElement('span', {
                   style: { position: 'absolute', top: 8, left: 8, fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 'var(--radius-pill)', background: 'var(--clr-card)', color: 'var(--clr-muted)', border: '1px solid var(--clr-border)' }
-                }, vStyle, ' · ', vMode === 'avatar' ? (SFD.AVATARS.find(x => x.id === vAvatar) || {}).name || 'Avatar' : 'B-roll'),
+                }, (specVals.visualStyle || vStyle), ' · ', vMode === 'avatar' ? (SFD.AVATARS.find(x => x.id === vAvatar) || {}).name || 'Avatar' : 'B-roll'),
                 React.createElement('span', {
                   style: { position: 'absolute', bottom: 8, right: 8, fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600, padding: '2px 7px', borderRadius: 'var(--radius-pill)', background: v.fit >= 85 ? 'var(--clr-accent-dim)' : 'var(--clr-card)', color: v.fit >= 85 ? 'var(--clr-accent)' : 'var(--clr-muted)', border: '1px solid var(--clr-border)' }
                 }, v.fit, '% fit')

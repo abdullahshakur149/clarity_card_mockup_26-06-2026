@@ -52,12 +52,12 @@
     return e('div', { className: 'pf-topbar' },
       e('div', { style: { display: 'flex', alignItems: 'center', gap: 14 } },
         e('span', { className: 'pf-wordmark' }, 'Clarity'),
-        e('span', { className: 'pf-hide-sm' }, 'Your journey · The groundwork')
+        e('span', { className: 'pf-hide-sm' }, 'Your journey · Strategic Planning')
       )
     );
   }
 
-  /* Milestone — fires once when all three groundwork steps are complete */
+  /* Milestone — fires once when all three research steps are complete */
   function LevelUpOverlay(props) {
     return e('div', { className: 'sp-lu', onClick: props.onClose },
       e('div', { className: 'sp-lu-card', onClick: function (ev) { ev.stopPropagation(); } },
@@ -66,7 +66,7 @@
         e('div', { className: 'sp-lu-eyebrow' }, 'A milestone'),
         e('div', { className: 'sp-lu-badge' }, e(Icon, { name: 'Trophy', size: 32 })),
         e('div', { className: 'sp-lu-title' }, 'Level up'),
-        e('div', { className: 'sp-lu-sub' }, 'The groundwork is done — you know your ground. Your ', e('b', null, 'Strategic Plan'), ' is ready to come together.'),
+        e('div', { className: 'sp-lu-sub' }, 'Your strategic planning is done — you know your ground. Your ', e('b', null, 'Strategic Plan'), ' is ready to come together.'),
         e('div', { className: 'sp-lu-actions' },
           e('button', { className: 'pf-cta', onClick: props.onAssemble }, 'Assemble my plan →'),
           e('button', { className: 'sp-lu-later', onClick: props.onClose }, 'Later'))));
@@ -168,7 +168,7 @@
       e('div', { className: 'id-main' },
         props.onExit && e('button', { className: 'id-back', onClick: props.onExit }, '‹ Home base'),
         e('div', { className: 'id-head' },
-          e('h1', { className: 'id-title' }, 'The groundwork'),
+          e('h1', { className: 'id-title' }, 'Strategic Planning'),
           e('p', { className: 'id-sub' }, 'Get to know your market, your customers and the landscape — then your plan writes itself.')
         ),
 
@@ -178,7 +178,7 @@
           e('span', { className: 'id-directive-val' }, goal)
         ),
 
-        /* the three groundwork steps */
+        /* the three research steps */
         e('div', { className: 'id-section-label' }, 'Three things to learn'),
         e('div', { className: 'id-missions' },
           MISSIONS.map(function (mn) {

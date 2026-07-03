@@ -356,3 +356,46 @@
   .ob-cards { grid-template-columns: repeat(2, 1fr); }
   .ob-console { padding: 22px 18px; }
 }
+
+/* ============================================================
+   Location picker (onboarding · ported from sajood, teal-tokened)
+   ============================================================ */
+.ob-loc-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; justify-content: center; }
+.ob-loc-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px 4px 12px;
+  border-radius: 20px; font-size: 12px; font-weight: 500; line-height: 1.4;
+  color: var(--clr-primary-hover);
+  background: color-mix(in srgb, var(--clr-primary) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--clr-primary) 30%, transparent);
+}
+.ob-loc-chip button { background: none; border: none; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 2px; opacity: 0.6; transition: opacity 0.12s; }
+.ob-loc-chip button:hover { opacity: 1; }
+
+.ob-loc-panel { width: 100%; max-width: 440px; margin: 0 auto; background: var(--clr-card); border: 1px solid var(--clr-border); border-radius: 14px; padding: 12px 14px; }
+
+.ob-loc-global-row, .ob-loc-item {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 9px 12px; border-radius: 8px; cursor: pointer; font-size: 14px;
+  color: var(--clr-text); background: none; border: none; transition: background 0.12s; user-select: none;
+}
+.ob-loc-global-row { padding: 10px 12px; border-bottom: 1px solid var(--clr-border); border-radius: 8px 8px 0 0; margin-bottom: 4px; }
+.ob-loc-global-row:hover, .ob-loc-item:hover { background: var(--clr-card-2); }
+.ob-loc-global-row.selected, .ob-loc-item.selected { background: color-mix(in srgb, var(--clr-primary) 9%, transparent); }
+
+.ob-loc-search {
+  width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--clr-border);
+  padding: 10px 2px; color: var(--clr-text); font-size: 14px; font-family: inherit; outline: none;
+  caret-color: var(--clr-primary); margin-bottom: 4px; transition: border-color 0.2s;
+}
+.ob-loc-search:focus { border-bottom-color: color-mix(in srgb, var(--clr-primary) 45%, transparent); }
+.ob-loc-search::placeholder { color: var(--clr-muted); opacity: 0.7; font-size: 13px; }
+
+.ob-loc-list { max-height: 220px; overflow-y: auto; margin: 2px 0 4px; scrollbar-width: thin; scrollbar-color: color-mix(in srgb, var(--clr-primary) 25%, transparent) transparent; }
+.ob-loc-list::-webkit-scrollbar { width: 4px; }
+.ob-loc-list::-webkit-scrollbar-track { background: transparent; }
+.ob-loc-list::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--clr-primary) 25%, transparent); border-radius: 2px; }
+
+.ob-loc-flag { font-size: 17px; line-height: 1; flex-shrink: 0; }
+.ob-loc-name { flex: 1; }
+.ob-loc-check { color: var(--clr-primary); font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.ob-loc-empty { padding: 16px 12px; font-size: 13px; color: var(--clr-muted); text-align: center; }

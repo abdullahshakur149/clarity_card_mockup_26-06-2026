@@ -1,8 +1,8 @@
 /* ============================================================================
-   gtm.js — Go-To-Market pillar. Zero-forms: auto-feeds the market average from
-   the Market research, the owner CALIBRATES price + margin on tactile dials
-   (no typed fields), then Clarity reveals the go-to-market MOVES — pricing
-   plays (from where the price lands vs market) + priority-driven plays, each
+   gtm.js — Go-To-Market pillar. Sajood-style context: a 90-day focus question
+   (My Plan) + four typed pricing numbers (avg order, market avg [auto-suggested
+   from the Market recon], margin, best seller), then Clarity reveals the go-to-
+   market MOVES — pricing plays (from where the price lands vs market) + priority-driven plays, each
    with Impact/Effort. Completing it awards XP and stores idea.missions.gtm.moves,
    which the My Tasks pillar turns into scheduled tasks. Journey tone.
      window.ClarityGTM({ idea, onChange, onBack })
@@ -81,20 +81,26 @@
     var market = mk.avg || 0;
     var saved = (idea.missions && idea.missions.gtm) || null;
 
-    var pr = React.useState(saved ? saved.avgOrder : (market || 40)); var price = pr[0], setPrice = pr[1];
-    var mg = React.useState(saved ? saved.margin : 50); var margin = mg[0], setMargin = mg[1];
+    /* sajood's typed pricing fields (stored as raw strings; parsed for calc) */
+    function numOf(v) { var n = parseFloat(String(v).replace(/[^0-9.\-]/g, '')); return isNaN(n) ? 0 : n; }
+    var pr = React.useState(saved && saved.avgOrder != null ? String(saved.avgOrder) : String(market || 40)); var price = pr[0], setPrice = pr[1];
+    var ma = React.useState(saved && saved.marketAvg != null ? String(saved.marketAvg) : String(market || 40)); var marketAvg = ma[0], setMarketAvg = ma[1];
+    var mg = React.useState(saved && saved.margin != null ? String(saved.margin) : '50'); var margin = mg[0], setMargin = mg[1];
+    var bs = React.useState(saved && saved.bestSeller ? saved.bestSeller : ''); var bestSeller = bs[0], setBestSeller = bs[1];
+    var pf2 = React.useState(saved && saved.planFocus ? saved.planFocus : ''); var planFocus = pf2[0], setPlanFocus = pf2[1];
     var vw = React.useState(saved ? 'plan' : 'calibrate'); var view = vw[0], setView = vw[1];
     var firstRef = React.useRef(!saved);
 
-    var pos = positionOf(price, market);
-    var deltaPct = market ? Math.round((price - market) / market * 100) : 0;
+    var priceN = numOf(price), marketN = numOf(marketAvg), marginN = numOf(margin);
+    var pos = positionOf(priceN, marketN);
+    var deltaPct = marketN ? Math.round((priceN - marketN) / marketN * 100) : 0;
 
     /* compile → plan, persist gtm + XP (once) */
     React.useEffect(function () {
       if (view !== 'running') return;
       var t = setTimeout(function () {
-        var moves = genMoves(pos, margin, profile.priorities);
-        var gtmObj = { avgOrder: price, margin: margin, marketAvg: market, unit: mk.unit, position: pos, moves: moves, date: dayLabel(), xp: XP_GTM };
+        var moves = genMoves(pos, marginN, profile.priorities);
+        var gtmObj = { avgOrder: priceN, margin: marginN, marketAvg: marketN, bestSeller: bestSeller, planFocus: planFocus, unit: mk.unit, position: pos, moves: moves, date: dayLabel(), xp: XP_GTM };
         var patch = { missions: Object.assign({}, idea.missions, { gtm: gtmObj }) };
         if (firstRef.current) {
           patch.xp = (idea.xp || 0) + XP_GTM;
@@ -113,47 +119,46 @@
       return function () { clearTimeout(t); };
     }, [view]);
 
-    /* ── CALIBRATE ── */
+    /* ── CONTEXT — sajood's My Plan focus + My Pricing fields ── */
     if (view === 'calibrate') {
-      var lo = market ? Math.round(market * 0.5 * 10) / 10 : 5;
-      var hi = market ? Math.round(market * 2) : 200;
-      var step = market > 200 ? 5 : market > 20 ? 1 : 0.1;
-      var verdict = market
+      var verdict = marketN
         ? (deltaPct === 0 ? 'right at market' : Math.abs(deltaPct) + '% ' + (deltaPct < 0 ? 'below' : 'above') + ' market') + ' — ' + POS_LABEL[pos]
-        : 'set your price — look at My Market first and I’ll load the average';
-      var bandPct = market ? Math.max(4, Math.min(96, Math.round((price - lo) / (hi - lo) * 100))) : 50;
-
+        : '';
+      var pfield = function (label, help, value, onChange, prefix, suffix) {
+        return e('div', { className: 'gtm-field' },
+          e('div', { className: 'gtm-field-l' }, label),
+          e('div', { className: 'gtm-field-help' }, help),
+          e('div', { className: 'gtm-input-wrap' },
+            prefix ? e('span', { className: 'gtm-input-aff' }, prefix) : null,
+            e('input', { className: 'pf-input gtm-num' + (prefix ? ' has-pre' : '') + (suffix ? ' has-suf' : ''), value: value, onChange: onChange }),
+            suffix ? e('span', { className: 'gtm-input-aff gtm-input-suf' }, suffix) : null));
+      };
       return shell(e(React.Fragment, null,
         e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),
-        e('h1', { className: 'gtm-title' }, 'Price your play'),
-        voice(market
-          ? 'Your research is in — the market average is loaded. Dial in your price and margin, and I’ll suggest your go-to-market moves.'
-          : 'Dial in your price and margin and I’ll suggest your moves. Tip: look at My Market first and I’ll load the market average for you.'),
+        e('h1', { className: 'gtm-title' }, 'Build your go-to-market plan'),
+        voice('Based on your research and persona, I’ll turn a few numbers into pricing moves and a 90-day plan.'),
 
-        /* auto-loaded context (only the pills that have real data) */
-        (market || profile.goal) ? e('div', { className: 'gtm-ctx' },
-          market ? e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Market avg'), e('span', { className: 'gtm-pill-v' }, fmtPrice(market, mk.unit) + ' · from your research')) : null,
-          profile.goal && e('div', { className: 'gtm-pill' }, e('span', { className: 'gtm-pill-l' }, 'Your goal'), e('span', { className: 'gtm-pill-v' }, profile.goal))) : null,
         (profile.priorities && profile.priorities.length) ? e('div', { className: 'gtm-prio' },
           e('span', { className: 'gtm-prio-l' }, 'Priorities'),
           profile.priorities.map(function (p, i) { return e('span', { key: i, className: 'gtm-prio-chip' }, p); })) : null,
 
-        /* price dial */
-        e('div', { className: 'gtm-dial' },
-          e('div', { className: 'gtm-dial-head' }, e('span', { className: 'gtm-dial-l' }, 'Your average order'), e('span', { className: 'gtm-dial-v' }, fmtPrice(price, mk.unit))),
-          e('div', { className: 'gtm-track' },
-            market && e('span', { className: 'gtm-track-mid', style: { left: Math.max(4, Math.min(96, Math.round((market - lo) / (hi - lo) * 100))) + '%' } }, 'market avg'),
-            e('input', { className: 'gtm-range', type: 'range', min: lo, max: hi, step: step, value: price, onChange: function (ev) { setPrice(parseFloat(ev.target.value)); } })),
-          e('div', { className: 'gtm-verdict gtm-' + pos }, e('span', { className: 'gtm-verdict-dot' }), verdict)),
+        /* My Plan — 90-day focus */
+        e('div', { className: 'gtm-focus-wrap' },
+          e('label', { className: 'gtm-focus-label' }, 'Anything specific you want to focus on in the next 90 days? ', e('span', { className: 'gtm-optional' }, '(optional)')),
+          e('textarea', { className: 'pf-input gtm-focus-input', rows: 2, value: planFocus,
+            placeholder: 'e.g. growing weekend foot traffic, landing 3 new wholesale accounts…',
+            onChange: function (ev) { setPlanFocus(ev.target.value); } })),
 
-        /* margin dial */
-        e('div', { className: 'gtm-dial' },
-          e('div', { className: 'gtm-dial-head' }, e('span', { className: 'gtm-dial-l' }, 'Your margin'), e('span', { className: 'gtm-dial-v' }, margin + '%')),
-          e('div', { className: 'gtm-track' },
-            e('input', { className: 'gtm-range', type: 'range', min: 10, max: 90, step: 1, value: margin, onChange: function (ev) { setMargin(parseInt(ev.target.value, 10)); } })),
-          e('div', { className: 'gtm-verdict ' + (margin < 40 ? 'gtm-value' : 'gtm-at-market') }, e('span', { className: 'gtm-verdict-dot' }), margin < 40 ? 'thin — protect profit' : 'healthy — room to invest')),
+        /* My Pricing — four numbers */
+        e('div', { className: 'gtm-sec-l' }, 'A few numbers help me find pricing moves that fit how you actually sell'),
+        e('div', { className: 'gtm-price-grid' },
+          pfield('Avg order', 'Your typical sale value', price, function (ev) { setPrice(ev.target.value); }, '$'),
+          pfield('Market avg', 'Typical for your category · from your competitor scan', marketAvg, function (ev) { setMarketAvg(ev.target.value); }, '$'),
+          pfield('Margin', 'Your profit margin', margin, function (ev) { setMargin(ev.target.value); }, null, '%'),
+          pfield('Best seller', 'Your top product or service', bestSeller, function (ev) { setBestSeller(ev.target.value); })),
+        verdict ? e('div', { className: 'gtm-verdict gtm-' + pos }, e('span', { className: 'gtm-verdict-dot' }), verdict) : null,
 
-        e('button', { className: 'pf-cta gtm-cta', onClick: function () { setView('running'); } }, 'Work out my moves →')
+        e('button', { className: 'pf-cta gtm-cta', onClick: function () { setView('running'); } }, 'Generate my plan →')
       ));
     }
 
@@ -169,7 +174,7 @@
     }
 
     /* ── PLAN (moves) ── */
-    var gtm = saved || { moves: genMoves(pos, margin, profile.priorities), position: pos, avgOrder: price, margin: margin, unit: mk.unit };
+    var gtm = saved || { moves: genMoves(pos, marginN, profile.priorities), position: pos, avgOrder: priceN, margin: marginN, unit: mk.unit };
     var moves = gtm.moves || [];
     return shell(e(React.Fragment, null,
       e('button', { className: 'id-back', onClick: onBack }, '‹ Home base'),

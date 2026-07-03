@@ -30,9 +30,9 @@ window.ClarityData = (function () {
         { type: 'x', icon: 'Hash', label: 'X / Thread', reason: '' },
       ],
       specs: [
-        { key: 'length', label: 'Length', opts: ['Short (~80 words)', 'Standard (~150 words)', 'Long-form (~400 words)'] },
-        { key: 'tone', label: 'Tone', opts: ['Warm & personal', 'Confident & direct', 'Playful', 'Editorial'] },
-        { key: 'cta', label: 'Call to action', opts: ['Pre-order now', 'Learn more', 'Reply to this', 'None'] },
+        { key: 'wordCount', label: 'Word count', opts: ['Short (~60 words)', 'Medium (~120 words)', 'Long (~250 words)'] },
+        { key: 'tone', label: 'Tone', opts: ['Match brand tone', 'Warm', 'Bold', 'Professional', 'Playful'] },
+        { key: 'formatStyle', label: 'Format style', opts: ['Story-led', 'Listicle', 'Punchy one-liner', 'Q&A / hook'] },
       ],
       angles: [
         { angle: 'Story-led open', desc: 'Opens on Millie\'s six years of loaves, then lands the pre-order ask.', fit: 91 },
@@ -49,9 +49,8 @@ window.ClarityData = (function () {
         { type: 'pinterest', icon: 'Pin', label: 'Pinterest Pin', reason: '' },
       ],
       specs: [
-        { key: 'ratio', label: 'Aspect ratio', opts: ['1:1 (Square)', '4:5 (Portrait)', '9:16 (Story)', '16:9 (Landscape)'] },
-        { key: 'style', label: 'Visual style', opts: ['Warm editorial photo', 'Flat-lay', 'Bold typographic', 'Lifestyle candid'] },
-        { key: 'mood', label: 'Mood', opts: ['Golden / warm', 'Clean / bright', 'Moody / artisanal'] },
+        { key: 'styleDir', label: 'Style direction', opts: ['Editorial craft', 'Minimal clean', 'Bold promo', 'Documentary / BTS'] },
+        { key: 'textOverlay', label: 'Text overlay', toggle: true, default: 'On' },
       ],
       angles: [
         { angle: 'Hero loaf close-up', desc: 'Steam, crust and golden light — the crumb shot that stops the scroll.', fit: 90 },
@@ -68,9 +67,8 @@ window.ClarityData = (function () {
         { type: 'yt-long', icon: 'MonitorPlay', label: 'YouTube Long', reason: '' },
       ],
       specs: [
-        { key: 'ratio', label: 'Aspect ratio', opts: ['9:16 (Vertical)', '16:9 (Landscape)', '1:1 (Square)', '4:5 (Portrait)'] },
-        { key: 'res', label: 'Resolution', opts: ['1080 x 1920', '1080 x 1080', '1920 x 1080', '3840 x 2160 (4K)'] },
-        { key: 'type', label: 'Content type', opts: ['Live-action film', 'Motion graphics', 'Talking-head / UGC', 'Stop-motion'] },
+        { key: 'visualStyle', label: 'Visual style', opts: ['Casual / UGC', 'Cinematic', 'Animated / Motion graphics', 'Documentary BTS'] },
+        { key: 'captions', label: 'Captions', toggle: true, default: 'On' },
       ],
       angles: [
         { angle: 'Hook-first cut', desc: 'Opens on the boldest claim, then proves it in three fast beats.', fit: 90 },
@@ -86,9 +84,8 @@ window.ClarityData = (function () {
         { type: 'spotify', icon: 'Headphones', label: 'Spotify / Music', reason: '' },
       ],
       specs: [
-        { key: 'length', label: 'Length', opts: ['15s spot', '30s spot', '2–3 min segment', 'Full episode'] },
-        { key: 'voice', label: 'Voice', opts: ['Warm female', 'Warm male', 'Founder voice', 'Neutral narrator'] },
-        { key: 'music', label: 'Music bed', opts: ['Acoustic / warm', 'Upbeat', 'Ambient', 'None'] },
+        { key: 'voiceStyle', label: 'Voice style', opts: ['Conversational', 'Calm', 'Energetic', 'Professional'] },
+        { key: 'musicBed', label: 'Music bed', toggle: true, default: 'On' },
       ],
       angles: [
         { angle: 'Narrative spot', desc: 'A 30-second story arc from first loaf to loyal regular.', fit: 89 },

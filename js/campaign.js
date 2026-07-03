@@ -305,6 +305,17 @@ const SERIES_GLYPH = {
   bts: 'Clapperboard',
   patience: 'GraduationCap'
 };
+/* sajood's Objective options, mapped onto my goals (which carry KPI + target) */
+const CAMP_OBJECTIVES = [
+  { obj: 'Awareness', goalId: 'awareness' },
+  { obj: 'Launch', goalId: 'preorders' },
+  { obj: 'Re-engagement', goalId: 'reengage' },
+  { obj: 'Promotion', goalId: 'promote' },
+  { obj: 'Community', goalId: 'community' }
+];
+/* sajood's series content-pattern options */
+const CAMP_PATTERNS = ['Custom', 'Awareness Drip', 'Launch Countdown', 'Last Call'];
+
 function CampaignFlow({
   onExit,
   onLaunch
@@ -332,6 +343,15 @@ function CampaignFlow({
   const [progress, setProgress] = React.useState(0);
   const [approved, setApproved] = React.useState({});
   const [spaced, setSpaced] = React.useState(false);
+  // sajood's campaign questions: timing + brief fields
+  const [startDate, setStartDate] = React.useState('');
+  const [startTime, setStartTime] = React.useState('09:00');
+  const [endDate,   setEndDate]   = React.useState('');
+  const [endTime,   setEndTime]   = React.useState('17:00');
+  const [bPersona,  setBPersona]  = React.useState('The Artisan Loyalist');
+  const [bMessage,  setBMessage]  = React.useState('Sourdough Saturday is back — drive pre-orders before Friday by leading with craft and proof: the 72-hour cold ferment, real customer stories, the 4am bakers. Warm, confident, never salesy.');
+  const [bProof,    setBProof]    = React.useState('72-hour cold ferment · sells out by noon · 5-star regulars');
+  const [bCta,      setBCta]      = React.useState('Pre-order now');
   const isMulti = mode === 'multi';
   const totalPieces = isMulti ? seriesPlan.reduce((a, s) => a + s.posts, 0) : set.reduce((a, s) => a + s.count, 0);
   const batch = CD.CAMP_BATCH;
@@ -355,6 +375,12 @@ function CampaignFlow({
   }
   function removeSeries(id) {
     setSeriesPlan(prev => prev.filter(s => s.id !== id));
+  }
+  function renameSeries(id, val) {
+    setSeriesPlan(prev => prev.map(s => s.id === id ? { ...s, name: val } : s));
+  }
+  function setSeriesPattern(id, val) {
+    setSeriesPlan(prev => prev.map(s => s.id === id ? { ...s, pattern: val } : s));
   }
   function go(n) {
     setStep(n);
@@ -410,14 +436,14 @@ function CampaignFlow({
       label: "Campaign name",
       value: name,
       onChange: e => setName(e.target.value)
-    }), /*#__PURE__*/React.createElement(CFieldLabel, null, "What's the goal?"), /*#__PURE__*/React.createElement("select", {
+    }), /*#__PURE__*/React.createElement(CFieldLabel, null, "Objective"), /*#__PURE__*/React.createElement("select", {
       style: selectStyle(),
       value: goalId,
       onChange: e => changeGoal(e.target.value)
-    }, CD.GOALS.map(g => /*#__PURE__*/React.createElement("option", {
-      key: g.id,
-      value: g.id
-    }, g.label))), /*#__PURE__*/React.createElement(CFieldLabel, null, "Target \u2014 ", goal.kpi), /*#__PURE__*/React.createElement("input", {
+    }, CAMP_OBJECTIVES.map(o => /*#__PURE__*/React.createElement("option", {
+      key: o.goalId,
+      value: o.goalId
+    }, o.obj))), /*#__PURE__*/React.createElement(CFieldLabel, null, "Target \u2014 ", goal.kpi), /*#__PURE__*/React.createElement("input", {
       type: "number",
       value: target,
       onChange: e => setTarget(e.target.value),
@@ -426,25 +452,10 @@ function CampaignFlow({
         maxWidth: 240
       }
     }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: 'flex',
-        gap: 16
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1
-      }
-    }, /*#__PURE__*/React.createElement(CFieldLabel, null, "Start date"), /*#__PURE__*/React.createElement("input", {
-      type: "date",
-      style: selectStyle()
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        flex: 1
-      }
-    }, /*#__PURE__*/React.createElement(CFieldLabel, null, "End date"), /*#__PURE__*/React.createElement("input", {
-      type: "date",
-      style: selectStyle()
-    }))), /*#__PURE__*/React.createElement(CFieldLabel, {
+      style: { display: 'flex', gap: 16 }
+    }, /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "Start date"), /*#__PURE__*/React.createElement("input", { type: "date", style: selectStyle(), value: startDate, onChange: e => setStartDate(e.target.value) })), /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "Start time"), /*#__PURE__*/React.createElement("input", { type: "time", style: selectStyle(), value: startTime, onChange: e => setStartTime(e.target.value) }))), /*#__PURE__*/React.createElement("div", {
+      style: { display: 'flex', gap: 16, marginTop: 12 }
+    }, /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "End date"), /*#__PURE__*/React.createElement("input", { type: "date", style: selectStyle(), value: endDate, onChange: e => setEndDate(e.target.value) })), /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "End time"), /*#__PURE__*/React.createElement("input", { type: "time", style: selectStyle(), value: endTime, onChange: e => setEndTime(e.target.value) }))), /*#__PURE__*/React.createElement(CFieldLabel, {
       hint: "Maker suggests a content set from these"
     }, "Where to post?"), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -546,22 +557,55 @@ function CampaignFlow({
         gap: 8,
         flexWrap: 'wrap'
       }
-    }, /*#__PURE__*/React.createElement("span", {
+    }, /*#__PURE__*/React.createElement("input", {
+      value: s.name,
+      placeholder: "Series name",
+      onChange: e => renameSeries(s.id, e.target.value),
       style: {
         fontSize: 14,
         fontWeight: 600,
-        color: 'var(--clr-text)'
+        color: 'var(--clr-text)',
+        background: 'transparent',
+        border: 'none',
+        borderBottom: '1px dashed var(--clr-border)',
+        outline: 'none',
+        fontFamily: 'inherit',
+        padding: '1px 0',
+        minWidth: 0,
+        maxWidth: 200
       }
-    }, s.name), s.mods.map(m => /*#__PURE__*/React.createElement(ModalityBadge, {
+    }), s.mods.map(m => /*#__PURE__*/React.createElement(ModalityBadge, {
       key: m,
       modality: m
     }))), /*#__PURE__*/React.createElement("div", {
       style: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 6
+      }
+    }, /*#__PURE__*/React.createElement("select", {
+      value: s.pattern,
+      onChange: e => setSeriesPattern(s.id, e.target.value),
+      style: {
         fontSize: 12,
         color: 'var(--clr-muted)',
-        marginTop: 3
+        background: 'var(--clr-card-2)',
+        border: '1px solid var(--clr-border)',
+        borderRadius: 6,
+        padding: '3px 7px',
+        fontFamily: 'inherit',
+        cursor: 'pointer'
       }
-    }, s.pattern, " \xB7 ", s.hint)), /*#__PURE__*/React.createElement("div", {
+    }, (CAMP_PATTERNS.indexOf(s.pattern) >= 0 ? CAMP_PATTERNS : [s.pattern].concat(CAMP_PATTERNS)).map(pt => /*#__PURE__*/React.createElement("option", {
+      key: pt,
+      value: pt
+    }, pt))), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 12,
+        color: 'var(--clr-muted)'
+      }
+    }, s.hint))), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',
         alignItems: 'center',
@@ -702,12 +746,25 @@ function CampaignFlow({
         marginTop: 8
       }
     }, "Write it once. Maker adapts the angle for every channel \u2014 tweak per platform only if you need to."), /*#__PURE__*/React.createElement(CInheritStrip, null), /*#__PURE__*/React.createElement(Input, {
+      label: "Persona",
+      value: bPersona,
+      onChange: e => setBPersona(e.target.value)
+    }), /*#__PURE__*/React.createElement(Input, {
       as: "textarea",
-      label: "The brief",
-      defaultValue: "Sourdough Saturday is back. Drive pre-orders before Friday by leading with craft and proof — the 72-hour cold ferment, real customer stories, and the 4am bakers. Warm, confident, never salesy.",
+      label: "Message",
+      value: bMessage,
+      onChange: e => setBMessage(e.target.value),
       style: {
-        height: 120
+        height: 100
       }
+    }), /*#__PURE__*/React.createElement(Input, {
+      label: "Proof",
+      value: bProof,
+      onChange: e => setBProof(e.target.value)
+    }), /*#__PURE__*/React.createElement(Input, {
+      label: "CTA",
+      value: bCta,
+      onChange: e => setBCta(e.target.value)
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         display: 'flex',

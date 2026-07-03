@@ -184,6 +184,8 @@
     var mg = React.useState([]); var msgs = mg[0], setMsgs = mg[1];
     var vc = React.useState(true); var voice = vc[0], setVoice = vc[1];
     var gp = React.useState('pick'); var gstep = gp[0], setGstep = gp[1];
+    var ga = React.useState(null); var genArch = ga[0], setGenArch = ga[1];   /* archetype chosen for the new persona */
+    var gb = React.useState({ name: '', age: '', desc: '', cares: '', trigger: '' }); var build = gb[0], setBuild = gb[1];  /* sajood's 5 build questions */
     var gr = React.useState(0); var greveal = gr[0], setGreveal = gr[1];
     var newRef = React.useRef(null);
     var bl = React.useState(0); var blip = bl[0], setBlip = bl[1];       /* warmth bloom trigger */
@@ -221,7 +223,20 @@
     }, [view, gstep]);
 
     function startGenesis() { setGstep('pick'); setView('genesis'); }
-    function pickArch(id) { newRef.current = makePersona(id); setGstep('awaken'); }
+    /* picking an archetype now opens the build form (sajood's 5 questions) */
+    function pickArch(id) { setGenArch(id); setBuild({ name: '', age: '', desc: '', cares: '', trigger: '' }); setGstep('build'); }
+    function setBuildField(k, v) { setBuild(function (b) { var o = Object.assign({}, b); o[k] = v; return o; }); }
+    function genesisCreate() {
+      var id = genArch || 'risk-reducer';
+      var b = build || {};
+      var name = (b.name || '').trim() || NAMES[Math.floor(Math.random() * NAMES.length)];
+      var p = makePersona(id, name);
+      if ((b.age || '').trim()) p.age = b.age.trim();
+      if ((b.desc || '').trim()) p.blurb = b.desc.trim();
+      if ((b.cares || '').trim()) p.mattersMost = b.cares.trim();   /* kept separate; archetype cares chips stay clean */
+      if ((b.trigger || '').trim()) p.trigger = b.trigger.trim();
+      newRef.current = p; setGstep('awaken');
+    }
     function openConversation(id) {
       var p = null; for (var i = 0; i < personas.length; i++) if (personas[i].id === id) p = personas[i];
       setCurId(id); setMsgs([]); setTab('talk'); setReturning(!!(p && p.met)); setView('conversation');
@@ -280,6 +295,29 @@
             e(PersonaFace, { seed: np.face || 0, mood: greveal >= 3 ? 'warming' : greveal >= 2 ? 'neutral' : 'guarded', size: 150 })),
           e('div', { className: 'pn-awaken-cap' }, greveal < 3 ? '…coming to life' : (np.name || 'Someone') + ' is here.'),
           greveal >= 3 && e('div', { className: 'pn-firstwords' }, '“' + ((bankFor(np.archetype, idea) || {}).greeting || np.greet || '') + '”')
+        ));
+      }
+      if (gstep === 'build') {
+        var ba = ARCH[genArch] || ARCH['risk-reducer'];
+        var bfield = function (label, key, ph, multi) {
+          return e('div', { className: 'pn-field' },
+            e('label', { className: 'pn-q' }, label),
+            multi
+              ? e('textarea', { className: 'pf-input pn-input', rows: 2, value: build[key], placeholder: ph, onChange: function (ev) { setBuildField(key, ev.target.value); } })
+              : e('input', { className: 'pf-input pn-input', value: build[key], placeholder: ph, onChange: function (ev) { setBuildField(key, ev.target.value); } }));
+        };
+        return shell(e(React.Fragment, null,
+          e('button', { className: 'id-back', onClick: function () { setGstep('pick'); } }, '‹ Choose someone else'),
+          e('div', { className: 'pn-eyebrow' }, 'Genesis'),
+          e('h1', { className: 'pn-title' }, 'Tell me about them'),
+          e('p', { className: 'pn-lead' }, 'A few details bring your ' + String(ba.label || 'customer').toLowerCase() + ' to life. Leave any blank and I’ll fill it in.'),
+          e('div', { className: 'pn-build' },
+            bfield('What’s your customer’s name?', 'name', 'e.g. Maya Holloway'),
+            bfield('How old are they?', 'age', 'e.g. 28–45'),
+            bfield('Describe them in one line', 'desc', 'e.g. Local foodie who values quality and shops small'),
+            bfield('What matters most to them?', 'cares', 'e.g. They love supporting local businesses', true),
+            bfield('What makes them decide to buy?', 'trigger', 'e.g. Seeing a limited batch they don’t want to miss out on', true)),
+          e('button', { className: 'pf-cta pn-cta', onClick: genesisCreate }, 'Bring them to life →')
         ));
       }
       return shell(e(React.Fragment, null,

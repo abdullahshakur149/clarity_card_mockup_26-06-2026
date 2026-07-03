@@ -40,6 +40,10 @@
       traits: { 'Price sensitivity': 50, 'Brand loyalty': 85, 'Risk appetite': 28, 'Research depth': 55 },
       channels: ['Community groups', 'Local events', 'Instagram'], cares: ['Belonging', 'Shared values', 'The story behind it'] }
   ];
+  /* archetype is now inferred (the "what drives them" question was swapped for
+     sajood's focus question); each sector leans to its most typical buyer. */
+  var ARCH_BY_SECTOR = { food: 'community', retail: 'cost', creative: 'status', tech: 'performance', trades: 'risk', other: 'risk' };
+  function inferArch(profile) { return ARCH_BY_SECTOR[profile && profile.sector] || 'risk'; }
   /* what Clarity thinks aloud while it sketches */
 
   /* call-sign generator — turns naming into a pick/shuffle mechanic */
@@ -239,21 +243,30 @@
     var vw = React.useState('roster'); var view = vw[0], setView = vw[1];
     var sk = React.useState(seeded);   var sketches = sk[0], setSketches = sk[1];
     var pr = React.useState((props.result && props.result.primary) || (seeded[0] && seeded[0].name) || null); var primary = pr[0], setPrimary = pr[1];
-    var st = React.useState(0);        var step = st[0], setStep = st[1];
-    var nm = React.useState('');       var name = nm[0], setName = nm[1];
-    var ar = React.useState(null);     var arch = ar[0], setArch = ar[1];
+    var fc = React.useState('');       var focus = fc[0], setFocus = fc[1];   /* sajood's optional focus question */
     var cur = React.useState(null);    var current = cur[0], setCurrent = cur[1];  // persona being viewed
-    var sg = React.useState(function () { return genCallsigns(profile); }); var suggestions = sg[0], setSuggestions = sg[1];
     var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
-    function startSketch() { setName(''); setArch(null); setStep(0); setSuggestions(genCallsigns(profile)); setView('sketch'); }
+    /* persona is auto-named now (no Name step) — pick a fresh one not already used */
+    function autoName() {
+      var used = {}; (sketches || []).forEach(function (p) { if (p && p.name) used[p.name] = true; });
+      var pool = genCallsigns(profile);
+      for (var i = 0; i < pool.length; i++) { if (!used[pool[i]]) return pool[i]; }
+      return pool[0] || 'Your customer';
+    }
+    function startSketch() { setFocus(''); setView('sketch'); }
 
     var inferred = (profile.desc || 'your core customer').trim();
+    var autoArch = inferArch(profile);
+    var autoArchLabel = (ARCHETYPES.filter(function (a) { return a.id === autoArch; })[0] || {}).label || 'Their motivations';
+    var locLabel = (function () { var l = (profile.locations) || []; return l.length ? (l[0] === 'Global' ? 'Global / Worldwide' : l.join(', ')) : 'Global'; })();
+    var sectorCat = (SECTOR_CTX[profile.sector] || SECTOR_CTX.other || {}).name || 'your market';
+    var sectorLabel = sectorCat.charAt(0).toUpperCase() + sectorCat.slice(1);
 
     React.useEffect(function () {
       if (view !== 'building') return;
       var t = setTimeout(function () {
-        var p = buildAudience(profile, name.trim(), arch);
+        var p = buildAudience(profile, autoName(), autoArch);
         var nextList = sketches.concat([p]);
         var nextPrimary = primary || p.name;
         setSketches(nextList); setPrimary(nextPrimary); setCurrent(p); setView('result');
@@ -303,8 +316,8 @@
     /* ── SKETCHES ── */
     if (view === 'roster') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
-        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Customers'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Strategic Planning'),
+        e('div', { className: 'id-eyebrow' }, 'Strategic Planning · My Customers'),
         e('h1', { className: 'mm-title' }, 'The people you’re for'),
         voice(sketches.length ? 'These are the people you’re for. Sketch more of them, or star the one who matters most.' : 'No sketches yet. Let’s draw the customer you’re really doing this for.'),
         sketches.length === 0
@@ -319,54 +332,34 @@
       ));
     }
 
-    /* ── SKETCH WIZARD ── */
+    /* ── CONFIRM YOUR CONTEXT (single screen, sajood structure — persona auto-named) ── */
     if (view === 'sketch') {
-      var node;
-      if (step === 0) {
-        var picked = suggestions.indexOf(name) >= 0;
-        node = e(React.Fragment, null,
-          voice('Give them a name — pick one I drafted, shuffle for more, or write your own.'),
-          e('div', { className: 'mm-sec' }, 'Their name',
-            e('button', { className: 'cu-shuffle', onClick: function () { setSuggestions(genCallsigns(profile)); } }, e(Icon, { name: 'Shuffle', size: 12 }), ' Shuffle')),
-          e('div', { className: 'cu-callsigns' },
-            suggestions.map(function (cs) {
-              return e('button', { key: cs, className: 'cu-callsign' + (name === cs ? ' sel' : ''), onClick: function () { setName(cs); } },
-                e('span', { className: 'cu-cs-badge' }, e(Icon, { name: 'Tag', size: 13 })),
-                e('span', { className: 'cu-cs-name' }, cs));
-            })),
-          e('div', { className: 'cu-coin' },
-            e('span', { className: 'cu-coin-l' }, 'Or coin your own'),
-            e('div', { className: 'pf-input-wrap' }, e(Icon, { name: 'PenLine', size: 15 }),
-              e('input', { className: 'pf-input', value: picked ? '' : name, placeholder: 'e.g. Saturday-market Sam',
-                onChange: function (ev) { setName(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter' && name.trim()) setStep(1); } }))),
-          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'Describe them'), e('span', { className: 'mm-inferred-v' }, inferred), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
-          e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: !name.trim() }, 'Continue →'));
-      } else {
-        node = e(React.Fragment, null,
-          voice('What drives them? Pick the shape that fits — it colours the whole sketch.'),
-          e('div', { className: 'mm-sec' }, 'What drives them'),
-          e('div', { className: 'cu-archs' },
-            ARCHETYPES.map(function (a) {
-              return e('button', { key: a.id, className: 'cu-arch' + (arch === a.id ? ' sel' : ''), onClick: function () { setArch(a.id); } },
-                e('span', { className: 'cu-arch-ic' }, e(Icon, { name: a.icon, size: 18 })),
-                e('span', { className: 'cu-arch-label' }, a.label),
-                e('span', { className: 'cu-arch-blurb' }, a.blurb));
-            })),
-          e('div', { className: 'mm-row' },
-            e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Their name'),
-            e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('building'); }, disabled: !arch }, 'Build the sketch →')));
-      }
+      var ctxRow = function (k, v) { return e('div', { className: 'mm-ctx-row' }, e('span', { className: 'mm-ctx-key' }, k), e('span', { className: 'mm-ctx-val' }, v)); };
       return shell(e(React.Fragment, null,
         e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All sketches'),
-        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Customers'),
-        e('div', { className: 'mm-steps' }, ['Name', 'What drives them'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
-        e('div', { className: 'mm-panel', key: step }, node)));
+        e('div', { className: 'mm-ctx-wrap' },
+          e('h1', { className: 'mm-ctx-title' }, 'Confirm your context'),
+          e('div', { className: 'mm-ctx-sub' }, 'I’ll sketch your core customer against this.'),
+          e('div', { className: 'mm-ctx-card' },
+            e('div', { className: 'mm-ctx-card-l' }, 'Your business context'),
+            ctxRow('Business', profile.name || '—'),
+            ctxRow('Category', sectorLabel),
+            ctxRow('Location', locLabel),
+            ctxRow('Reading them as', autoArchLabel)),
+          e('div', { className: 'mm-focus-wrap' },
+            e('label', { className: 'mm-focus-label', htmlFor: 'cust-focus-input' }, 'Anything specific about your customers you want us to look into? ', e('span', { className: 'mm-optional' }, '(optional)')),
+            e('input', { id: 'cust-focus-input', className: 'pf-input mm-focus-input', value: focus, autoFocus: true,
+              placeholder: 'e.g. first-time buyers vs repeat customers, or customers who gift to others',
+              onChange: function (ev) { setFocus(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter') setView('building'); } }),
+            e('div', { className: 'mm-focus-hint' }, 'Leave blank to run a general read for your category.'),
+            e('div', { className: 'mm-ctx-actions' },
+              e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('building'); } }, 'Build the sketch →'))))));
     }
 
     /* ── BUILDING ── */
     if (view === 'building') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Customers'),
+        e('div', { className: 'id-eyebrow' }, 'Strategic Planning · My Customers'),
         e('h1', { className: 'mm-title' }, 'Sketching them…'),
         voice('Drawing them out now — what they want, where they spend their time…'),
         e('div', { className: 'mm-bar' }, e('i', null))));
@@ -432,7 +425,7 @@
         e('div', { className: 'rc-rule' }),
 
         /* sections rendered as accordion / tabs by the shared viewer */
-        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: [
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: (window.ClarityReportSections && window.ClarityReportSections.forReport('customers', profile.sector)) || sections, stats: [
           { value: p.fit + '%', label: 'Fit — ' + p.name, note: p.fit >= 80 ? 'Best match' : 'Good match', tone: p.fit >= 80 ? 'good' : 'neutral' },
           { value: r.wtp.band, label: 'Willingness to pay', note: 'per purchase', tone: 'good' },
           p.channels && p.channels[0] ? { value: p.channels[0], label: 'Top channel', note: 'best reach', tone: 'good' } : null,
@@ -445,7 +438,7 @@
           ? e('button', { className: 'id-back', onClick: function () { setPrimary(p.name); if (onComplete) onComplete({ xp: 0, count: sketches.length, sketches: sketches, primary: p.name, lastName: p.name }); } }, '★ Make them your main person')
           : e('span', { className: 'cu-isprimary' }, '★ Your main person'),
         e('button', { className: 'pf-cta mm-cta', onClick: startSketch }, 'Sketch another →')),
-      e('button', { className: 'id-back', style: { marginTop: 16 }, onClick: onBack }, '‹ The groundwork')
+      e('button', { className: 'id-back', style: { marginTop: 16 }, onClick: onBack }, '‹ Strategic Planning')
     ));
   }
 

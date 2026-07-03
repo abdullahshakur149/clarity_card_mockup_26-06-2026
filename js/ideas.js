@@ -30,7 +30,7 @@
     var p = progress(idea);
     if (p.hasPlan) return { label: 'Plan ready', cls: 'ok' };
     if (p.recon >= 3) return { label: 'Ready to assemble', cls: 'rec' };
-    if (p.recon > 0) return { label: 'Groundwork ' + p.recon + ' of 3', cls: '' };
+    if (p.recon > 0) return { label: 'Research ' + p.recon + ' of 3', cls: '' };
     return { label: 'New', cls: '' };
   }
 
@@ -67,7 +67,7 @@
               e('div', { className: 'iq-card-name' }, idea.name),
               e('div', { className: 'iq-card-meta' }, (SECTOR_NAME[idea.profile && idea.profile.sector] || 'Business') + '  ·  ' + (idea.createdLabel || '')),
               e('div', { className: 'iq-card-foot' },
-                e('div', { className: 'iq-prog' }, [0, 1, 2].map(function (n) { return e('span', { key: n, className: 'iq-dot' + (pr.recon > n ? ' on' : '') }); }), e('span', { className: 'iq-prog-l' }, 'Groundwork')),
+                e('div', { className: 'iq-prog' }, [0, 1, 2].map(function (n) { return e('span', { key: n, className: 'iq-dot' + (pr.recon > n ? ' on' : '') }); }), e('span', { className: 'iq-prog-l' }, 'Research')),
                 (score != null && pr.hasPlan) ? e('div', { className: 'iq-score' }, e('b', null, score), e('span', null, 'Score')) : e('div', { className: 'iq-open' }, 'Open →')));
           }),
           e('button', { className: 'iq-card iq-new', onClick: onNew },
@@ -114,7 +114,7 @@
               : p.id === 'tasks'     ? gtmDone
               : !!p.active;
             var chip = p.id === 'strategic'
-              ? (pr.hasPlan ? 'Plan ready' : pr.recon >= 3 ? 'Ready' : pr.recon > 0 ? ('Groundwork ' + pr.recon + ' of 3') : 'Start here')
+              ? (pr.hasPlan ? 'Plan ready' : pr.recon >= 3 ? 'Ready' : pr.recon > 0 ? ('Research ' + pr.recon + ' of 3') : 'Start here')
               : p.id === 'persona'
               ? (!planDone ? 'After the plan' : (idea.personas && idea.personas.length) ? (idea.personas.length + ' in your circle') : 'Meet them')
               : p.id === 'gtm'

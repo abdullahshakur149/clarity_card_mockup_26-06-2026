@@ -149,6 +149,27 @@
         e('div', { className: 'capcom-line' }, typed, !done && e('span', { className: 'pf-cursor' }, '▉'))));
   }
 
+  /* Country list for the location picker (ported from sajood's onboarding) */
+  var OB_COUNTRIES = [
+    { name: 'Australia', flag: '🇦🇺' }, { name: 'Austria', flag: '🇦🇹' }, { name: 'Bangladesh', flag: '🇧🇩' },
+    { name: 'Belgium', flag: '🇧🇪' }, { name: 'Brazil', flag: '🇧🇷' }, { name: 'Canada', flag: '🇨🇦' },
+    { name: 'China', flag: '🇨🇳' }, { name: 'Denmark', flag: '🇩🇰' }, { name: 'Egypt', flag: '🇪🇬' },
+    { name: 'Finland', flag: '🇫🇮' }, { name: 'France', flag: '🇫🇷' }, { name: 'Germany', flag: '🇩🇪' },
+    { name: 'Ghana', flag: '🇬🇭' }, { name: 'Hong Kong', flag: '🇭🇰' }, { name: 'India', flag: '🇮🇳' },
+    { name: 'Indonesia', flag: '🇮🇩' }, { name: 'Ireland', flag: '🇮🇪' }, { name: 'Israel', flag: '🇮🇱' },
+    { name: 'Italy', flag: '🇮🇹' }, { name: 'Japan', flag: '🇯🇵' }, { name: 'Jordan', flag: '🇯🇴' },
+    { name: 'Kenya', flag: '🇰🇪' }, { name: 'Malaysia', flag: '🇲🇾' }, { name: 'Mexico', flag: '🇲🇽' },
+    { name: 'Morocco', flag: '🇲🇦' }, { name: 'Netherlands', flag: '🇳🇱' }, { name: 'New Zealand', flag: '🇳🇿' },
+    { name: 'Nigeria', flag: '🇳🇬' }, { name: 'Norway', flag: '🇳🇴' }, { name: 'Pakistan', flag: '🇵🇰' },
+    { name: 'Philippines', flag: '🇵🇭' }, { name: 'Poland', flag: '🇵🇱' }, { name: 'Portugal', flag: '🇵🇹' },
+    { name: 'Qatar', flag: '🇶🇦' }, { name: 'Saudi Arabia', flag: '🇸🇦' }, { name: 'Singapore', flag: '🇸🇬' },
+    { name: 'South Africa', flag: '🇿🇦' }, { name: 'South Korea', flag: '🇰🇷' }, { name: 'Spain', flag: '🇪🇸' },
+    { name: 'Sri Lanka', flag: '🇱🇰' }, { name: 'Sweden', flag: '🇸🇪' }, { name: 'Switzerland', flag: '🇨🇭' },
+    { name: 'Taiwan', flag: '🇹🇼' }, { name: 'Thailand', flag: '🇹🇭' }, { name: 'Turkey', flag: '🇹🇷' },
+    { name: 'UAE', flag: '🇦🇪' }, { name: 'United Kingdom', flag: '🇬🇧' }, { name: 'United States', flag: '🇺🇸' },
+    { name: 'Vietnam', flag: '🇻🇳' }, { name: 'Other', flag: '🌐' }
+  ];
+
   function ClarityOnboarding(props) {
     var onComplete = props.onComplete;
 
@@ -162,6 +183,8 @@
     var dc = React.useState(null);               var dossier = dc[0], setDossier = dc[1];
     var ed = React.useState(null);               var editing = ed[0], setEditing = ed[1];   /* {key,val} */
     var nm = React.useState('');                 var nameVal = nm[0], setNameVal = nm[1];
+    var lc = React.useState([]);                 var locations = lc[0], setLocations = lc[1];   /* location picker */
+    var lq = React.useState('');                 var locSearch = lq[0], setLocSearch = lq[1];
 
     var recRef = React.useRef(null);
     var finalRef = React.useRef('');
@@ -203,14 +226,14 @@
     }
     React.useEffect(function () {
       if (view !== 'decoding') return;
-      var to = setTimeout(function () { var d = decodedRef.current; setView(d && !d.name ? 'name' : 'dossier'); }, 2200);
+      var to = setTimeout(function () { var d = decodedRef.current; setView(d && !d.name ? 'name' : 'location'); }, 2200);
       return function () { clearTimeout(to); };
     }, [view]);
 
     function submitName() {
       var v = (nameVal || '').trim();
-      var d = Object.assign({}, decodedRef.current, { name: v || 'Your venture' });
-      decodedRef.current = d; setDossier(d); setView('dossier');
+      var d = Object.assign({}, decodedRef.current, { name: v || 'Your idea' });
+      decodedRef.current = d; setDossier(d); setView('location');
     }
     function saveEdit() {
       if (!editing) return;
@@ -222,11 +245,14 @@
     function restart() {
       stopListening(); setText(''); setLink(''); setInterim(''); finalRef.current = '';
       decodedRef.current = null; setDossier(null); setEditing(null); setNameVal('');
+      setLocations([]); setLocSearch('');
       setMode(SR ? 'speak' : 'type'); setView('input');
     }
+    function toggleLoc(name) { setLocations(function (a) { return a.indexOf(name) >= 0 ? a.filter(function (x) { return x !== name; }) : a.concat([name]); }); }
+    function removeLoc(name) { setLocations(function (a) { return a.filter(function (x) { return x !== name; }); }); }
     function finish() {
       var d = decodedRef.current || dossier || {};
-      if (onComplete) onComplete({ sector: d.sector, name: d.name, desc: d.desc, audience: d.audience, goal: d.goal, priorities: d.priorities || [] });
+      if (onComplete) onComplete({ sector: d.sector, name: d.name, desc: d.desc, audience: d.audience, goal: d.goal, priorities: d.priorities || [], locations: locations });
     }
 
     /* ── frame ── */
@@ -306,6 +332,37 @@
             onChange: function (ev) { setNameVal(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter') submitName(); } }),
           e('button', { className: 'pf-cta dt-cta', onClick: submitName }, 'That’s the one ', e(Icon, { name: 'ArrowRight', size: 16 }))),
         e('button', { className: 'dt-skip', onClick: function () { setNameVal(''); submitName(); } }, 'Skip for now')
+      ));
+    }
+
+    /* ── WHERE YOU OPERATE (location picker, ported from sajood) ── */
+    if (view === 'location') {
+      var q = locSearch.trim().toLowerCase();
+      var filtered = OB_COUNTRIES.filter(function (c) { return !q || c.name.toLowerCase().indexOf(q) >= 0; });
+      var isGlobal = locations.indexOf('Global') >= 0;
+      return shell(e(React.Fragment, null,
+        e('button', { className: 'dt-skip', style: { alignSelf: 'flex-start' }, onClick: function () { setView('input'); } }, '‹ Back'),
+        e('div', { className: 'dt-eyebrow' }, 'One quick thing'),
+        e('h1', { className: 'dt-title' }, 'Where do you operate?'),
+        e(Voice, { line: 'Pick the places you serve — one, a few, or the whole world. It shapes every bit of research I run for you.' }),
+        locations.length > 0 && e('div', { className: 'ob-loc-chips' },
+          locations.map(function (l) {
+            return e('span', { key: l, className: 'ob-loc-chip' }, (l === 'Global' ? 'Global / Worldwide' : l),
+              e('button', { type: 'button', 'aria-label': 'Remove ' + l, onClick: function () { removeLoc(l); } }, '×'));
+          })),
+        e('div', { className: 'ob-loc-panel' },
+          e('button', { type: 'button', className: 'ob-loc-global-row ob-loc-item' + (isGlobal ? ' selected' : ''), onClick: function () { toggleLoc('Global'); } },
+            e('span', { className: 'ob-loc-flag' }, '🌍'), e('span', { className: 'ob-loc-name' }, 'Global / Worldwide'), isGlobal && e('span', { className: 'ob-loc-check' }, '✓')),
+          e('input', { className: 'ob-loc-search', value: locSearch, placeholder: 'Search countries…', onChange: function (ev) { setLocSearch(ev.target.value); } }),
+          e('div', { className: 'ob-loc-list' },
+            filtered.length
+              ? filtered.map(function (c) {
+                  var sel = locations.indexOf(c.name) >= 0;
+                  return e('button', { type: 'button', key: c.name, className: 'ob-loc-item' + (sel ? ' selected' : ''), onClick: function () { toggleLoc(c.name); } },
+                    e('span', { className: 'ob-loc-flag' }, c.flag), e('span', { className: 'ob-loc-name' }, c.name), sel && e('span', { className: 'ob-loc-check' }, '✓'));
+                })
+              : e('div', { className: 'ob-loc-empty' }, 'No matches — try another spelling, or pick “Other”.'))),
+        e('button', { className: 'pf-cta dt-cta', disabled: locations.length === 0, onClick: function () { setView('dossier'); } }, 'Continue ', e(Icon, { name: 'ArrowRight', size: 16 }))
       ));
     }
 

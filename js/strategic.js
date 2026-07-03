@@ -456,7 +456,7 @@
     var storeKey = 'strategic:' + (plan.biz || plan.category || 'plan');
 
     return shell(e(React.Fragment, null,
-      e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+      e('button', { className: 'id-back', onClick: onBack }, '‹ Strategic Planning'),
       e('div', { className: 'mm-acq' }, e('span', { className: 'mm-acq-stamp' }, 'Your plan has come together'), e('span', { className: 'mm-acq-xp' }, '+', plan.xp, ' XP')),
       e(Voice, { line: 'Done — here’s the read on your plan. The plain version is up top; the detail sits underneath if you want it.' }),
 

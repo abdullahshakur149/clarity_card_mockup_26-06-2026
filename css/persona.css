@@ -156,3 +156,10 @@
 .pn-keepsake-l { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-body); font-size: 11px; letter-spacing: 0.01em; color: var(--clr-persona-2); margin-bottom: 8px; }
 .pn-keepsake-t { font-family: var(--font-display); font-style: italic; font-size: 15px; line-height: 1.45; color: var(--clr-text); }
 .pn-keepsake-sig { font-size: 13px; color: var(--clr-muted); margin-top: 8px; text-align: right; }
+
+/* Genesis build form — sajood's 5 questions when creating someone new */
+.pn-build { display: flex; flex-direction: column; gap: 15px; max-width: 520px; }
+.pn-field { display: flex; flex-direction: column; gap: 7px; }
+.pn-q { font-size: 14px; font-weight: 600; color: var(--clr-text); }
+.pn-input { width: 100%; box-sizing: border-box; font-size: 14px; }
+.pn-cta { margin-top: 22px; }

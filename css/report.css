@@ -256,3 +256,92 @@
 @keyframes rc-tab-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
 @media (prefers-reduced-motion: reduce) { .rc-acc-body, .rc-tabpanel { animation: none; } .rc-acc-chev { transition: none; } }
+
+/* ============================================================================
+   sr-* — sajood's ported report content (tables, cards, chips, findings,
+   sources, mini-cards, driver columns, positioning map). Lives inside .rc-doc,
+   so it inherits the reader's Day/Night theme via the --rc-* tokens.
+   ========================================================================== */
+.rc-doc .sr-table { display: flex; flex-direction: column; border: 1px solid var(--rc-hair); border-radius: 10px; overflow: hidden; margin: 6px 0 18px; }
+.rc-doc .sr-trow { display: grid; border-top: 1px solid var(--rc-hair); }
+.rc-doc .sr-trow:first-child { border-top: none; }
+.rc-doc .sr-thead { background: var(--rc-panel); }
+.rc-doc .sr-cell { padding: 11px 14px; font-size: 13px; line-height: 1.5; color: var(--rc-ink-soft); border-left: 1px solid var(--rc-hair); }
+.rc-doc .sr-cell:first-child { border-left: none; color: var(--rc-ink); font-weight: 500; }
+.rc-doc .sr-cell-h { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.02em; color: var(--rc-ink-faint); }
+
+.rc-doc .sr-p { font-size: 14px; line-height: 1.6; color: var(--rc-ink-soft); margin: 0 0 14px; }
+.rc-doc .sr-overview { font-size: 14.5px; line-height: 1.6; color: var(--rc-ink); margin: 14px 0; }
+.rc-doc .sr-subhead { font-family: var(--font-body); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rc-ink-faint); margin: 18px 0 10px; }
+.rc-doc .sr-opp-h { font-family: var(--font-display); font-size: 18px; font-weight: 700; letter-spacing: -0.01em; color: var(--rc-ink); margin: 2px 0 10px; }
+
+.rc-doc .sr-card { display: flex; gap: 12px; background: var(--rc-panel); border: 1px solid var(--rc-hair); border-radius: 12px; padding: 14px 16px; margin: 14px 0; }
+.rc-doc .sr-card-accent { border-left: 3px solid var(--rc-accent); }
+.rc-doc .sr-card-ic { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.rc-doc .sr-card-h { font-size: 14px; font-weight: 700; color: var(--rc-ink); margin-bottom: 5px; }
+.rc-doc .sr-card-t { font-size: 13.5px; line-height: 1.55; color: var(--rc-ink-soft); }
+
+.rc-doc .sr-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 14px; }
+.rc-doc .sr-chip { font-size: 12px; font-weight: 500; color: var(--rc-accent-ink); background: var(--rc-accent-dim); border: 1px solid color-mix(in srgb, var(--rc-accent) 30%, transparent); border-radius: 99px; padding: 5px 12px; }
+
+.rc-doc .sr-bullets { display: flex; flex-direction: column; gap: 9px; margin: 4px 0 16px; }
+.rc-doc .sr-bullet { display: flex; gap: 10px; font-size: 13.5px; line-height: 1.5; color: var(--rc-ink-soft); }
+.rc-doc .sr-bullet-mk { flex-shrink: 0; color: var(--rc-accent); }
+.rc-doc .sr-bullet.up .sr-bullet-mk { color: #12876f; }
+
+.rc-doc .sr-findings { display: flex; flex-direction: column; gap: 14px; }
+.rc-doc .sr-finding { display: flex; gap: 13px; }
+.rc-doc .sr-finding-n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: var(--rc-accent-ink); background: var(--rc-accent-dim); }
+.rc-doc .sr-finding-h { font-size: 14.5px; font-weight: 600; color: var(--rc-ink); margin-bottom: 4px; }
+.rc-doc .sr-finding-t { font-size: 13.5px; line-height: 1.55; color: var(--rc-ink-soft); }
+
+.rc-doc .sr-sources { display: flex; flex-direction: column; gap: 10px; }
+.rc-doc .sr-source { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; border: 1px solid var(--rc-hair); border-radius: 10px; padding: 12px 14px; }
+.rc-doc .sr-source-pub { font-size: 13px; font-weight: 600; color: var(--rc-ink); margin-bottom: 3px; }
+.rc-doc .sr-source-snip { font-size: 12.5px; font-style: italic; line-height: 1.5; color: var(--rc-ink-soft); }
+.rc-doc .sr-source-conf { flex-shrink: 0; font-size: 11px; font-weight: 600; color: var(--rc-accent-ink); background: var(--rc-accent-dim); border-radius: 99px; padding: 4px 10px; white-space: nowrap; align-self: center; }
+
+.rc-doc .sr-minis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.rc-doc .sr-mini { background: var(--rc-panel); border: 1px solid var(--rc-hair); border-radius: 12px; padding: 14px 16px; }
+.rc-doc .sr-mini-h { font-size: 14px; font-weight: 700; color: var(--rc-ink); }
+.rc-doc .sr-mini-sub { font-size: 11.5px; color: var(--rc-ink-faint); margin-top: 2px; }
+.rc-doc .sr-mini-t { font-size: 13px; line-height: 1.5; color: var(--rc-ink-soft); margin-top: 7px; }
+.rc-doc .sr-mini-row { display: flex; justify-content: space-between; gap: 12px; font-size: 12.5px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rc-hair); }
+.rc-doc .sr-mini-row span { color: var(--rc-ink-faint); }
+.rc-doc .sr-mini-row b { color: var(--rc-ink); }
+.rc-doc .sr-sw-l { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--rc-ink-faint); margin: 10px 0 4px; }
+.rc-doc .sr-trigger { font-size: 12.5px; font-style: italic; color: var(--rc-ink-soft); margin-top: 7px; }
+
+.rc-doc .sr-dual { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rc-doc .sr-drivers { display: flex; flex-direction: column; gap: 10px; }
+.rc-doc .sr-driver { border: 1px solid var(--rc-hair); border-radius: 10px; padding: 11px 13px; }
+.rc-doc .sr-driver-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.rc-doc .sr-driver-f { font-size: 13px; font-weight: 600; color: var(--rc-ink); }
+.rc-doc .sr-driver-w { font-size: 11px; font-weight: 700; border-radius: 99px; padding: 2px 8px; color: var(--rc-accent-ink); background: var(--rc-accent-dim); white-space: nowrap; }
+.rc-doc .sr-driver.down .sr-driver-w { color: #a8532c; background: rgba(224, 123, 106, 0.16); }
+.rc-doc .sr-driver-q { font-size: 12.5px; font-style: italic; line-height: 1.5; color: var(--rc-ink-soft); margin-top: 6px; }
+
+.rc-doc .sr-map-wrap { display: flex; gap: 10px; margin: 8px 0 18px; }
+.rc-doc .sr-map-yaxis { display: flex; flex-direction: column; justify-content: space-between; align-items: center; padding: 4px 0; }
+.rc-doc .sr-map-yaxis span { font-size: 10px; color: var(--rc-ink-faint); }
+.rc-doc .sr-map-axname { writing-mode: vertical-rl; transform: rotate(180deg); font-weight: 600; letter-spacing: 0.03em; color: var(--rc-ink-soft) !important; }
+.rc-doc .sr-map-col { flex: 1; min-width: 0; }
+.rc-doc .sr-map-field { position: relative; aspect-ratio: 3 / 2; border: 1px solid var(--rc-hair); border-radius: 10px; background: var(--rc-panel); overflow: hidden; }
+.rc-doc .sr-map-hline, .rc-doc .sr-map-vline { position: absolute; background: var(--rc-hair); }
+.rc-doc .sr-map-hline { left: 0; right: 0; top: 50%; height: 1px; }
+.rc-doc .sr-map-vline { top: 0; bottom: 0; left: 50%; width: 1px; }
+.rc-doc .sr-map-dot { position: absolute; width: 11px; height: 11px; border-radius: 50%; background: var(--rc-ink-faint); transform: translate(-50%, -50%); }
+.rc-doc .sr-map-dot.you { background: var(--rc-accent); }
+.rc-doc .sr-map-ring { position: absolute; width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--rc-accent); opacity: 0.5; transform: translate(-50%, -50%); }
+.rc-doc .sr-map-lbl { position: absolute; font-size: 11px; color: var(--rc-ink-soft); white-space: nowrap; }
+.rc-doc .sr-map-lbl.you { color: var(--rc-accent-ink); font-weight: 700; }
+.rc-doc .sr-map-xaxis { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+.rc-doc .sr-map-xaxis span { font-size: 10px; color: var(--rc-ink-faint); }
+
+@media (max-width: 640px) {
+  .rc-doc .sr-minis, .rc-doc .sr-dual { grid-template-columns: 1fr; }
+  .rc-doc .sr-trow { grid-template-columns: 1fr !important; }
+  .rc-doc .sr-thead { display: none; }
+  .rc-doc .sr-cell { border-left: none; display: flex; justify-content: space-between; gap: 12px; }
+  .rc-doc .sr-cell::before { content: attr(data-label); font-weight: 600; color: var(--rc-ink-faint); font-size: 11px; }
+}

@@ -600,51 +600,75 @@ function StudioContentLibrary({
   onOpen,
   onCreateNew
 }) {
+  const e = React.createElement;
   const s = D.STUDIOS.find(x => x.key === studioKey) || D.STUDIOS[0];
-  return /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib"
-  }, /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    className: "id-back",
-    onClick: onBack
-  }, "\u2039 Create content"), /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib-head"
-  }, /*#__PURE__*/React.createElement(Eyebrow, null, "Studio ", s.name), /*#__PURE__*/React.createElement("h2", {
-    className: "ct-lib-title"
-  }, "Your ", s.name.toLowerCase(), " content"), /*#__PURE__*/React.createElement("p", {
-    className: "ct-lib-sub"
-  }, pieces.length, " piece", pieces.length === 1 ? '' : 's', " saved \u2014 open one for stats or start something new.")), /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib-grid"
-  }, pieces.map(p => /*#__PURE__*/React.createElement("button", {
-    type: "button",
-    key: p.id || p.title,
-    className: "ct-lib-card",
-    onClick: () => onOpen(p)
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib-thumb",
-    style: { background: `color-mix(in srgb, ${s.accent} 16%, var(--clr-card-2))`, color: s.accent }
-  }, /*#__PURE__*/React.createElement(Icon, {
-    name: p.motif || s.icon,
-    size: 30
-  }), (p.views || p.views === 0) && /*#__PURE__*/React.createElement("span", {
-    className: "ct-lib-thumb-views"
-  }, (p.views >= 1000 ? (p.views / 1000).toFixed(1) + 'k' : p.views), " views")), /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib-body"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib-card-title"
-  }, p.title), /*#__PURE__*/React.createElement("div", {
-    className: "ct-lib-card-meta"
-  }, /*#__PURE__*/React.createElement(StatusBadge, {
-    status: p.status || 'draft'
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "ct-lib-card-date"
-  }, p.date || p.platform || '')))))), /*#__PURE__*/React.createElement("div", {
-    className: "ct-new-row"
-  }, /*#__PURE__*/React.createElement(Button, {
-    accent: s.accent,
-    onClick: onCreateNew
-  }, "Create new ", s.name.toLowerCase(), " \u2192")));
+  const [query, setQuery]   = React.useState('');
+  const [status, setStatus] = React.useState('all');
+  const [sortBy, setSortBy] = React.useState('recent');
+
+  const STATUSES = [['all', 'All'], ['published', 'Published'], ['scheduled', 'Scheduled'], ['draft', 'Draft'], ['review', 'Review']];
+  const STATUS_ORDER = { published: 0, scheduled: 1, review: 2, draft: 3 };
+  const rank = st => (STATUS_ORDER[st] != null ? STATUS_ORDER[st] : 9);
+  const dateVal = p => { const t = Date.parse((p && p.date) || ''); return isNaN(t) ? 0 : t; };
+
+  const all = pieces || [];
+  const q = query.trim().toLowerCase();
+  let shown = all.filter(p =>
+    (status === 'all' || (p.status || 'draft') === status) &&
+    (!q || String(p.title || '').toLowerCase().indexOf(q) >= 0));
+  shown = shown.slice().sort((a, b) =>
+    sortBy === 'title'  ? String(a.title || '').localeCompare(String(b.title || '')) :
+    sortBy === 'status' ? rank(a.status) - rank(b.status) :
+    dateVal(b) - dateVal(a));
+
+  const card = p => e('button', { type: 'button', key: p.id || p.title, className: 'ct-lib-card', onClick: () => onOpen(p) },
+    e('div', { className: 'ct-lib-thumb', style: { background: `color-mix(in srgb, ${s.accent} 16%, var(--clr-card-2))`, color: s.accent } },
+      e(Icon, { name: p.motif || s.icon, size: 30 }),
+      (p.views || p.views === 0) && e('span', { className: 'ct-lib-thumb-views' }, (p.views >= 1000 ? (p.views / 1000).toFixed(1) + 'k' : p.views), ' views')),
+    e('div', { className: 'ct-lib-body' },
+      e('div', { className: 'ct-lib-card-title' }, p.title),
+      e('div', { className: 'ct-lib-card-meta' },
+        e(StatusBadge, { status: p.status || 'draft' }),
+        e('span', { className: 'ct-lib-card-date' }, p.date || p.platform || ''))));
+
+  return e('div', { className: 'ct-lib' },
+    e('button', { type: 'button', className: 'id-back', onClick: onBack }, '‹ Create content'),
+    e('div', { className: 'ct-lib-head' },
+      e(Eyebrow, null, 'Studio ', s.name),
+      e('h2', { className: 'ct-lib-title' }, 'Your ', s.name.toLowerCase(), ' content'),
+      e('p', { className: 'ct-lib-sub' },
+        all.length === 0
+          ? 'Nothing here yet — make your first piece.'
+          : shown.length === all.length
+            ? (all.length + ' piece' + (all.length === 1 ? '' : 's') + ' saved — open one for stats or start something new.')
+            : (shown.length + ' of ' + all.length + ' shown'))),
+    all.length > 0 && e('div', { className: 'ct-lib-toolbar' },
+      e('div', { className: 'ct-lib-search' },
+        e(Icon, { name: 'Search', size: 15 }),
+        e('input', { type: 'text', value: query, placeholder: 'Search your ' + s.name.toLowerCase() + ' content…', onChange: ev => setQuery(ev.target.value) })),
+      e('div', { className: 'ct-lib-sortwrap' },
+        e('span', { className: 'ct-lib-sort-l' }, 'Sort'),
+        e('select', { className: 'ct-lib-sort', value: sortBy, onChange: ev => setSortBy(ev.target.value) },
+          e('option', { value: 'recent' }, 'Most recent'),
+          e('option', { value: 'status' }, 'By status'),
+          e('option', { value: 'title' }, 'By title (A–Z)')))),
+    all.length > 0 && e('div', { className: 'ct-lib-chips' },
+      STATUSES.map(row => {
+        const id = row[0], label = row[1];
+        const n = id === 'all' ? all.length : all.filter(p => (p.status || 'draft') === id).length;
+        return e('button', { type: 'button', key: id, className: 'ct-lib-chip' + (status === id ? ' on' : ''), onClick: () => setStatus(id) },
+          label, e('span', { className: 'ct-lib-chip-n' }, n));
+      })),
+    shown.length
+      ? e('div', { className: 'ct-lib-grid' }, shown.map(card))
+      : e('div', { className: 'ct-lib-empty' },
+          e(Icon, { name: 'SearchX', size: 26 }),
+          e('span', null, 'No pieces match — try a different search or filter.'),
+          e('button', { type: 'button', className: 'ct-lib-empty-clear', onClick: () => { setQuery(''); setStatus('all'); } }, 'Clear filters')),
+    e('div', { className: 'ct-new-row' },
+      e(Button, { accent: s.accent, onClick: onCreateNew }, 'Create new ', s.name.toLowerCase(), ' →')));
 }
+
 
 /* ---------- Single content detail + stats ---------- */
 function StudioContentDetail({

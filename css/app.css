@@ -32,26 +32,26 @@ body { background: var(--clr-bg); font-family: var(--font-body); height: 100vh; 
 #clarity-loader.cl-hiding { animation: cl-out .6s cubic-bezier(.4,0,1,1) forwards !important; }
 .cl-glow {
   position: absolute; width: 520px; height: 520px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(43,212,187,.065) 0%, transparent 65%);
+  background: radial-gradient(circle, rgba(212,168,83,.07) 0%, transparent 65%);
   pointer-events: none; animation: cl-glow-pulse 3s ease-in-out infinite;
 }
 .cl-sig-wrap { position: relative; display: inline-block; }
 .cl-sig {
   font-family: 'Great Vibes', cursive; font-size: 108px;
-  color: #2bd4bb; line-height: 1.15; display: block; white-space: nowrap;
+  color: #d4a853; line-height: 1.15; display: block; white-space: nowrap;
   clip-path: inset(0 101% 0 0 round 2px);
   animation: cl-reveal 2s cubic-bezier(.4,0,.25,1) .3s forwards;
 }
 .cl-pen {
   position: absolute; top: 8%; height: 84%; width: 3px; border-radius: 2px;
-  background: linear-gradient(to bottom, transparent, #2bd4bb 30%, #2bd4bb 70%, transparent);
-  box-shadow: 0 0 10px 3px rgba(43,212,187,.7), 0 0 22px 6px rgba(43,212,187,.25);
+  background: linear-gradient(to bottom, transparent, #d4a853 30%, #d4a853 70%, transparent);
+  box-shadow: 0 0 10px 3px rgba(212,168,83,.6), 0 0 22px 6px rgba(212,168,83,.25);
   animation: cl-pen 2s cubic-bezier(.4,0,.25,1) .3s forwards;
   left: 0%; opacity: 0; animation-fill-mode: both;
 }
 .cl-underline {
   position: absolute; bottom: -2px; left: 6%; width: 88%; height: 1.5px;
-  background: linear-gradient(90deg, transparent, #2bd4bb 15%, rgba(43,212,187,.35) 85%, transparent);
+  background: linear-gradient(90deg, transparent, #d4a853 15%, rgba(212,168,83,.35) 85%, transparent);
   transform-origin: left; transform: scaleX(0);
   animation: cl-underline .7s cubic-bezier(.4,0,.2,1) 2.1s forwards;
 }
@@ -66,7 +66,7 @@ body { background: var(--clr-bg); font-family: var(--font-body); height: 100vh; 
   opacity: 0; animation: cl-up .4s ease 2.5s forwards;
 }
 .cl-dots span {
-  width: 5px; height: 5px; border-radius: 50%; background: #2bd4bb;
+  width: 5px; height: 5px; border-radius: 50%; background: #d4a853;
   animation: cl-dot 1.2s ease-in-out infinite;
 }
 .cl-dots span:nth-child(2) { animation-delay: .18s; }

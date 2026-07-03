@@ -147,11 +147,13 @@
       { id: 'e_07', domain: 'similarweb.com',  topic: 'Competitor traffic & channel mix',             url: 'https://www.similarweb.com/' }
     ];
   }
-  function buildReport(profile, regions) {
+  function locLabelOf(profile) {
+    var l = (profile && profile.locations) || [];
+    return l.length ? (l[0] === 'Global' ? 'Global / Worldwide' : l.join(', ')) : 'Global';
+  }
+  function buildReport(profile) {
     var s = SECTORS[profile.sector] || SECTORS.other;
-    var region = regions && regions.length
-      ? regions.map(function (id) { return (REGIONS.filter(function (r) { return r.id === id; })[0] || {}).label; }).join(', ')
-      : 'Global';
+    var region = locLabelOf(profile);
     var evidence = buildEvidence(s.category);
     return { xp: XP, category: s.category, region: region, dq: s.dq, date: fmtDate(),
       sources: evidence.length, depth: 'Standard (3 queries)', sections: s.findings.length,
@@ -253,19 +255,16 @@
     var slS = React.useState(initPrimary);   var sel = slS[0], setSel = slS[1];
     var idRef = React.useRef(1);
     var sp = React.useState(0);   var step = sp[0], setStep = sp[1];
-    var rg = React.useState([]);  var regions = rg[0], setRegions = rg[1];
-    var fo = React.useState(['demand', 'competitors', 'pricing']); var foci = fo[0], setFoci = fo[1];
+    var fc = React.useState('');  var focus = fc[0], setFocus = fc[1];   /* sajood's optional focus question */
     var tv = React.useState('dark'); var theme = tv[0], setTheme = tv[1];  /* report reader mode (dark by default) */
 
     var soldWhat = (profile.desc || 'your product').trim();
-
-    function toggleRegion(id) { setRegions(function (a) { return a.indexOf(id) >= 0 ? a.filter(function (x) { return x !== id; }) : a.concat([id]); }); }
-    function toggleFocus(id) { setFoci(function (a) { return a.indexOf(id) >= 0 ? a.filter(function (x) { return x !== id; }) : a.concat([id]); }); }
+    var locLabel = locLabelOf(profile);
 
     React.useEffect(function () {
       if (view !== 'running') return;
       var t = setTimeout(function () {
-        var rep = buildReport(profile, regions);
+        var rep = buildReport(profile);
         rep.id = 'mkt_' + (idRef.current++); rep.status = 'ready';
         var next = reports.concat([rep]);
         setReports(next); setPrimaryId(rep.id); setSel(rep.id); setView('result');
@@ -293,57 +292,43 @@
     /* ── INTRO ── */
     if (view === 'brief') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
-        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Strategic Planning'),
+        e('div', { className: 'id-eyebrow' }, 'Strategic Planning · My Market'),
         e('h1', { className: 'mm-title' }, 'Understand your market'),
         voice('You haven’t looked at your market yet. Give me a minute and I’ll come back with answers — not a pile of links.'),
         e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('scan'); setStep(0); } }, 'Start the research →')
       ));
     }
 
-    /* ── SCAN WIZARD ── */
+    /* ── CONFIRM YOUR CONTEXT (single screen, sajood structure) ── */
     if (view === 'scan') {
-      var stepNode;
-      if (step === 0) {
-        stepNode = e(React.Fragment, null,
-          voice('First — where do you operate? Pick the parts of the world you serve.'),
-          e('div', { className: 'mm-sec' }, 'Where you operate'),
-          e('div', { className: 'mm-foci' },
-            REGIONS.map(function (r) { var on = regions.indexOf(r.id) >= 0; return e('button', { key: r.id, className: 'ob-opt' + (on ? ' sel' : ''), onClick: function () { toggleRegion(r.id); } }, r.label); })),
-          e('div', { className: 'mm-inferred' }, e(Icon, { name: 'Sparkles', size: 13 }), e('span', { className: 'mm-inferred-l' }, 'What you sell'), e('span', { className: 'mm-inferred-v' }, soldWhat), e('span', { className: 'mm-inferred-badge' }, 'From your intro')),
-          e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(1); }, disabled: regions.length === 0 }, 'Next →'));
-      } else if (step === 1) {
-        stepNode = e(React.Fragment, null,
-          voice('What should I look into? Pick whatever matters to you.'),
-          e('div', { className: 'mm-sec' }, 'What to look into'),
-          e('div', { className: 'mm-foci' },
-            FOCI.map(function (f) { var on = foci.indexOf(f.id) >= 0; return e('button', { key: f.id, className: 'ob-opt' + (on ? ' sel' : ''), onClick: function () { toggleFocus(f.id); } }, f.label); })),
-          e('div', { className: 'mm-row' },
-            e('button', { className: 'id-back', onClick: function () { setStep(0); } }, '‹ Back'),
-            e('button', { className: 'pf-cta mm-cta', onClick: function () { setStep(2); }, disabled: foci.length === 0 }, 'Next →')));
-      } else {
-        stepNode = e(React.Fragment, null,
-          voice('All set. I’ll do the reading and come back with a plain answer.'),
-          e('div', { className: 'mm-sec' }, 'What I’ll look at'),
-          e('div', { className: 'mm-summary' },
-            e('div', { className: 'mm-srow' }, e('span', null, 'Where'), e('b', null, regions.length + ' region' + (regions.length > 1 ? 's' : '') + ' · ' + regions.map(function (id) { return (REGIONS.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(', '))),
-            e('div', { className: 'mm-srow' }, e('span', null, 'Looking into'), e('b', null, foci.map(function (id) { return (FOCI.filter(function (x) { return x.id === id; })[0] || {}).label; }).join(' · '))),
-            e('div', { className: 'mm-srow' }, e('span', null, 'Category'), e('b', null, soldWhat))),
-          e('div', { className: 'mm-row' },
-            e('button', { className: 'id-back', onClick: function () { setStep(1); } }, '‹ Back'),
-            e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('running'); } }, 'Start the research →')));
-      }
+      var sectorLabel = (SECTORS[profile.sector] || SECTORS.other).category;
+      function ctxRow(k, v) { return e('div', { className: 'mm-ctx-row' }, e('span', { className: 'mm-ctx-key' }, k), e('span', { className: 'mm-ctx-val' }, v)); }
       return shell(e(React.Fragment, null,
         e('button', { className: 'id-back', onClick: onBack }, '‹ Leave for now'),
-        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
-        e('div', { className: 'mm-steps' }, ['Where', 'What', 'Go'].map(function (s, i) { return e('span', { key: s, className: 'mm-step' + (i === step ? ' on' : '') + (i < step ? ' done' : '') }, (i + 1) + ' ' + s); })),
-        e('div', { className: 'mm-panel', key: step }, stepNode)));
+        e('div', { className: 'mm-ctx-wrap' },
+          e('h1', { className: 'mm-ctx-title' }, 'Confirm your context'),
+          e('div', { className: 'mm-ctx-sub' }, 'I’ll run your Market Scan against this.'),
+          e('div', { className: 'mm-ctx-card' },
+            e('div', { className: 'mm-ctx-card-l' }, 'Your business context'),
+            ctxRow('Business', profile.name || '—'),
+            ctxRow('Category', sectorLabel),
+            ctxRow('Location', locLabel),
+            ctxRow('About', (profile.desc || '').trim() || '—')),
+          e('div', { className: 'mm-focus-wrap' },
+            e('label', { className: 'mm-focus-label', htmlFor: 'mm-focus-input' }, 'Anything specific you want us to focus on? ', e('span', { className: 'mm-optional' }, '(optional)')),
+            e('input', { id: 'mm-focus-input', className: 'pf-input mm-focus-input', value: focus, autoFocus: true,
+              placeholder: 'e.g. weekend farmers market customers in Auckland',
+              onChange: function (ev) { setFocus(ev.target.value); }, onKeyDown: function (ev) { if (ev.key === 'Enter') setView('running'); } }),
+            e('div', { className: 'mm-focus-hint' }, 'Leave blank to run a general analysis for your category.'),
+            e('div', { className: 'mm-ctx-actions' },
+              e('button', { className: 'pf-cta mm-cta', onClick: function () { setView('running'); } }, 'Start the research →'))))));
     }
 
     /* ── RESEARCHING — just the line that fills, no scan list or map ── */
     if (view === 'running') {
       return shell(e(React.Fragment, null,
-        e('div', { className: 'id-eyebrow' }, 'The groundwork · My Market'),
+        e('div', { className: 'id-eyebrow' }, 'Strategic Planning · My Market'),
         e('h1', { className: 'mm-title' }, 'Having a look around…'),
         e('div', { className: 'mm-bar' }, e('i', null))));
     }
@@ -351,20 +336,20 @@
     /* ── ROSTER — browse past market research ── */
     if (view === 'roster') {
       return shell(e(React.Fragment, null,
-        e('button', { className: 'id-back', onClick: onBack }, '‹ The groundwork'),
+        e('button', { className: 'id-back', onClick: onBack }, '‹ Strategic Planning'),
         voice('Everything I’ve read about your market. Open one, run a fresh look, or star the one that feeds your plan.'),
         window.ClarityReportRoster && e(window.ClarityReportRoster, {
-          eyebrow: 'The groundwork · My Market', title: 'Your market research', accent: CATEGORY.accent,
+          eyebrow: 'Strategic Planning · My Market', title: 'Your market research', accent: CATEGORY.accent,
           reports: reports, primaryId: primaryId, fallbackTitle: 'Market research', newLabel: 'Run a fresh look →',
           onOpen: function (id) { setSel(id); setView('result'); },
-          onNew: function () { setRegions([]); setStep(0); setView('scan'); },
+          onNew: function () { setFocus(''); setStep(0); setView('scan'); },
           onSetPrimary: function (id) { setPrimaryId(id); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: id }); }
         })
       ));
     }
 
     /* ── RESULT — clean-document report (verdict-first, human voice) ── */
-    var r = reports.filter(function (x) { return x.id === sel; })[0] || (RP && RP.primary({ reports: reports, primaryId: primaryId })) || buildReport(profile, regions);
+    var r = reports.filter(function (x) { return x.id === sel; })[0] || (RP && RP.primary({ reports: reports, primaryId: primaryId })) || buildReport(profile);
     function toggleTheme() { setTheme(function (t) { return t === 'light' ? 'dark' : 'light'; }); }
 
     /* report sections handed to the shared viewer (accordion / tabs) */
@@ -427,8 +412,9 @@
           e('div', { className: 'rc-mast-meta' }, r.date + '  ·  ' + r.region + '  ·  Prepared by Clarity')),
         e('div', { className: 'rc-rule' }),
 
-        /* sections rendered as accordion / tabs by the shared viewer */
-        window.ClarityReportBody && e(window.ClarityReportBody, { sections: sections, stats: [
+        /* sections rendered as accordion / tabs by the shared viewer
+           (sajood's ported report content when available; else my fallback) */
+        window.ClarityReportBody && e(window.ClarityReportBody, { sections: (window.ClarityReportSections && window.ClarityReportSections.forReport('market', profile.sector)) || sections, stats: [
           { value: '' + r.dq, label: 'Confidence score', note: r.dq >= 80 ? 'Strong opportunity' : r.dq >= 65 ? 'Workable' : 'Proceed with care', tone: r.dq >= 80 ? 'good' : r.dq >= 65 ? 'neutral' : 'warn' },
           { value: '' + r.stats.competitors, label: 'Competitors mapped', note: 'in your space', tone: 'neutral' },
           { value: r.stats.avg, label: 'Average price', note: 'market rate', tone: 'neutral' },
@@ -439,7 +425,7 @@
       e('div', { className: 'mm-row' },
         e('button', { className: 'id-back', onClick: function () { setView('roster'); } }, '‹ All research'),
         (sel !== primaryId) && e('button', { className: 'id-back', onClick: function () { setPrimaryId(sel); if (onComplete) onComplete({ xp: 0, reports: reports, primaryId: sel }); } }, '★ Make primary'),
-        e('button', { className: 'pf-cta mm-cta', onClick: function () { setRegions([]); setStep(0); setView('scan'); } }, 'Run a fresh look →'))
+        e('button', { className: 'pf-cta mm-cta', onClick: function () { setFocus(''); setStep(0); setView('scan'); } }, 'Run a fresh look →'))
     ));
   }
 

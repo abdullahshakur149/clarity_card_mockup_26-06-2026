@@ -232,3 +232,20 @@
 .ct-detail-block-t { font-size: 14px; line-height: 1.55; color: var(--clr-text); }
 
 .ct-new-row { display: flex; justify-content: center; padding-top: 4px; }
+
+/* content library — search / status filter / sort */
+.ct-lib-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 6px 0 12px; }
+.ct-lib-search { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 10px; padding: 8px 12px; color: var(--clr-muted); }
+.ct-lib-search input { flex: 1; min-width: 0; background: none; border: none; outline: none; color: var(--clr-text); font-size: 14px; font-family: inherit; }
+.ct-lib-search input::placeholder { color: var(--clr-faint); }
+.ct-lib-sortwrap { display: flex; align-items: center; gap: 8px; }
+.ct-lib-sort-l { font-size: 12px; color: var(--clr-muted); }
+.ct-lib-sort { background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: 10px; padding: 8px 10px; color: var(--clr-text); font-size: 13px; font-family: inherit; cursor: pointer; }
+.ct-lib-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.ct-lib-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 500; color: var(--clr-muted); background: var(--clr-card-2); border: 1px solid var(--clr-border); border-radius: var(--radius-pill, 99px); padding: 6px 12px; cursor: pointer; transition: color .15s ease, background .15s ease, border-color .15s ease; }
+.ct-lib-chip:hover { color: var(--clr-text); }
+.ct-lib-chip.on { color: var(--clr-primary-hover); background: var(--clr-primary-dim); border-color: var(--clr-primary-border); }
+.ct-lib-chip-n { font-size: 11px; color: var(--clr-faint); }
+.ct-lib-chip.on .ct-lib-chip-n { color: var(--clr-primary-hover); }
+.ct-lib-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 46px 20px; color: var(--clr-muted); text-align: center; }
+.ct-lib-empty-clear { font-size: 13px; font-weight: 600; color: var(--clr-primary-hover); background: none; border: none; cursor: pointer; }
