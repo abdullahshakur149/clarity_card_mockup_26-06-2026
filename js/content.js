@@ -162,6 +162,7 @@
     var sk = React.useState(null); var studioKey = sk[0], setStudioKey = sk[1];
     var ci = React.useState(null); var campaignId = ci[0], setCampaignId = ci[1];
     var cf = React.useState(false); var campFlow = cf[0], setCampFlow = cf[1];
+    var ecs = React.useState(null); var editCampaign = ecs[0], setEditCampaign = ecs[1];
     var sp = React.useState(null); var selPiece = sp[0], setSelPiece = sp[1];
     var bf = React.useState(false); var briefOpen = bf[0], setBriefOpen = bf[1];
     var ds2 = React.useState(function () { return window.ariaDirectorSeen ? window.ariaDirectorSeen() : true; }); var directorSeen = ds2[0], setDirectorSeen = ds2[1];
@@ -207,8 +208,9 @@
     }
 
     var overlay = campFlow && window.CampaignFlow && e(window.CampaignFlow, {
-      onExit: function () { setCampFlow(false); },
-      onLaunch: function () { setCampFlow(false); }
+      editCampaign: editCampaign,
+      onExit: function () { setCampFlow(false); setEditCampaign(null); },
+      onLaunch: function () { setCampFlow(false); setEditCampaign(null); }
     });
 
     /* Director's Call — once, on first entry */
@@ -281,7 +283,7 @@
     /* campaign detail */
     if (view === 'campaign-detail' && window.CampaignDetailScreen) {
       return shell(e(React.Fragment, null,
-        e(window.CampaignDetailScreen, { campaignId: campaignId, justLaunched: false, onBack: function () { setView('campaigns'); }, onDismiss: function () {}, onAddSeries: function () { setCampFlow(true); } }),
+        e(window.CampaignDetailScreen, { campaignId: campaignId, justLaunched: false, onBack: function () { setView('campaigns'); }, onDismiss: function () {}, onAddSeries: function () { setEditCampaign(null); setCampFlow(true); }, onEdit: function () { var camp = (SData.CAMPAIGNS || []).filter(function (x) { return x.id === campaignId; })[0]; setEditCampaign(camp || null); setCampFlow(true); } }),
         overlay));
     }
 

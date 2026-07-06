@@ -316,21 +316,52 @@ const CAMP_OBJECTIVES = [
 /* sajood's series content-pattern options */
 const CAMP_PATTERNS = ['Custom', 'Awareness Drip', 'Launch Countdown', 'Last Call'];
 
+// Map an existing campaign (CD.CAMPAIGNS shape) back onto the flow's inputs so
+// "Edit campaign" can reopen the flow pre-filled with its current settings.
+function goalIdFromCampaign(camp) {
+  if (!camp) return 'preorders';
+  if (camp.goalId) return camp.goalId;
+  const g = (camp.goal || '').toLowerCase();
+  const byLabel = (CD.GOALS || []).find(x => x.label.toLowerCase().includes(g) || (g && g.includes(x.label.toLowerCase().split(' / ')[0])));
+  if (byLabel) return byLabel.id;
+  const byObj = CAMP_OBJECTIVES.find(o => o.obj.toLowerCase() === g);
+  if (byObj) return byObj.goalId;
+  const KW = [
+    ['awareness', ['aware', 'leadership', 'authority', 'brand']],
+    ['reengage',  ['re-engage', 'reengage', 'win back', 'lapsed', 'retention']],
+    ['promote',   ['promo', 'conversion', 'gifting', 'event', 'offer']],
+    ['community', ['community', 'followers']],
+    ['preorders', ['pre-order', 'preorder', 'sales', 'launch']],
+  ];
+  for (const [id, words] of KW) if (words.some(w => g.includes(w))) return id;
+  return 'preorders';
+}
+function channelsFromCampaign(camp) {
+  const base = {};
+  (CD.CHANNELS || []).forEach(ch => { base[ch] = false; });
+  let any = false;
+  if (camp && camp.chips) camp.chips.forEach(ch => { if (ch in base) { base[ch] = true; any = true; } });
+  return any ? base : { LinkedIn: true, Instagram: true, Facebook: true, Email: true, X: false, YouTube: false };
+}
+
 function CampaignFlow({
   onExit,
-  onLaunch
+  onLaunch,
+  editCampaign
 }) {
+  const editing = !!editCampaign;
   const [step, setStep] = React.useState(0);
   const [mode, setMode] = React.useState('single'); // 'single' = one idea (preselected) · 'multi' = several ideas
-  const [name, setName] = React.useState('Summer Pre-order Push');
-  const [goalId, setGoalId] = React.useState('preorders');
+  const [name, setName] = React.useState(editing ? editCampaign.name : 'Summer Pre-order Push');
+  const [goalId, setGoalId] = React.useState(editing ? goalIdFromCampaign(editCampaign) : 'preorders');
   const goal = CD.GOALS.find(g => g.id === goalId) || CD.GOALS[0];
-  const [target, setTarget] = React.useState(goal.target);
-  const [channels, setChannels] = React.useState({
-    Instagram: true,
+  const [target, setTarget] = React.useState(editing && editCampaign.kpiGoal ? editCampaign.kpiGoal : goal.target);
+  const [channels, setChannels] = React.useState(editing ? channelsFromCampaign(editCampaign) : {
     LinkedIn: true,
-    TikTok: true,
+    Instagram: true,
+    Facebook: true,
     Email: true,
+    X: false,
     YouTube: false
   });
   const [set, setSet] = React.useState(CD.CAMP_SET.map(s => ({
@@ -348,7 +379,7 @@ function CampaignFlow({
   const [startTime, setStartTime] = React.useState('09:00');
   const [endDate,   setEndDate]   = React.useState('');
   const [endTime,   setEndTime]   = React.useState('17:00');
-  const [bPersona,  setBPersona]  = React.useState('The Artisan Loyalist');
+  const [bPersona,  setBPersona]  = React.useState('Maya Holloway');
   const [bMessage,  setBMessage]  = React.useState('Sourdough Saturday is back — drive pre-orders before Friday by leading with craft and proof: the 72-hour cold ferment, real customer stories, the 4am bakers. Warm, confident, never salesy.');
   const [bProof,    setBProof]    = React.useState('72-hour cold ferment · sells out by noon · 5-star regulars');
   const [bCta,      setBCta]      = React.useState('Pre-order now');
@@ -425,14 +456,14 @@ function CampaignFlow({
         margin: 0,
         textAlign: 'center'
       }
-    }, "Start a campaign"), /*#__PURE__*/React.createElement("p", {
+    }, editing ? "Edit campaign" : "Start a campaign"), /*#__PURE__*/React.createElement("p", {
       style: {
         fontSize: 14,
         color: 'var(--clr-muted)',
         textAlign: 'center',
         marginTop: 8
       }
-    }, "A campaign is a goal with a deadline. Tell Maker the target \u2014 it builds the plan to hit it."), /*#__PURE__*/React.createElement(CInheritStrip, null), /*#__PURE__*/React.createElement(Input, {
+    }, editing ? "Update this campaign's goal, timing and channels \u2014 then save." : "A campaign is a goal with a deadline. Tell Maker the target \u2014 it builds the plan to hit it."), /*#__PURE__*/React.createElement(CInheritStrip, null), /*#__PURE__*/React.createElement(Input, {
       label: "Campaign name",
       value: name,
       onChange: e => setName(e.target.value)
@@ -466,6 +497,7 @@ function CampaignFlow({
     }, clashChannels.map(ch => /*#__PURE__*/React.createElement(ChannelChip, {
       key: ch,
       selected: channels[ch],
+      title: CD.CHANNEL_DESC[ch],
       onClick: () => setChannels(p => ({
         ...p,
         [ch]: !p[ch]
@@ -1195,7 +1227,7 @@ function CampaignFlow({
       right: /*#__PURE__*/React.createElement(Button, {
         onClick: onLaunch,
         accent: "var(--clr-campaign)"
-      }, "Launch campaign \u2192")
+      }, editing ? "Save changes \u2192" : "Launch campaign \u2192")
     }));
   }
   return /*#__PURE__*/React.createElement("div", {
@@ -1378,7 +1410,8 @@ function CampaignDetailScreen({
   justLaunched,
   onBack,
   onDismiss,
-  onAddSeries
+  onAddSeries,
+  onEdit
 }) {
   const c = CD.CAMPAIGNS.find(x => x.id === campaignId) || CD.CAMPAIGNS[0];
   const onTrack = c.pace >= c.target;
@@ -1534,7 +1567,8 @@ function CampaignDetailScreen({
     }
   }, /*#__PURE__*/React.createElement(Button, {
     variant: "outline",
-    size: "sm"
+    size: "sm",
+    onClick: onEdit
   }, "Edit campaign"), /*#__PURE__*/React.createElement(Button, {
     size: "sm",
     onClick: onAddSeries

@@ -16,87 +16,174 @@ window.ClarityData = (function () {
     { key: 'audio', name: 'Audio', icon: 'Mic', accent: 'var(--clr-audio-mod)', tag: 'Podcasts, voiceovers and audio ads — start from a goal, not a blank track.', ex: ['Podcast', 'Voiceover', 'Ad', 'Narration'] },
   ];
 
-  // --- Studio Create flow (mirrors the source mockups: GTM → lock → generate →
-  // preview → publish). The idea/persona/market are inherited, so the flow opens
-  // straight on Go-to-Market with an AI-picked platform. Per-modality so each
-  // studio shows the right platforms, specs and variation angles. ---
+  // --- Studio Create / Content-Engine flow. Ported to match the clarity-launchpad
+  // reference (studio-create/create-flow.js): the 5-step spine is
+  //   What (modality) → Where (platform) → Format → Brief → Generate.
+  // Per modality: launchpad label/desc, platform set, per-platform formats (with the
+  // recommended index + why-note), the creative controls shown in the Brief step, and
+  // the sample A/B/C variation angles. ---
   const STUDIO_FLOW = {
     text: {
+      label: 'Written', desc: 'Posts, articles, email, threads',
       platforms: [
-        { type: 'email', icon: 'Mail', label: 'Email', rec: true, reason: 'a pre-order push converts best in the inbox — owned audience, no algorithm.' },
-        { type: 'linkedin', icon: 'Briefcase', label: 'LinkedIn post', reason: '' },
-        { type: 'blog', icon: 'FileText', label: 'Blog / SEO', reason: '' },
-        { type: 'ig-caption', icon: 'Image', label: 'Instagram caption', reason: '' },
-        { type: 'x', icon: 'Hash', label: 'X / Thread', reason: '' },
+        { type: 'LinkedIn', icon: 'Briefcase', label: 'LinkedIn', desc: 'Posts, articles', rec: true, reason: 'long-form posts let the craft story land with the widest reach.' },
+        { type: 'Instagram', icon: 'Instagram', label: 'Instagram', desc: 'Captions, stories', reason: '' },
+        { type: 'X', icon: 'Hash', label: 'X', desc: 'Tweets, threads', reason: '' },
+        { type: 'Email', icon: 'Mail', label: 'Email', desc: 'Newsletters', reason: '' },
       ],
-      specs: [
-        { key: 'wordCount', label: 'Word count', opts: ['Short (~60 words)', 'Medium (~120 words)', 'Long (~250 words)'] },
-        { key: 'tone', label: 'Tone', opts: ['Match brand tone', 'Warm', 'Bold', 'Professional', 'Playful'] },
-        { key: 'formatStyle', label: 'Format style', opts: ['Story-led', 'Listicle', 'Punchy one-liner', 'Q&A / hook'] },
+      formats: {
+        LinkedIn:  [{ id: 'Post', limit: '1,300 chars' }, { id: 'Article', limit: '125k chars' }],
+        Instagram: [{ id: 'Caption', limit: '2,200 chars' }, { id: 'Story text', limit: '220 chars' }],
+        X:         [{ id: 'Single tweet', limit: '280 chars' }, { id: 'Thread', limit: '280/tweet' }],
+        Email:     [{ id: 'Newsletter', limit: 'No limit' }],
+      },
+      suggested:  { LinkedIn: 0, Instagram: 0, X: 1, Email: 0 },
+      suggestWhy: {
+        LinkedIn:  'Long-form Posts drive the most reach on LinkedIn',
+        Instagram: 'Captions outperform Story text for feed engagement',
+        X:         'Threads earn more impressions than single tweets',
+        Email:     'Newsletter is the only native long-form email format',
+      },
+      controls: [
+        { key: 'length', label: 'Word count', type: 'select', opts: ['Short (~60 words)', 'Medium (~120 words)', 'Long (~250 words)'], default: 'Medium (~120 words)' },
+        { key: 'tone', label: 'Tone', type: 'select', opts: ['Match brand tone', 'Warm', 'Bold', 'Professional', 'Playful'], default: 'Match brand tone' },
+        { key: 'style', label: 'Format style', type: 'select', opts: ['Story-led', 'Listicle', 'Punchy one-liner', 'Q&A / hook'], default: 'Story-led' },
       ],
       angles: [
-        { angle: 'Story-led open', desc: 'Opens on Millie\'s six years of loaves, then lands the pre-order ask.', fit: 91 },
-        { angle: 'Proof-first', desc: 'Leads with the 72-hour cold ferment as the reason to trust the craft.', fit: 86 },
-        { angle: 'Scarcity nudge', desc: 'Friday cut-off up top, warm sign-off — urgency without the hard sell.', fit: 83 },
+        { angle: 'Contrarian hook → craft moat → CTA', desc: 'Uses market-gap data — ghost kitchen vs artisan CAGR.', fit: 81 },
+        { angle: 'Hot take → stat proof → urgency CTA', desc: 'Best persona fit for Maya — data plus authenticity.', fit: 88 },
+        { angle: 'Ritual → simplicity → soft CTA', desc: 'Process-story angle drawn from consumer research.', fit: 74 },
       ],
     },
     image: {
+      label: 'Image', desc: 'Feed posts, carousels, banners',
       platforms: [
-        { type: 'ig-feed', icon: 'Image', label: 'Instagram Feed', rec: true, reason: 'a visual, craft-led product — the feed rewards beautiful, aspirational stills.' },
-        { type: 'ig-story', icon: 'Smartphone', label: 'Instagram Story', reason: '' },
-        { type: 'poster', icon: 'Frame', label: 'Poster / Print', reason: '' },
-        { type: 'fb-ad', icon: 'Megaphone', label: 'Facebook Ad', reason: '' },
-        { type: 'pinterest', icon: 'Pin', label: 'Pinterest Pin', reason: '' },
+        { type: 'Instagram', icon: 'Instagram', label: 'Instagram', desc: 'Feed, Stories', rec: true, reason: 'a visual, craft-led product — the feed rewards beautiful, aspirational stills.' },
+        { type: 'LinkedIn', icon: 'Briefcase', label: 'LinkedIn', desc: 'Banners, carousels', reason: '' },
+        { type: 'Facebook', icon: 'Facebook', label: 'Facebook', desc: 'Reels, feed', reason: '' },
+        { type: 'Pinterest', icon: 'Pin', label: 'Pinterest', desc: 'Pins', reason: '' },
       ],
-      specs: [
-        { key: 'styleDir', label: 'Style direction', opts: ['Editorial craft', 'Minimal clean', 'Bold promo', 'Documentary / BTS'] },
-        { key: 'textOverlay', label: 'Text overlay', toggle: true, default: 'On' },
+      formats: {
+        Instagram: [{ id: 'Portrait 4:5', aspect: '4:5', dims: '1080×1350' }, { id: 'Feed 1:1', aspect: '1:1', dims: '1080×1080' }, { id: 'Story 9:16', aspect: '9:16', dims: '1080×1920' }],
+        LinkedIn:  [{ id: 'Banner 1.91:1', aspect: '1.91:1', dims: '1200×627' }, { id: 'Square 1:1', aspect: '1:1', dims: '1200×1200' }],
+        Facebook:  [{ id: 'Reel cover 9:16', aspect: '9:16', dims: '1080×1920' }, { id: 'Feed 1:1', aspect: '1:1', dims: '1080×1080' }],
+        Pinterest: [{ id: 'Pin 2:3', aspect: '4:5', dims: '1000×1500' }],
+      },
+      suggested:  { Instagram: 0, LinkedIn: 1, Facebook: 1, Pinterest: 0 },
+      suggestWhy: {
+        Instagram: 'Portrait 4:5 takes the most feed real estate',
+        LinkedIn:  'Square 1:1 reads best in the LinkedIn feed',
+        Facebook:  'Feed 1:1 is the safest crop for Facebook',
+        Pinterest: 'Tall 2:3 pins get the highest save rate',
+      },
+      controls: [
+        { key: 'aspect', label: 'Aspect ratio', type: 'format-aspect' },
+        { key: 'styleDir', label: 'Style direction', type: 'select', opts: ['Editorial craft', 'Minimal clean', 'Bold promo', 'Documentary / BTS'], default: 'Editorial craft' },
+        { key: 'palette', label: 'Color palette', type: 'palette' },
+        { key: 'textOverlay', label: 'Text overlay', type: 'toggle', default: 'On' },
       ],
       angles: [
-        { angle: 'Hero loaf close-up', desc: 'Steam, crust and golden light — the crumb shot that stops the scroll.', fit: 90 },
-        { angle: 'Hands in flour', desc: 'The 4am craft moment, warm and human, brand mark bottom-right.', fit: 87 },
-        { angle: 'Typographic announce', desc: '"Sourdough Saturday is back" set over a soft-focus bakery shelf.', fit: 82 },
+        { angle: 'Hero product · warm light · logo lockup', desc: 'Matches brand-kit colours and weekend urgency.', fit: 84 },
+        { angle: 'Full-bleed craft · headline center', desc: 'Highest persona fit — process over convenience.', fit: 91 },
+        { angle: 'Behind-the-scenes · text overlay', desc: 'Consumer research: ferment visuals +34% conversion.', fit: 76 },
       ],
     },
     video: {
+      label: 'Video', desc: 'Short-form, long-form, ads',
       platforms: [
-        { type: 'ig-reel', icon: 'Film', label: 'Instagram Reel', rec: true, reason: 'a visual, lifestyle product — Reels rewards aspirational short-form video.' },
-        { type: 'yt-short', icon: 'Play', label: 'YouTube Short', reason: '' },
-        { type: 'tiktok', icon: 'Music', label: 'TikTok', reason: '' },
-        { type: 'linkedin', icon: 'Briefcase', label: 'LinkedIn Video', reason: '' },
-        { type: 'yt-long', icon: 'MonitorPlay', label: 'YouTube Long', reason: '' },
+        { type: 'Instagram', icon: 'Instagram', label: 'Instagram', desc: 'Reels', rec: true, reason: 'a lifestyle product — Reels reward aspirational short-form video.' },
+        { type: 'Facebook', icon: 'Facebook', label: 'Facebook', desc: 'Reels, feed', reason: '' },
+        { type: 'YouTube', icon: 'Youtube', label: 'YouTube', desc: 'Shorts, long', reason: '' },
+        { type: 'TikTok', icon: 'Music', label: 'TikTok', desc: 'Covers', reason: '' },
       ],
-      specs: [
-        { key: 'visualStyle', label: 'Visual style', opts: ['Casual / UGC', 'Cinematic', 'Animated / Motion graphics', 'Documentary BTS'] },
-        { key: 'captions', label: 'Captions', toggle: true, default: 'On' },
+      formats: {
+        Instagram: [{ id: 'Reel 9:16', aspect: '9:16', dur: '0:30' }, { id: 'Story 9:16', aspect: '9:16', dur: '0:15' }],
+        Facebook:  [{ id: 'Reel 9:16', aspect: '9:16', dur: '0:30' }, { id: 'Feed 1:1', aspect: '1:1', dur: '0:45' }],
+        YouTube:   [{ id: 'Short 9:16', aspect: '9:16', dur: '0:60' }, { id: 'Long 16:9', aspect: '16:9', dur: '3:00' }],
+        TikTok:    [{ id: 'Cover 9:16', aspect: '9:16', dur: '0:30' }],
+      },
+      suggested:  { Instagram: 0, Facebook: 0, YouTube: 0, TikTok: 0 },
+      suggestWhy: {
+        Instagram: 'Reel 9:16 is the highest-distribution video format',
+        Facebook:  'Reel 9:16 gets prioritized in Facebook video',
+        YouTube:   'Shorts capture the most new-viewer reach',
+        TikTok:    '9:16 cover is the native TikTok format',
+      },
+      controls: [
+        { key: 'vtype', label: 'Video type', type: 'format-id' },
+        { key: 'duration', label: 'Duration', type: 'format-dur' },
+        { key: 'aspect', label: 'Aspect ratio', type: 'format-aspect' },
+        { key: 'visualStyle', label: 'Visual style', type: 'select', opts: ['Casual / UGC', 'Cinematic', 'Animated / Motion graphics', 'Documentary BTS'], default: 'Casual / UGC' },
+        { key: 'captions', label: 'Burn-in captions', type: 'toggle', default: 'On' },
+        { key: 'script', label: 'Script or scene description', type: 'textarea', placeholder: 'Key scenes, dialogue, or shot list…' },
       ],
       angles: [
-        { angle: 'Hook-first cut', desc: 'Opens on the boldest claim, then proves it in three fast beats.', fit: 90 },
-        { angle: 'Story-driven cut', desc: 'Follows Millie from the problem straight to the payoff.', fit: 86 },
-        { angle: 'Founder UGC cut', desc: 'Raw, talking-to-camera energy that reads authentic, not an ad.', fit: 83 },
+        { angle: 'Hook-first cut', desc: 'Scroll-stop hook aligned to persona fear and motivator.', fit: 90 },
+        { angle: 'Story-driven cut', desc: 'Narrative arc from the brief and consumer trigger.', fit: 86 },
+        { angle: 'Process montage', desc: 'Platform-native reel pacing for Instagram.', fit: 83 },
       ],
     },
     audio: {
+      label: 'Audio', desc: 'Podcast, voiceover, ad spot',
       platforms: [
-        { type: 'podcast', icon: 'Mic', label: 'Podcast episode', rec: true, reason: 'long-form trust-building — your loyalists listen on the commute.' },
-        { type: 'voiceover', icon: 'Volume2', label: 'Voiceover', reason: '' },
-        { type: 'audio-ad', icon: 'Radio', label: 'Audio ad', reason: '' },
-        { type: 'spotify', icon: 'Headphones', label: 'Spotify / Music', reason: '' },
+        { type: 'Spotify', icon: 'Headphones', label: 'Spotify', desc: 'Podcast', rec: true, reason: 'long-form trust-building — your loyalists listen on the commute.' },
+        { type: 'Apple', icon: 'Podcast', label: 'Apple', desc: 'Podcasts', reason: '' },
+        { type: 'YouTube', icon: 'Youtube', label: 'YouTube', desc: 'Video podcast', reason: '' },
       ],
-      specs: [
-        { key: 'voiceStyle', label: 'Voice style', opts: ['Conversational', 'Calm', 'Energetic', 'Professional'] },
-        { key: 'musicBed', label: 'Music bed', toggle: true, default: 'On' },
+      formats: {
+        Spotify: [{ id: 'Episode', dur: '25–45 min' }, { id: 'Short clip', dur: '3–5 min' }],
+        Apple:   [{ id: 'Episode', dur: '25–45 min' }],
+        YouTube: [{ id: 'Video podcast', dur: '20–60 min' }],
+      },
+      suggested:  { Spotify: 0, Apple: 0, YouTube: 0 },
+      suggestWhy: {
+        Spotify: 'Full episodes build the strongest listener habit',
+        Apple:   'Full episodes index best in Apple Podcasts',
+        YouTube: 'Video podcast unlocks YouTube discovery',
+      },
+      controls: [
+        { key: 'atype', label: 'Audio type', type: 'format-id' },
+        { key: 'duration', label: 'Duration', type: 'format-dur' },
+        { key: 'voiceStyle', label: 'Voice style', type: 'select', opts: ['Conversational', 'Calm', 'Energetic', 'Professional'], default: 'Conversational' },
+        { key: 'musicBed', label: 'Background music', type: 'toggle', default: 'On' },
+        { key: 'script', label: 'Script or talking points', type: 'textarea', placeholder: 'Key messages, bullet points, or full script…' },
       ],
       angles: [
-        { angle: 'Narrative spot', desc: 'A 30-second story arc from first loaf to loyal regular.', fit: 89 },
-        { angle: 'Founder note', desc: 'Owner-to-listener, intimate and unpolished — pure trust.', fit: 85 },
-        { angle: 'Sensory tease', desc: 'Leads on sound design — crackling crust, then the pre-order line.', fit: 81 },
+        { angle: 'Interview + data segment', desc: 'Balances warmth with research credibility.', fit: 87 },
+        { angle: 'Solo narrative', desc: 'Efficient solo format for a weekly cadence.', fit: 82 },
+        { angle: 'Customer story focus', desc: 'Community motivator drawn from consumer research.', fit: 79 },
       ],
     },
   };
 
-  const CHANNELS = ['Instagram', 'LinkedIn', 'TikTok', 'Email', 'YouTube'];
-  const CHANNEL_MOD = { Instagram: 'image', LinkedIn: 'text', TikTok: 'video', Email: 'text', YouTube: 'video' };
+  // --- Creative-brief step (ported from create-flow.js cfStepBrief). Sample data
+  // matches the launchpad: Hearth Bakery / Maya Holloway. ---
+  const BRIEF = {
+    brand: 'Hearth Bakery',
+    personas: ['Maya Holloway', 'Alex Rivera', 'All segments'],
+    palette: ['#d4a853', '#8c5a2b', '#e8dcc8', '#3a2417'],
+    defaults: {
+      goal:    'Drive weekend pre-orders',
+      whyNow:  'Seasonal launch · Summer 2026',
+      persona: 'Maya Holloway',
+      message: 'Sourdough Saturday is back — 72-hour cold ferment, stone-baked, limited batch. Craft over convenience.',
+      proof:   '68% of food-tech startups shuttered since 2023; artisan bakeries grew 14% CAGR.',
+      cta:     'Pre-order now — closes Friday at 6 PM.',
+    },
+    fields: {
+      goal:    { label: 'Campaign objective', placeholder: 'What measurable outcome do we want?', help: 'Example: Drive weekend pre-orders from existing Instagram followers.' },
+      whyNow:  { label: 'Why this moment', placeholder: 'Why this campaign now?', help: 'Example: Summer menu launch + Saturday footfall spike.' },
+      persona: { label: 'Primary persona', help: 'Who this message should feel written for.' },
+      message: { label: 'Core message', note: '— single clear sentence', placeholder: 'What is the one idea the audience must remember?', help: 'Keep it sharp: offer + differentiator + urgency.' },
+      proof:   { label: 'Proof points', placeholder: 'What makes this claim credible?', help: 'Ingredients, process, data, social proof.' },
+      cta:     { label: 'Call to action', placeholder: 'What exactly should people do next?', help: 'Example: Pre-order now. Pickup Saturday 8–11 AM.' },
+    },
+  };
+
+  // Campaign channels — matched to the clarity-launchpad campaign flow (CP_PLATFORMS).
+  const CHANNELS = ['LinkedIn', 'Instagram', 'Facebook', 'Email', 'X', 'YouTube'];
+  const CHANNEL_MOD = { LinkedIn: 'text', Instagram: 'image', Facebook: 'text', Email: 'text', X: 'text', YouTube: 'video' };
+  const CHANNEL_DESC = { LinkedIn: 'B2B reach', Instagram: 'Visual + stories', Facebook: 'Broad local audience', Email: 'Owned audience', X: 'Real-time updates', YouTube: 'Long + short video' };
 
   const GOALS = [
     { id: 'preorders', label: 'Drive pre-orders / sales', kpi: 'Pre-orders', target: 500 },
@@ -133,7 +220,7 @@ window.ClarityData = (function () {
     { title: 'Why 72-hour cold ferment is worth the wait', channel: 'LinkedIn', mod: 'text', pf: 84, series: 'patience' },
     { title: 'What Millie said after 6 years of loaves', channel: 'Instagram', mod: 'image', pf: 91, series: 'launch' },
     { title: 'Pre-orders open — reserve before Friday', channel: 'Email', mod: 'text', pf: 87, series: 'launch' },
-    { title: 'Meet the 4am bakers — a morning POV', channel: 'TikTok', mod: 'video', pf: 79, series: 'bts' },
+    { title: 'Meet the 4am bakers — a morning POV', channel: 'YouTube', mod: 'video', pf: 79, series: 'bts' },
     { title: 'The science of a 72-hour crumb', channel: 'LinkedIn', mod: 'text', pf: 90, series: 'patience' },
   ];
 
@@ -142,7 +229,7 @@ window.ClarityData = (function () {
   const CAMP_SERIES_PLAN = [
     { id: 'launch', name: 'Sourdough Saturday Launch', pattern: 'Launch Countdown', posts: 3, mods: ['image', 'text'], hint: 'Build anticipation to the Friday cut-off' },
     { id: 'bts', name: 'Meet the 4am Bakers', pattern: 'Behind-the-Scenes', posts: 1, mods: ['video'], hint: 'Trust through transparency' },
-    { id: 'patience', name: 'Why Patience Wins', pattern: 'Educational Ladder', posts: 2, mods: ['text'], hint: 'Authority for The Artisan Loyalist' },
+    { id: 'patience', name: 'Why Patience Wins', pattern: 'Educational Ladder', posts: 2, mods: ['text'], hint: 'Authority for Maya Holloway' },
   ];
 
   // Pillars — the gamified onboarding ladder. The user starts with only Intelligence
@@ -173,11 +260,14 @@ window.ClarityData = (function () {
   // --- Campaign flow (the middle-ground, content-first flow) ---
   // Step 2: Maker's suggested content SET — adjustable counts per platform.
   // Counts feed the batch total. This is the "suggests a content set" beat.
+  // Asset-mix bundle matched to the launchpad campaign flow (CP_BUNDLE_RULES):
+  // LinkedIn 3 posts · Instagram 1 hero + 2 stories · Facebook 2 posts · Email 2.
   const CAMP_SET = [
-    { id: 'ig', platform: 'Instagram', mod: 'image', type: 'Feed + Story', count: 3, hint: 'Carousels & stories for reach' },
-    { id: 'li', platform: 'LinkedIn', mod: 'text', type: 'Thought-leadership post', count: 2, hint: 'Authority for The Artisan Loyalist' },
-    { id: 'em', platform: 'Email', mod: 'text', type: 'Broadcast', count: 2, hint: 'Pre-order announcement + reminder' },
-    { id: 'tt', platform: 'TikTok', mod: 'video', type: 'Short-form reel', count: 2, hint: 'Behind-the-craft POV' },
+    { id: 'li', platform: 'LinkedIn', mod: 'text', type: 'LinkedIn posts', count: 3, hint: 'Authority for Maya Holloway' },
+    { id: 'ig-image', platform: 'Instagram', mod: 'image', type: 'Hero images', count: 1, hint: 'Aspirational stills for the feed' },
+    { id: 'ig-story', platform: 'Instagram', mod: 'image', type: 'Stories', count: 2, hint: 'Ephemeral reach & reminders' },
+    { id: 'fb', platform: 'Facebook', mod: 'text', type: 'Facebook posts', count: 2, hint: 'Broad local audience' },
+    { id: 'em', platform: 'Email', mod: 'text', type: 'Emails', count: 2, hint: 'Pre-order announcement + reminder' },
   ];
 
   // Step 5: schedule rows — note the two Instagram pieces on the SAME day (clash).
@@ -186,7 +276,7 @@ window.ClarityData = (function () {
     { title: 'What Millie said after 6 years of loaves', channel: 'Instagram', mod: 'image', day: 'Mon Jun 2', time: '5:00 PM', clash: true },
     { title: 'Why 72-hour cold ferment is worth the wait', channel: 'LinkedIn', mod: 'text', day: 'Tue Jun 3', time: '8:00 AM' },
     { title: 'Pre-orders open — reserve before Friday', channel: 'Email', mod: 'text', day: 'Wed Jun 4', time: '7:00 AM' },
-    { title: 'Meet the 4am bakers — a morning POV', channel: 'TikTok', mod: 'video', day: 'Thu Jun 5', time: '12:00 PM' },
+    { title: 'Meet the 4am bakers — a morning POV', channel: 'YouTube', mod: 'video', day: 'Thu Jun 5', time: '12:00 PM' },
     { title: 'The science of a 72-hour crumb', channel: 'LinkedIn', mod: 'text', day: 'Fri Jun 6', time: '8:00 AM' },
   ];
 
@@ -279,6 +369,6 @@ window.ClarityData = (function () {
     },
   };
 
-  return { ENGINE_STRATEGY, STUDIOS, STUDIO_FLOW, CHANNELS, CHANNEL_MOD, GOALS, CAMPAIGNS, SERIES, CAMP_PLAN, CAMP_BATCH, CAMP_SERIES_PLAN, CAMP_SET, CAMP_SCHEDULE, PILLARS, CLARA_GOAL, PROFILE,
+  return { ENGINE_STRATEGY, STUDIOS, STUDIO_FLOW, BRIEF, CHANNELS, CHANNEL_MOD, CHANNEL_DESC, GOALS, CAMPAIGNS, SERIES, CAMP_PLAN, CAMP_BATCH, CAMP_SERIES_PLAN, CAMP_SET, CAMP_SCHEDULE, PILLARS, CLARA_GOAL, PROFILE,
     VOICES, AVATARS, AUDIO_GOALS, AUDIO_VIBES, AUDIO_PRODUCTION, TEXT_BRIEF, IMAGE_BRIEF, VIDEO_CONTROLS, ADV };
 })();

@@ -1,10 +1,11 @@
-/* wizard.js — unified 5-step studio wizard (replaces studioflow.js)
-   All modalities share the same 5-step spine:
-     1. Platform  — where does this piece live?
-     2. Brief     — the core idea / script
-     3. Production — voice / style / specs
-     4. Generate  — 3 AI variations scored for persona fit
-     5. Preview   — refine + publish / schedule / campaign (inline)
+/* wizard.js — unified Content-Engine wizard (replaces studioflow.js).
+   Question flow ported to match the clarity-launchpad reference
+   (studio-create/create-flow.js). All modalities share the same 5-step spine:
+     1. What     — pick the content type (modality)
+     2. Where    — publishing platform
+     3. Format   — per-platform format (aspect / dims / limit) + preview
+     4. Brief    — creative brief (Strategy + Message) + per-modality controls
+     5. Generate — 3 AI variations scored for persona fit, then publish inline
    Exposes window.StudioFlow (drop-in replacement). */
 (function () {
 'use strict';
@@ -14,7 +15,7 @@ const { Button: SFButton, Card: SFCard, Icon: SFIcon, WizardSteps: SFWizard } = 
 const SFD = window.ClarityData;
 
 const SF_MOTIF = { text: 'FileText', image: 'Image', video: 'Clapperboard', audio: 'AudioLines' };
-const STEPS = ['What?', 'Where?', 'Format', 'Brief', 'Generate'];
+const STEPS = ['What', 'Where', 'Format', 'Brief', 'Generate'];
 const GEN_STEP = 4;
 
 /* ── Keyframes injected once ──────────────────────────────────────── */
@@ -111,7 +112,7 @@ function PersonaFitBar({ step, studioKey, platform, rec, variations, selected })
         writingMode: 'vertical-rl', transform: 'rotate(180deg)',
         whiteSpace: 'nowrap'
       }
-    }, 'Loyalist fit')
+    }, 'Persona fit')
   );
 }
 
@@ -282,16 +283,80 @@ function SFRecBanner({ rec, accent }) {
   );
 }
 
+/* ── Format-step preview helpers (ported from create-flow.js cfFormatPreview) ── */
+function sfAspectDims(asp, maxLong) {
+  const p = String(asp || '1:1').split(':');
+  const rw = parseFloat(p[0]) || 1, rh = parseFloat(p[1]) || 1;
+  if (rw >= rh) return { w: maxLong, h: Math.round(maxLong * rh / rw) };
+  return { h: maxLong, w: Math.round(maxLong * rw / rh) };
+}
+function SFFormatPreview(format, platformLabel, accent, recommended, modality) {
+  if (!format) {
+    return React.createElement('div', {
+      style: { textAlign: 'center', color: 'var(--clr-muted)', fontSize: 12.5, padding: '24px 0' }
+    }, 'Select a format above to see a preview');
+  }
+  const meta = [format.id, format.dims || format.dur || format.limit].filter(Boolean).join(' · ');
+  const hasAspect = !!format.aspect;
+  const dims = hasAspect ? sfAspectDims(format.aspect, modality === 'video' ? 150 : 190) : { w: 240, h: 130 };
+  return React.createElement('div', {
+    style: { marginTop: 22, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 11 }
+  },
+    React.createElement('div', {
+      style: {
+        width: dims.w, height: dims.h, borderRadius: 'var(--radius-md)',
+        border: '1px solid var(--clr-border)', background: `color-mix(in srgb, ${accent} 10%, var(--clr-card-2))`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: accent, position: 'relative'
+      }
+    },
+      hasAspect && React.createElement('span', {
+        style: { position: 'absolute', top: 6, right: 8, fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--clr-muted)' }
+      }, format.aspect),
+      platformLabel && React.createElement('span', {
+        style: { position: 'absolute', bottom: 6, left: 8, fontSize: 10, color: 'var(--clr-muted)' }
+      }, platformLabel),
+      React.createElement(SFIcon, { name: SF_MOTIF[modality] || 'Image', size: 26, strokeWidth: 1.6 })
+    ),
+    React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5, color: 'var(--clr-text)' } },
+      React.createElement('span', null, meta),
+      recommended && React.createElement('span', {
+        style: { fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 'var(--radius-pill)', background: `color-mix(in srgb, ${accent} 18%, transparent)`, color: accent }
+      }, 'Recommended')
+    )
+  );
+}
+
+/* ── Brief-step text field (label · note · input/textarea · help) ── */
+function SFBriefField({ field, value, onChange, multiline }) {
+  const boxStyle = {
+    width: '100%', boxSizing: 'border-box', background: 'var(--clr-card-2)',
+    border: '1px solid var(--clr-border)', borderRadius: 'var(--radius-sm)',
+    color: 'var(--clr-text)', font: 'var(--type-body)'
+  };
+  return React.createElement('div', null,
+    React.createElement('div', {
+      style: { font: 'var(--type-label-xs)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 'var(--label-tracking)', color: 'var(--clr-muted)', marginBottom: 7, display: 'flex', gap: 6, alignItems: 'baseline' }
+    },
+      field.label,
+      field.note && React.createElement('span', { style: { textTransform: 'none', letterSpacing: 0, fontWeight: 400, color: 'var(--clr-muted)', fontSize: 11 } }, field.note)
+    ),
+    multiline
+      ? React.createElement('textarea', { value, onChange: e => onChange(e.target.value), placeholder: field.placeholder, rows: 3, style: { ...boxStyle, padding: '10px 12px', resize: 'vertical', lineHeight: 1.5 } })
+      : React.createElement('input', { value, onChange: e => onChange(e.target.value), placeholder: field.placeholder, style: { ...boxStyle, padding: '9px 11px' } }),
+    field.help && React.createElement('div', { style: { fontSize: 11.5, color: 'var(--clr-muted)', marginTop: 6, lineHeight: 1.4 } }, field.help)
+  );
+}
+
 /* ── Campaign slide-in layer ──────────────────────────────────────── */
 function CampLayer({ variation, platform, studio, accent, onLaunch, onClose }) {
   const MOD_ICON  = { text: 'FileText', image: 'Image', video: 'Clapperboard', audio: 'AudioLines' };
-  const CHANNELS  = ['Instagram', 'LinkedIn', 'TikTok', 'Email', 'YouTube'];
+  const CHANNELS  = SFD.CHANNELS;
   const suggestions = SFD.CAMP_SET.slice(0, 3);
 
   const [name,     setName]     = React.useState('Sourdough Saturday Push');
   const [goalId,   setGoalId]   = React.useState(SFD.GOALS?.[0]?.id || 'preorders');
   const [mode,     setMode]     = React.useState('single');
-  const [channels, setChannels] = React.useState({ Instagram: true, LinkedIn: true, TikTok: true, Email: true, YouTube: false });
+  const [channels, setChannels] = React.useState({ LinkedIn: true, Instagram: true, Facebook: true, Email: true, X: false, YouTube: false });
   const [startDate, setStartDate] = React.useState('');
   const [endDate,   setEndDate]   = React.useState('');
 
@@ -427,6 +492,7 @@ function CampLayer({ variation, platform, studio, accent, onLaunch, onClose }) {
           CHANNELS.map(ch =>
             React.createElement('span', {
               key: ch,
+              title: SFD.CHANNEL_DESC[ch],
               onClick: () => setChannels(p => ({ ...p, [ch]: !p[ch] })),
               style: {
                 cursor: 'pointer', padding: '6px 13px', borderRadius: 20, fontSize: 12.5, fontWeight: 500,
@@ -544,9 +610,21 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   const [vCaptions, setVCaptions] = React.useState(true);
   const [vAspect,   setVAspect]   = React.useState('9:16');
 
-  /* ── Step 2: Brief (sajood's exact per-modality questions, keyed by spec.key) ── */
+  /* ── Step 2: Format picker ── */
+  const [fmtIdx, setFmtIdx] = React.useState(0);
+
+  /* ── Step 3: Creative-brief controls (keyed by control.key) ── */
   const [specVals, setSpecVals] = React.useState({});
   function setSpecVal(key, val) { setSpecVals(v => ({ ...v, [key]: val })); }
+
+  /* ── Step 3: Strategic brief (Strategy + Message cards) ── */
+  const BD = SFD.BRIEF.defaults;
+  const [bGoal,    setBGoal]    = React.useState(BD.goal);
+  const [bWhyNow,  setBWhyNow]  = React.useState(BD.whyNow);
+  const [bPersona, setBPersona] = React.useState(BD.persona);
+  const [bMessage, setBMessage] = React.useState(BD.message);
+  const [bProof,   setBProof]   = React.useState(BD.proof);
+  const [bCta,     setBCta]     = React.useState(BD.cta);
 
   /* ── Advanced ── */
   const [advOpen, setAdvOpen] = React.useState(false);
@@ -574,12 +652,23 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     if (!flow) return;
     setStep(1);
     setPlatform(flow.platforms.find(p => p.rec)?.type || flow.platforms[0].type);
-    if (flow.specs) {
+    if (flow.controls) {
       const sv = {};
-      flow.specs.forEach(s => { sv[s.key] = s.toggle ? (s.default || 'On') : s.opts[0]; });
+      flow.controls.forEach(c => {
+        if (c.type === 'select')        sv[c.key] = c.default || c.opts[0];
+        else if (c.type === 'toggle')   sv[c.key] = c.default || 'On';
+        else if (c.type === 'palette')  sv[c.key] = (SFD.BRIEF.palette || [])[0];
+        else if (c.type === 'textarea') sv[c.key] = '';
+      });
       setSpecVals(sv);
     }
   }, [studioKey]);
+
+  /* when platform changes: re-select the recommended format for that platform */
+  React.useEffect(() => {
+    if (!flow || !platform) return;
+    setFmtIdx((flow.suggested && flow.suggested[platform]) || 0);
+  }, [platform]);
 
   const intelOk     = intelDone || intelOverride;
   const curPlatform = flow ? flow.platforms.find(p => p.type === platform) || rec : null;
@@ -590,7 +679,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     if (!window.ariaShowHint || !curPlatform) return;
     if (step === 1) {
       setTimeout(() => window.ariaShowHint(
-        `I've pre-selected ${curPlatform.label} — it has the strongest reach for The Artisan Loyalist based on your strategy. Tap any card to change it.`,
+        `I've pre-selected ${curPlatform.label} — it has the strongest reach for Maya Holloway based on your strategy. Tap any card to change it.`,
         5500, 'excited'
       ), 400);
     }
@@ -660,11 +749,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
       clickRate: stats.clickRate
     });
   }
-  function canNext() {
-    if (k === 'audio' && step === 3) return aScript.trim().length > 0;
-    if (k === 'video' && step === 3) return vScript.trim().length > 0;
-    return true;
-  }
+  function canNext() { return true; }
   function nextLabel() {
     if (step === GEN_STEP - 1) return 'Generate →';
     return 'Continue →';
@@ -680,15 +765,17 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
       React.createElement(SFAnims, null),
       React.createElement('div', { style: { maxWidth: 680, margin: '0 auto', padding: '56px 28px 80px' } },
         React.createElement(SFHead, {
-          title: 'What are you making?',
-          sub: 'Pick a format and the studio tunes itself for your platform and persona.'
+          title: 'Select content type',
+          sub: 'Choose the format for this piece of content.'
         }),
         React.createElement('div', {
           style: { display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14, marginTop: 10 }
         },
           SFD.STUDIOS.map(s => React.createElement(SFPickCard, {
             key: s.key, on: false, accent: s.accent,
-            icon: s.icon, title: s.name, sub: s.tag,
+            icon: s.icon,
+            title: (SFD.STUDIO_FLOW[s.key] || {}).label || s.name,
+            sub: (SFD.STUDIO_FLOW[s.key] || {}).desc || s.tag,
             onClick: () => setStudioKey(s.key)
           }))
         )
@@ -720,224 +807,167 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     );
   }
 
-  /* ── STEP 1: Platform (Where?) ── */
+  /* ── STEP 2: Platform (Where?) ── */
   else if (step === 1) {
-    if (k === 'audio') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'What kind of audio?', sub: "Pick a goal and Maker pre-tunes voice, music and pacing. You stay the director." }),
-        Inherit,
-        React.createElement('div', {
-          style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 12 }
-        }, SFD.AUDIO_GOALS.map(g =>
-          React.createElement(SFPickCard, {
-            key: g.id, on: aGoal === g.id, accent: a,
-            icon: g.icon, title: g.label, sub: g.desc,
-            onClick: () => { setAGoal(g.id); setAVoice(g.voice); setAMusic(g.music); setAPace(g.pace); setAAcou(g.acoustics); }
-          })
-        )),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change format'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    } else {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, {
-          title: 'Where does this live?',
-          sub: 'Pick the platform — format, specs and persona fit are tuned automatically.'
-        }),
-        Inherit,
-        React.createElement(SFRecBanner, { rec, accent: a }),
-        React.createElement('div', {
-          style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10 }
-        }, flow.platforms.map(p =>
-          React.createElement(SFPickCard, {
-            key: p.type, on: platform === p.type, accent: a,
-            recBadge: p.rec, icon: p.icon, title: p.label,
-            onClick: () => setPlatform(p.type)
-          })
-        )),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change format'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    }
-  }
-
-  /* ── STEP 3: Brief ── */
-  else if (step === 3) {
-    if (k === 'text') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Write the brief', sub: "Strategy is loaded — shape this one piece. Aria fills the rest." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
-          React.createElement('div', null,
-            React.createElement(SFLabel, { hint: true }, 'Topic angle'),
-            React.createElement(SFSelect, { value: tAngle, onChange: setTAngle, opts: SFD.TEXT_BRIEF.angle.opts })
-          ),
-          React.createElement('div', null,
-            React.createElement(SFLabel, null, 'What should it say?'),
-            React.createElement(SFTextarea, { value: tMsg, onChange: setTMsg, placeholder: "Describe this post in plain English — the one idea it must land…" })
-          ),
-          React.createElement('div', null,
-            React.createElement(SFLabel, null, 'Tone'),
-            React.createElement(SFChips, { opts: SFD.TEXT_BRIEF.tones, sel: tTones, accent: a, onToggle: o => setTTones(s => s.indexOf(o) >= 0 ? s.filter(x => x !== o) : [...s, o]) })
-          )
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    } else if (k === 'image') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Describe the visual', sub: "Strategy and brand kit are loaded — tell us what to picture." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
-          React.createElement('div', null,
-            React.createElement(SFLabel, null, 'Describe the visual'),
-            React.createElement(SFTextarea, { value: iPrompt, onChange: setIPrompt, placeholder: "A warm hero image for Sourdough Saturday — rustic bakery, golden crust, morning light…" })
-          ),
-          React.createElement('div', null,
-            React.createElement(SFLabel, null, 'Style references'),
-            React.createElement(SFChips, { opts: SFD.IMAGE_BRIEF.styles, sel: iStyles, accent: a, onToggle: o => setIStyles(s => s.indexOf(o) >= 0 ? s.filter(x => x !== o) : [...s, o]) })
-          )
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
-        })
-      );
-    } else if (k === 'audio') {
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Script', sub: "Paste it, let Aria draft it, or upload a file — then edit freely." }),
-        React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 14 } },
-          React.createElement('div', { style: { display: 'flex', gap: 10 } },
-            React.createElement(SFButton, {
-              variant: 'outline', size: 'sm',
-              onClick: () => setAScript('HOST: Welcome back. Today we\'re up at 4am to find out what really happens before the doors open — flour, water, time, and a 72-hour cold ferment.')
-            },
-              React.createElement('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
-                React.createElement(SFIcon, { name: 'Sparkles', size: 13 }), 'Draft with AI'
-              )
-            )
-          ),
-          React.createElement(SFTextarea, { value: aScript, onChange: setAScript, placeholder: "Paste or write your script here…", rows: 7 }),
-          React.createElement('div', null,
-            React.createElement(SFLabel, null, 'Vibe tones'),
-            React.createElement(SFChips, { opts: SFD.AUDIO_VIBES, sel: aVibes, accent: a, onToggle: o => setAVibes(s => s.indexOf(o) >= 0 ? s.filter(x => x !== o) : [...s, o]) })
-          )
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, disabled: !canNext(), onClick: next }, nextLabel())
-        })
-      );
-    } else {
-      /* video */
-      body = React.createElement(React.Fragment, null,
-        React.createElement(SFHead, { title: 'Script & presenter', sub: "Write what gets said, then choose how the video is fronted." }),
-        /* Presenter mode toggle via cards */
-        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 } },
-          React.createElement('div', {
-            onClick: () => setVMode('avatar'),
-            style: {
-              cursor: 'pointer', padding: '11px 14px', borderRadius: 'var(--radius-md)',
-              border: `1px solid ${vMode === 'avatar' ? a : 'var(--clr-border)'}`,
-              background: vMode === 'avatar' ? `color-mix(in srgb, ${a} 12%, transparent)` : 'var(--clr-card)',
-              display: 'flex', alignItems: 'center', gap: 9, transition: 'all var(--dur-fast) var(--ease)'
-            }
-          },
-            React.createElement(SFIcon, { name: 'User', size: 16, color: a }),
-            React.createElement('div', null,
-              React.createElement('div', { style: { fontSize: 13, fontWeight: 600, color: 'var(--clr-text)' } }, 'AI Avatar'),
-              React.createElement('div', { style: { fontSize: 11, color: 'var(--clr-muted)' } }, 'On-screen presenter')
-            )
-          ),
-          React.createElement('div', {
-            onClick: () => setVMode('broll'),
-            style: {
-              cursor: 'pointer', padding: '11px 14px', borderRadius: 'var(--radius-md)',
-              border: `1px solid ${vMode === 'broll' ? a : 'var(--clr-border)'}`,
-              background: vMode === 'broll' ? `color-mix(in srgb, ${a} 12%, transparent)` : 'var(--clr-card)',
-              display: 'flex', alignItems: 'center', gap: 9, transition: 'all var(--dur-fast) var(--ease)'
-            }
-          },
-            React.createElement(SFIcon, { name: 'Clapperboard', size: 16, color: a }),
-            React.createElement('div', null,
-              React.createElement('div', { style: { fontSize: 13, fontWeight: 600, color: 'var(--clr-text)' } }, 'B-roll / footage'),
-              React.createElement('div', { style: { fontSize: 11, color: 'var(--clr-muted)' } }, 'No on-screen presenter')
-            )
-          )
-        ),
-        vMode === 'avatar' && React.createElement(SFCard, { inset: true, padding: 14, radius: 'var(--radius-md)', style: { marginBottom: 14 } },
-          React.createElement(SFLabel, { hint: true }, 'Pick a presenter'),
-          React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(130px,1fr))', gap: 10 } },
-            SFD.AVATARS.map(av => {
-              const on = vAvatar === av.id;
-              return React.createElement('div', {
-                key: av.id, onClick: () => setVAvatar(av.id),
-                style: {
-                  cursor: 'pointer', borderRadius: 'var(--radius-md)', overflow: 'hidden',
-                  border: `1px solid ${on ? av.accent : 'var(--clr-border)'}`,
-                  background: on ? `color-mix(in srgb, ${av.accent} 10%, transparent)` : 'var(--clr-card)',
-                  transition: 'all var(--dur-fast) var(--ease)'
-                }
-              },
-                React.createElement('div', {
-                  style: {
-                    aspectRatio: '1/1',
-                    background: `color-mix(in srgb, ${av.accent} 18%, var(--clr-card-2))`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: av.accent
-                  }
-                }, React.createElement(SFIcon, { name: 'User', size: 28, strokeWidth: 1.5 })),
-                React.createElement('div', { style: { padding: '8px 10px' } },
-                  React.createElement('div', { style: { fontSize: 12.5, fontWeight: 600, color: 'var(--clr-text)' } }, av.name),
-                  React.createElement('div', { style: { fontSize: 10.5, color: 'var(--clr-muted)', marginTop: 1 } }, av.role)
-                )
-              );
-            })
-          )
-        ),
-        React.createElement(SFCard, { inset: true, padding: 14, radius: 'var(--radius-md)' },
-          React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 } },
-            React.createElement(SFLabel, null, 'Script · what ', vMode === 'avatar' ? 'the avatar' : 'the voiceover', ' says'),
-            React.createElement(SFButton, {
-              variant: 'ghost', size: 'sm',
-              onClick: () => setVScript('Stop paying full price for bread that was frozen weeks ago. Every Saturday we cold-ferment for 72 hours, stone-bake at dawn, and sell out by noon. Pre-order now — link below.')
-            },
-              React.createElement('span', { style: { display: 'inline-flex', alignItems: 'center', gap: 6 } },
-                React.createElement(SFIcon, { name: 'Sparkles', size: 13 }), 'Draft with AI'
-              )
-            )
-          ),
-          React.createElement(SFTextarea, { value: vScript, onChange: setVScript, placeholder: "Write the script…", rows: 5 })
-        ),
-        React.createElement(SFFoot, {
-          left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
-          right: React.createElement(SFButton, { accent: a, disabled: !canNext(), onClick: next }, nextLabel())
-        })
-      );
-    }
-  }
-
-  /* ── STEP 2: Format (auto-suggested specs) ── */
-  else if (step === 2) {
-    /* Set the brief — sajood's exact per-modality questions + options */
     body = React.createElement(React.Fragment, null,
-      React.createElement(SFHead, { title: 'Set the brief', sub: 'A few choices shape this piece — tweak or keep the picks.' }),
-      React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
-        (flow.specs || []).map(spec =>
-          React.createElement('div', { key: spec.key },
-            React.createElement(SFLabel, null, spec.label),
-            spec.toggle
-              ? React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-                  React.createElement(SFSwitch, { on: (specVals[spec.key] || spec.default || 'On') !== 'Off', onClick: () => setSpecVal(spec.key, (specVals[spec.key] || spec.default || 'On') === 'Off' ? 'On' : 'Off') }),
-                  React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, (specVals[spec.key] || spec.default || 'On') !== 'Off' ? 'On' : 'Off')
-                )
-              : React.createElement(SFSelect, { value: specVals[spec.key] || spec.opts[0], onChange: val => setSpecVal(spec.key, val), opts: spec.opts })
-          )
+      React.createElement(SFHead, {
+        title: 'Publishing platform',
+        sub: 'Select the platform this content is being created for.'
+      }),
+      Inherit,
+      React.createElement(SFRecBanner, { rec, accent: a }),
+      React.createElement('div', {
+        style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10 }
+      }, flow.platforms.map(p =>
+        React.createElement(SFPickCard, {
+          key: p.type, on: platform === p.type, accent: a,
+          recBadge: p.rec, icon: p.icon, title: p.label, sub: p.desc,
+          onClick: () => setPlatform(p.type)
+        })
+      )),
+      React.createElement(SFFoot, {
+        left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change format'),
+        right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
+      })
+    );
+  }
+
+  /* ── STEP 4: Write the creative brief (Strategy + Message + controls) ── */
+  else if (step === 3) {
+    const BF      = SFD.BRIEF;
+    const F       = BF.fields;
+    const palette = BF.palette || [];
+    const curFmt  = (flow.formats && flow.formats[platform] ? flow.formats[platform][fmtIdx] : null) || {};
+
+    const ctrlField = (label, node) => React.createElement('div', null,
+      React.createElement(SFLabel, null, label), node
+    );
+    const roBox = (txt) => React.createElement('div', {
+      style: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--clr-card-2)', border: '1px solid var(--clr-border)', borderRadius: 'var(--radius-sm)', padding: '9px 11px', fontSize: 13, color: 'var(--clr-text)' }
+    }, txt, React.createElement('span', { style: { fontSize: 10, color: 'var(--clr-muted)', border: '1px solid var(--clr-border)', borderRadius: 4, padding: '1px 6px' } }, 'from format'));
+
+    const renderControl = (c) => {
+      const val = specVals[c.key];
+      if (c.type === 'select') {
+        return ctrlField(c.label, React.createElement(SFSelect, { value: val || c.default || c.opts[0], onChange: v => setSpecVal(c.key, v), opts: c.opts }));
+      }
+      if (c.type === 'toggle') {
+        const on = (val || c.default || 'On') !== 'Off';
+        return ctrlField(c.label, React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+          React.createElement(SFSwitch, { on, onClick: () => setSpecVal(c.key, on ? 'Off' : 'On') }),
+          React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, on ? 'On' : 'Off')
+        ));
+      }
+      if (c.type === 'textarea') {
+        return ctrlField(c.label, React.createElement(SFTextarea, { value: val || '', onChange: v => setSpecVal(c.key, v), placeholder: c.placeholder, rows: 3 }));
+      }
+      if (c.type === 'palette') {
+        return ctrlField(c.label, React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } },
+          palette.map(col => {
+            const on = (val || palette[0]) === col;
+            return React.createElement('div', {
+              key: col, onClick: () => setSpecVal(c.key, col), title: col,
+              style: { width: 26, height: 26, borderRadius: 7, cursor: 'pointer', background: col, boxShadow: on ? `0 0 0 2px var(--clr-bg), 0 0 0 4px ${a}` : 'inset 0 0 0 1px rgba(0,0,0,0.15)' }
+            });
+          }),
+          React.createElement('span', { style: { fontSize: 10, color: 'var(--clr-muted)' } }, 'brand kit')
+        ));
+      }
+      if (c.type === 'format-id')     return ctrlField(c.label, roBox(curFmt.id || '—'));
+      if (c.type === 'format-dur')    return ctrlField(c.label, roBox(curFmt.dur || '—'));
+      if (c.type === 'format-aspect') return ctrlField(c.label, roBox((curFmt.aspect || '—') + (curFmt.dims ? ' · ' + curFmt.dims : '')));
+      return null;
+    };
+
+    const pill = (txt) => React.createElement('span', {
+      style: { fontSize: 11.5, padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--clr-card-2)', border: '1px solid var(--clr-border)', color: 'var(--clr-muted)' }
+    }, txt);
+
+    body = React.createElement(React.Fragment, null,
+      React.createElement(SFHead, { title: 'Write the creative brief', sub: `${BF.brand} · lock the strategy your generator will execute` }),
+      /* context pills */
+      React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginBottom: 20 } },
+        pill(studio.name),
+        pill(curPlatform ? curPlatform.label : 'Platform'),
+        pill(curFmt.id || 'Format'),
+        React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, 'Used for all generated variations.')
+      ),
+      /* Strategy card */
+      React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16, marginBottom: 16 } },
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontSize: 13.5, fontWeight: 700, color: 'var(--clr-text)' } }, 'Strategy'),
+          React.createElement('div', { style: { fontSize: 12, color: 'var(--clr-muted)', marginTop: 3 } }, 'Define the goal and timing context for this piece of content.')
+        ),
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14 } },
+          React.createElement(SFBriefField, { field: F.goal, value: bGoal, onChange: setBGoal }),
+          React.createElement(SFBriefField, { field: F.whyNow, value: bWhyNow, onChange: setBWhyNow })
         )
       ),
+      /* Message card */
+      React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16, marginBottom: 16 } },
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontSize: 13.5, fontWeight: 700, color: 'var(--clr-text)' } }, 'Message'),
+          React.createElement('div', { style: { fontSize: 12, color: 'var(--clr-muted)', marginTop: 3 } }, "Who you're talking to, what to say, and what makes it credible.")
+        ),
+        React.createElement('div', null,
+          React.createElement(SFLabel, null, F.persona.label),
+          React.createElement(SFSelect, { value: bPersona, onChange: setBPersona, opts: BF.personas }),
+          React.createElement('div', { style: { fontSize: 11.5, color: 'var(--clr-muted)', marginTop: 6 } }, F.persona.help)
+        ),
+        React.createElement(SFBriefField, { field: F.message, value: bMessage, onChange: setBMessage, multiline: true }),
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 14 } },
+          React.createElement(SFBriefField, { field: F.proof, value: bProof, onChange: setBProof }),
+          React.createElement(SFBriefField, { field: F.cta, value: bCta, onChange: setBCta })
+        )
+      ),
+      /* Creative controls */
+      React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16 } },
+        React.createElement('div', null,
+          React.createElement('div', { style: { fontSize: 13.5, fontWeight: 700, color: 'var(--clr-text)' } }, studio.name, ' controls'),
+          React.createElement('div', { style: { fontSize: 12, color: 'var(--clr-muted)', marginTop: 3 } }, `Shape how this ${k} is generated.`)
+        ),
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 } },
+          (flow.controls || []).map(c => React.createElement('div', { key: c.key, style: c.type === 'textarea' ? { gridColumn: '1 / -1' } : null }, renderControl(c)))
+        )
+      ),
+      React.createElement(SFFoot, {
+        left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
+        right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
+      })
+    );
+  }
+
+  /* ── STEP 3: Format picker (per-platform formats + recommended + preview) ── */
+  else if (step === 2) {
+    const fmts   = (flow.formats && flow.formats[platform]) || [];
+    const sugIdx = (flow.suggested && flow.suggested[platform]) || 0;
+    const why    = (flow.suggestWhy && flow.suggestWhy[platform]) || '';
+    const curFmt = fmts[fmtIdx] || fmts[0] || null;
+    body = React.createElement(React.Fragment, null,
+      React.createElement(SFHead, { title: 'Format', sub: `Pre-set to ${curPlatform ? curPlatform.label : 'platform'} standards. Change if needed.` }),
+      React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 9, justifyContent: 'center' } },
+        fmts.map((fmt, i) => {
+          const on = i === fmtIdx, sug = i === sugIdx;
+          return React.createElement('span', {
+            key: fmt.id, onClick: () => setFmtIdx(i),
+            style: {
+              cursor: 'pointer', fontSize: 13, padding: '7px 14px', borderRadius: 'var(--radius-pill)',
+              display: 'inline-flex', alignItems: 'center', gap: 7,
+              border: `1px solid ${on ? a : 'var(--clr-border)'}`,
+              background: on ? `color-mix(in srgb, ${a} 14%, transparent)` : 'var(--clr-card-2)',
+              color: on ? 'var(--clr-text)' : 'var(--clr-muted)',
+              transition: 'all var(--dur-fast) var(--ease)'
+            }
+          },
+            fmt.id,
+            sug && React.createElement('span', {
+              style: { fontSize: 8.5, fontWeight: 700, letterSpacing: '0.04em', padding: '2px 6px', borderRadius: 'var(--radius-pill)', background: a, color: 'var(--clr-bg)' }
+            }, 'RECOMMENDED')
+          );
+        })
+      ),
+      why && React.createElement('div', { style: { textAlign: 'center', fontSize: 12.5, color: 'var(--clr-muted)', marginTop: 12 } }, why),
+      SFFormatPreview(curFmt, curPlatform ? curPlatform.label : '', a, fmtIdx === sugIdx, k),
       React.createElement(SFFoot, {
         left:  React.createElement(SFButton, { variant: 'outline', onClick: back }, '← Back'),
         right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
@@ -972,7 +1002,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
             ),
             'Maker is generating ', studio.name.toLowerCase(), ' variations…'
           ),
-          React.createElement('div', { style: { fontSize: 13, color: 'var(--clr-muted)', marginTop: 6 } }, 'Scoring against The Artisan Loyalist')
+          React.createElement('div', { style: { fontSize: 13, color: 'var(--clr-muted)', marginTop: 6 } }, 'Scoring against Maya Holloway')
         ),
         React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 } },
           [0,1,2].map(i => React.createElement('div', {
@@ -1012,7 +1042,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
                 React.createElement(SFIcon, { name: v.motif, size: 34, strokeWidth: 1.75 }),
                 k === 'video' && React.createElement('span', {
                   style: { position: 'absolute', top: 8, left: 8, fontSize: 10, fontWeight: 600, padding: '2px 7px', borderRadius: 'var(--radius-pill)', background: 'var(--clr-card)', color: 'var(--clr-muted)', border: '1px solid var(--clr-border)' }
-                }, (specVals.visualStyle || vStyle), ' · ', vMode === 'avatar' ? (SFD.AVATARS.find(x => x.id === vAvatar) || {}).name || 'Avatar' : 'B-roll'),
+                }, (specVals.visualStyle || 'Casual / UGC')),
                 React.createElement('span', {
                   style: { position: 'absolute', bottom: 8, right: 8, fontSize: 10, fontFamily: 'var(--font-mono)', fontWeight: 600, padding: '2px 7px', borderRadius: 'var(--radius-pill)', background: v.fit >= 85 ? 'var(--clr-accent-dim)' : 'var(--clr-card)', color: v.fit >= 85 ? 'var(--clr-accent)' : 'var(--clr-muted)', border: '1px solid var(--clr-border)' }
                 }, v.fit, '% fit')
