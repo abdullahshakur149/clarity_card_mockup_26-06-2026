@@ -298,7 +298,7 @@ function CampaignsHomeScreen({
 
 /* ===================== Campaign flow (overlay wizard) ===================== */
 function stepsFor(mode) {
-  return ['Goal & window', mode === 'multi' ? 'Series plan' : 'Content set', 'One brief', 'Generate', 'Review', 'Schedule'];
+  return ['Goal & audience', 'Brief', 'Launch'];
 }
 const SERIES_GLYPH = {
   launch: 'Rocket',
@@ -307,11 +307,11 @@ const SERIES_GLYPH = {
 };
 /* sajood's Objective options, mapped onto my goals (which carry KPI + target) */
 const CAMP_OBJECTIVES = [
-  { obj: 'Awareness', goalId: 'awareness' },
-  { obj: 'Launch', goalId: 'preorders' },
-  { obj: 'Re-engagement', goalId: 'reengage' },
-  { obj: 'Promotion', goalId: 'promote' },
-  { obj: 'Community', goalId: 'community' }
+  { obj: 'Awareness', goalId: 'awareness', plain: 'Get discovered' },
+  { obj: 'Launch', goalId: 'preorders', plain: 'Launch something new' },
+  { obj: 'Re-engagement', goalId: 'reengage', plain: 'Win back quiet customers' },
+  { obj: 'Promotion', goalId: 'promote', plain: 'Drive a sale or offer' },
+  { obj: 'Community', goalId: 'community', plain: 'Build a following' }
 ];
 /* sajood's series content-pattern options */
 const CAMP_PATTERNS = ['Custom', 'Awareness Drip', 'Launch Countdown', 'Last Call'];
@@ -374,6 +374,7 @@ function CampaignFlow({
   const [progress, setProgress] = React.useState(0);
   const [approved, setApproved] = React.useState({});
   const [spaced, setSpaced] = React.useState(false);
+  const [advOpen, setAdvOpen] = React.useState(false);
   // sajood's campaign questions: timing + brief fields
   const [startDate, setStartDate] = React.useState('');
   const [startTime, setStartTime] = React.useState('09:00');
@@ -387,6 +388,18 @@ function CampaignFlow({
   const totalPieces = isMulti ? seriesPlan.reduce((a, s) => a + s.posts, 0) : set.reduce((a, s) => a + s.count, 0);
   const batch = CD.CAMP_BATCH;
   const steps = stepsFor(mode);
+  function buildCampaign() {
+    const selectedChannels = CD.CHANNELS.filter(ch => channels[ch]);
+    const id = editing && editCampaign.id ? editCampaign.id : 'c_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return {
+      id, name, goalId, goal: goal.label, status: 'running',
+      window: (startDate || 'Now') + ' – ' + (endDate || 'open'),
+      series: isMulti ? seriesPlan.length : 1, pieces: totalPieces,
+      kpiLabel: goal.kpi, kpiNow: 0, kpiGoal: Number(target) || goal.target,
+      pace: 80, target: 75, daysLeft: 14, reach: '—', pfAvg: 0, published: 0,
+      chips: ['Artisan Loyalist'].concat(selectedChannels.slice(0, 2))
+    };
+  }
   function changeGoal(id) {
     setGoalId(id);
     const g = CD.GOALS.find(x => x.id === id);
@@ -419,7 +432,7 @@ function CampaignFlow({
 
   // step 4 fake batch progress
   React.useEffect(() => {
-    if (step !== 3) return;
+    if (step !== 2) return;
     setProgress(0);
     const t = setInterval(() => setProgress(p => {
       if (p >= 100) {
@@ -474,19 +487,7 @@ function CampaignFlow({
     }, CAMP_OBJECTIVES.map(o => /*#__PURE__*/React.createElement("option", {
       key: o.goalId,
       value: o.goalId
-    }, o.obj))), /*#__PURE__*/React.createElement(CFieldLabel, null, "Target \u2014 ", goal.kpi), /*#__PURE__*/React.createElement("input", {
-      type: "number",
-      value: target,
-      onChange: e => setTarget(e.target.value),
-      style: {
-        ...selectStyle(),
-        maxWidth: 240
-      }
-    }), /*#__PURE__*/React.createElement("div", {
-      style: { display: 'flex', gap: 16 }
-    }, /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "Start date"), /*#__PURE__*/React.createElement("input", { type: "date", style: selectStyle(), value: startDate, onChange: e => setStartDate(e.target.value) })), /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "Start time"), /*#__PURE__*/React.createElement("input", { type: "time", style: selectStyle(), value: startTime, onChange: e => setStartTime(e.target.value) }))), /*#__PURE__*/React.createElement("div", {
-      style: { display: 'flex', gap: 16, marginTop: 12 }
-    }, /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "End date"), /*#__PURE__*/React.createElement("input", { type: "date", style: selectStyle(), value: endDate, onChange: e => setEndDate(e.target.value) })), /*#__PURE__*/React.createElement("div", { style: { flex: 1 } }, /*#__PURE__*/React.createElement(CFieldLabel, null, "End time"), /*#__PURE__*/React.createElement("input", { type: "time", style: selectStyle(), value: endTime, onChange: e => setEndTime(e.target.value) }))), /*#__PURE__*/React.createElement(CFieldLabel, {
+    }, o.plain || o.obj))), /*#__PURE__*/React.createElement(CFieldLabel, {
       hint: "Maker suggests a content set from these"
     }, "Where to post?"), /*#__PURE__*/React.createElement("div", {
       style: {
@@ -529,9 +530,9 @@ function CampaignFlow({
       }, "Cancel"),
       right: /*#__PURE__*/React.createElement(Button, {
         onClick: () => go(1)
-      }, isMulti ? 'Plan the series →' : 'Suggest the content set →')
+      }, "Write the brief →")
     }));
-  } else if (step === 1) {
+  } else if (step === 991) {
     body = isMulti ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", {
       style: {
         font: 'var(--type-display-md)',
@@ -762,7 +763,7 @@ function CampaignFlow({
         onClick: () => go(2)
       }, "Write one brief \u2192")
     }));
-  } else if (step === 2) {
+  } else if (step === 1) {
     body = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", {
       style: {
         font: 'var(--type-display-md)',
@@ -860,13 +861,13 @@ function CampaignFlow({
     }, "Add a note \u2192")))), /*#__PURE__*/React.createElement(FlowFoot, {
       left: /*#__PURE__*/React.createElement(Button, {
         variant: "outline",
-        onClick: () => go(1)
+        onClick: () => go(0)
       }, "\u2190 Back"),
       right: /*#__PURE__*/React.createElement(Button, {
-        onClick: () => go(3)
+        onClick: () => go(2)
       }, "Generate ", totalPieces, " pieces \u2192")
     }));
-  } else if (step === 3) {
+  } else if (step === 993) {
     const done = progress >= 100;
     body = /*#__PURE__*/React.createElement("div", {
       style: {
@@ -929,7 +930,7 @@ function CampaignFlow({
       disabled: !done,
       onClick: () => go(4)
     }, done ? 'Review the batch →' : 'Generating…')));
-  } else if (step === 4) {
+  } else if (step === 994) {
     const approvedCount = Object.values(approved).filter(Boolean).length;
     const card = (b, i) => {
       const ok = approved[i];
@@ -1128,14 +1129,19 @@ function CampaignFlow({
       time: r.clash && spaced ? 'Tue Jun 3 · 9:00 AM' : r.time
     }));
     const hasClash = rows.some(r => r.clash);
-    body = /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", {
+    body = progress < 100
+      ? /*#__PURE__*/React.createElement(React.Fragment, null,
+          /*#__PURE__*/React.createElement("h2", { style: { font: 'var(--type-display-md)', color: 'var(--clr-text)', margin: 0, textAlign: 'center' } }, "Building your campaign"),
+          /*#__PURE__*/React.createElement("p", { style: { fontSize: 14, color: 'var(--clr-muted)', textAlign: 'center', marginTop: 8 } }, "Maker is writing your pieces and placing them across the window."),
+          /*#__PURE__*/React.createElement("div", { style: { marginTop: 28 } }, /*#__PURE__*/React.createElement(ProgressMeter, { value: progress })))
+      : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h2", {
       style: {
         font: 'var(--type-display-md)',
         color: 'var(--clr-text)',
         margin: 0,
         textAlign: 'center'
       }
-    }, "Confirm & schedule"), /*#__PURE__*/React.createElement("p", {
+    }, "Here's your campaign"), /*#__PURE__*/React.createElement("p", {
       style: {
         fontSize: 14,
         color: 'var(--clr-muted)',
@@ -1225,7 +1231,7 @@ function CampaignFlow({
         onClick: () => go(4)
       }, "\u2190 Back"),
       right: /*#__PURE__*/React.createElement(Button, {
-        onClick: onLaunch,
+        onClick: () => onLaunch(buildCampaign()),
         accent: "var(--clr-campaign)"
       }, editing ? "Save changes \u2192" : "Launch campaign \u2192")
     }));

@@ -163,6 +163,8 @@
     var ci = React.useState(null); var campaignId = ci[0], setCampaignId = ci[1];
     var cf = React.useState(false); var campFlow = cf[0], setCampFlow = cf[1];
     var ecs = React.useState(null); var editCampaign = ecs[0], setEditCampaign = ecs[1];
+    var jl = React.useState(false); var justLaunched = jl[0], setJustLaunched = jl[1];
+    var cr = React.useState(0); var campRev = cr[0], setCampRev = cr[1];
     var sp = React.useState(null); var selPiece = sp[0], setSelPiece = sp[1];
     var bf = React.useState(false); var briefOpen = bf[0], setBriefOpen = bf[1];
     var ds2 = React.useState(function () { return window.ariaDirectorSeen ? window.ariaDirectorSeen() : true; }); var directorSeen = ds2[0], setDirectorSeen = ds2[1];
@@ -207,10 +209,19 @@
       setView('flow');
     }
 
+    function persistAndOpen(camp) {
+      if (camp && SData.addCampaign) {
+        SData.addCampaign(camp);
+        setCampaignId(camp.id);
+        setJustLaunched(true);
+        setCampRev(function (n) { return n + 1; });
+        setView('campaign-detail');
+      }
+    }
     var overlay = campFlow && window.CampaignFlow && e(window.CampaignFlow, {
       editCampaign: editCampaign,
       onExit: function () { setCampFlow(false); setEditCampaign(null); },
-      onLaunch: function () { setCampFlow(false); setEditCampaign(null); }
+      onLaunch: function (camp) { setCampFlow(false); setEditCampaign(null); persistAndOpen(camp); }
     });
 
     /* Director's Call — once, on first entry */
@@ -235,7 +246,8 @@
             onExit: function () {
               setView(piecesForStudio(idea.content, studioKey).length ? 'library' : 'studio');
             },
-            onPublish: finishPublish
+            onPublish: finishPublish,
+            onCampaign: persistAndOpen
           }),
           window.AriaWidget && e(window.AriaWidget, { studioKey: studioKey, accent: studio ? studio.accent : undefined })
         )));
@@ -283,7 +295,7 @@
     /* campaign detail */
     if (view === 'campaign-detail' && window.CampaignDetailScreen) {
       return shell(e(React.Fragment, null,
-        e(window.CampaignDetailScreen, { campaignId: campaignId, justLaunched: false, onBack: function () { setView('campaigns'); }, onDismiss: function () {}, onAddSeries: function () { setEditCampaign(null); setCampFlow(true); }, onEdit: function () { var camp = (SData.CAMPAIGNS || []).filter(function (x) { return x.id === campaignId; })[0]; setEditCampaign(camp || null); setCampFlow(true); } }),
+        e(window.CampaignDetailScreen, { campaignId: campaignId, justLaunched: justLaunched, onBack: function () { setJustLaunched(false); setView('campaigns'); }, onDismiss: function () { setJustLaunched(false); }, onAddSeries: function () { var cur = (SData.CAMPAIGNS || []).filter(function (x) { return x.id === campaignId; })[0]; setEditCampaign(cur || null); setCampFlow(true); }, onEdit: function () { var camp = (SData.CAMPAIGNS || []).filter(function (x) { return x.id === campaignId; })[0]; setEditCampaign(camp || null); setCampFlow(true); } }),
         overlay));
     }
 
@@ -291,7 +303,7 @@
     if (view === 'campaigns' && window.CampaignsHomeScreen) {
       return shell(e(React.Fragment, null,
         e('button', { className: 'id-back', onClick: function () { setView('engine'); } }, '‹ Content Engine'),
-        e(window.CampaignsHomeScreen, { onNew: function () { setCampFlow(true); }, onOpen: function (id) { setCampaignId(id); setView('campaign-detail'); } }),
+        e(window.CampaignsHomeScreen, { key: 'ch-' + campRev, onNew: function () { setCampFlow(true); }, onOpen: function (id) { setCampaignId(id); setView('campaign-detail'); } }),
         overlay));
     }
 

@@ -369,6 +369,14 @@ window.ClarityData = (function () {
     },
   };
 
-  return { ENGINE_STRATEGY, STUDIOS, STUDIO_FLOW, BRIEF, CHANNELS, CHANNEL_MOD, CHANNEL_DESC, GOALS, CAMPAIGNS, SERIES, CAMP_PLAN, CAMP_BATCH, CAMP_SERIES_PLAN, CAMP_SET, CAMP_SCHEDULE, PILLARS, CLARA_GOAL, PROFILE,
+  // Runtime writer so launched campaigns persist for the session and show in the list.
+  function addCampaign(camp) {
+    if (!camp || !camp.id) return camp;
+    const i = CAMPAIGNS.findIndex(c => c.id === camp.id);
+    if (i >= 0) CAMPAIGNS[i] = camp; else CAMPAIGNS.unshift(camp);
+    return camp;
+  }
+
+  return { ENGINE_STRATEGY, STUDIOS, STUDIO_FLOW, BRIEF, CHANNELS, CHANNEL_MOD, CHANNEL_DESC, GOALS, CAMPAIGNS, addCampaign, SERIES, CAMP_PLAN, CAMP_BATCH, CAMP_SERIES_PLAN, CAMP_SET, CAMP_SCHEDULE, PILLARS, CLARA_GOAL, PROFILE,
     VOICES, AVATARS, AUDIO_GOALS, AUDIO_VIBES, AUDIO_PRODUCTION, TEXT_BRIEF, IMAGE_BRIEF, VIDEO_CONTROLS, ADV };
 })();

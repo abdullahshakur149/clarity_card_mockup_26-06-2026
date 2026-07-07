@@ -15,8 +15,8 @@ const { Button: SFButton, Card: SFCard, Icon: SFIcon, WizardSteps: SFWizard } = 
 const SFD = window.ClarityData;
 
 const SF_MOTIF = { text: 'FileText', image: 'Image', video: 'Clapperboard', audio: 'AudioLines' };
-const STEPS = ['What', 'Where', 'Format', 'Brief', 'Generate'];
-const GEN_STEP = 4;
+const STEPS = ['Compose', 'Generate'];
+const GEN_STEP = 1;
 
 /* ── Keyframes injected once ──────────────────────────────────────── */
 function SFAnims() {
@@ -66,12 +66,12 @@ function PersonaFitBar({ step, studioKey, platform, rec, variations, selected })
   if (selected != null && variations && variations[selected]) {
     /* Variation chosen — use its real fit score */
     fit = variations[selected].fit;
-  } else if (step >= 1 && platform && PLATFORM_FIT[platform] != null) {
+  } else if (step >= 0 && platform && PLATFORM_FIT[platform] != null) {
     /* Use the specific per-platform score, nudged slightly per extra step */
     const base  = PLATFORM_FIT[platform];
     const bonus = Math.max(0, step - 1) * 3;
     fit = Math.min(base + 6, base + bonus);
-  } else if (step >= 1 && platform) {
+  } else if (step >= 0 && platform) {
     fit = rec && platform === rec.type ? 74 : 52;
   } else {
     /* Just picked a modality */
@@ -256,6 +256,23 @@ function SFAdvanced({ open, onToggle, children, accent }) {
     open && React.createElement('div', {
       style: { padding: '4px 15px 16px', display: 'grid', gap: 14, borderTop: '1px solid var(--clr-border)' }
     }, children)
+  );
+}
+
+function SFPickRow({ icon, label, value, accent, open, onToggle, children }) {
+  return React.createElement('div', {
+    style: { border: '1px solid var(--clr-border)', borderRadius: 'var(--radius-md)', background: 'var(--clr-card)', marginBottom: 10 }
+  },
+    React.createElement('div', {
+      onClick: onToggle,
+      style: { display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', cursor: 'pointer', userSelect: 'none' }
+    },
+      React.createElement(SFIcon, { name: icon, size: 15, color: accent }),
+      React.createElement('span', { style: { fontSize: 11, color: 'var(--clr-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 } }, label),
+      React.createElement('span', { style: { marginLeft: 'auto', fontSize: 13, color: 'var(--clr-text)', fontWeight: 600 } }, value),
+      React.createElement('span', { style: { fontSize: 12, color: accent, marginLeft: 12, fontWeight: 600 } }, open ? 'Done' : 'Change')
+    ),
+    open && React.createElement('div', { style: { padding: '2px 14px 14px', borderTop: '1px solid var(--clr-border)' } }, children)
   );
 }
 
@@ -550,7 +567,7 @@ function CampLayer({ variation, platform, studio, accent, onLaunch, onClose }) {
 /* ═══════════════════════════════════════════════════════════════════
    UNIFIED STUDIO FLOW — 5 steps, all modalities
 ═══════════════════════════════════════════════════════════════════ */
-function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
+function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish, onCampaign }) {
   /* studioKey starts null — picked in step 0 modality picker */
   const [studioKey, setStudioKey] = React.useState(studioProp?.key || null);
   const studio = studioKey ? SFD.STUDIOS.find(s => s.key === studioKey) : null;
@@ -612,6 +629,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
 
   /* ── Step 2: Format picker ── */
   const [fmtIdx, setFmtIdx] = React.useState(0);
+  const [pickOpen, setPickOpen] = React.useState(null); // null | 'platform' | 'format' — inline picker reveal
 
   /* ── Step 3: Creative-brief controls (keyed by control.key) ── */
   const [specVals, setSpecVals] = React.useState({});
@@ -650,7 +668,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   /* when modality is chosen: advance to step 1 + seed flow-dependent defaults */
   React.useEffect(() => {
     if (!flow) return;
-    setStep(1);
+    setStep(0);
     setPlatform(flow.platforms.find(p => p.rec)?.type || flow.platforms[0].type);
     if (flow.controls) {
       const sv = {};
@@ -672,6 +690,30 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
 
   const intelOk     = intelDone || intelOverride;
   const curPlatform = flow ? flow.platforms.find(p => p.type === platform) || rec : null;
+
+  /* Current format object for the selected platform (used by Compose + controls) */
+  const curFmt = (flow && flow.formats && flow.formats[platform] ? flow.formats[platform][fmtIdx] : null) || {};
+
+  /* Creative-control renderer (hoisted from the old Brief step so Compose can use it) */
+  const ctrlField = (label, node) => React.createElement('div', null,
+    React.createElement(SFLabel, null, label), node
+  );
+  const roBox = (txt) => React.createElement('div', {
+    style: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--clr-card-2)', border: '1px solid var(--clr-border)', borderRadius: 'var(--radius-sm)', padding: '9px 11px', fontSize: 13, color: 'var(--clr-text)' }
+  }, txt, React.createElement('span', { style: { fontSize: 10, color: 'var(--clr-muted)', border: '1px solid var(--clr-border)', borderRadius: 4, padding: '1px 6px' } }, 'from format'));
+  function renderControl(c) {
+    const palette = (SFD.BRIEF && SFD.BRIEF.palette) || [];
+    const val = specVals[c.key];
+    if (c.type === 'select')   return ctrlField(c.label, React.createElement(SFSelect, { value: val || c.default || c.opts[0], onChange: v => setSpecVal(c.key, v), opts: c.opts }));
+    if (c.type === 'toggle')   { const on = (val || c.default || 'On') !== 'Off'; return ctrlField(c.label, React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } }, React.createElement(SFSwitch, { on, onClick: () => setSpecVal(c.key, on ? 'Off' : 'On') }), React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, on ? 'On' : 'Off'))); }
+    if (c.type === 'textarea') return ctrlField(c.label, React.createElement(SFTextarea, { value: val || '', onChange: v => setSpecVal(c.key, v), placeholder: c.placeholder, rows: 3 }));
+    if (c.type === 'palette')  return ctrlField(c.label, React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } }, palette.map(col => { const on = (val || palette[0]) === col; return React.createElement('div', { key: col, onClick: () => setSpecVal(c.key, col), title: col, style: { width: 26, height: 26, borderRadius: 7, cursor: 'pointer', background: col, boxShadow: on ? `0 0 0 2px var(--clr-bg), 0 0 0 4px ${a}` : 'inset 0 0 0 1px rgba(0,0,0,0.15)' } }); }), React.createElement('span', { style: { fontSize: 10, color: 'var(--clr-muted)' } }, 'brand kit')));
+    if (c.type === 'format-id')     return ctrlField(c.label, roBox(curFmt.id || '—'));
+    if (c.type === 'format-dur')    return ctrlField(c.label, roBox(curFmt.dur || '—'));
+    if (c.type === 'format-aspect') return ctrlField(c.label, roBox((curFmt.aspect || '—') + (curFmt.dims ? ' · ' + curFmt.dims : '')));
+    return null;
+  }
+
   const Inherit     = window.InheritStrip ? React.createElement(window.InheritStrip) : null;
 
   /* Proactive Aria hints on step entry with pre-filled defaults */
@@ -690,11 +732,14 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   function startGenerate() {
     setGenerating(true); setVariations(null); setSelected(null);
     setTimeout(() => {
-      setVariations(flow.angles.slice(0, 3).map((ang, i) => ({
+      const vs = flow.angles.slice(0, 3).map((ang, i) => ({
         ...ang, label: ['A','B','C'][i],
         fit: Math.max(72, ang.fit - regen % 2 * 2),
         motif: SF_MOTIF[k]
-      })));
+      }));
+      setVariations(vs);
+      let best = 0; vs.forEach((v, i) => { if (v.fit > vs[best].fit) best = i; });
+      setSelected(best);
       setGenerating(false);
     }, 1400);
   }
@@ -719,7 +764,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   }
   function back() {
     if (step === GEN_STEP) setGenerating(false);
-    if (step <= 1) { leaveStudio(); return; }
+    if (step <= 0) { leaveStudio(); return; }
     setStep(s => s - 1);
   }
   function doPublish(mode, campName) {
@@ -750,10 +795,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     });
   }
   function canNext() { return true; }
-  function nextLabel() {
-    if (step === GEN_STEP - 1) return 'Generate →';
-    return 'Continue →';
-  }
+  function nextLabel() { return step === GEN_STEP - 1 ? 'Generate →' : 'Continue →'; }
 
   /* ════ STEP BODIES ════ */
 
@@ -786,7 +828,7 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
   let body = null;
 
   /* ── Intel gate (shows at step 1 — first real creation step) ── */
-  if (!intelOk && step === 1) {
+  if (!intelOk && step === 0) {
     body = React.createElement('div', { style: { maxWidth: 480, margin: '40px auto 0', textAlign: 'center' } },
       React.createElement('div', {
         style: {
@@ -807,27 +849,67 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     );
   }
 
-  /* ── STEP 2: Platform (Where?) ── */
-  else if (step === 1) {
+  /* ── STEP 0: Compose — message-first, platform/format inline, rest in Advanced ── */
+  else if (step === 0) {
+    const F      = SFD.BRIEF.fields;
+    const fmts   = (flow.formats && flow.formats[platform]) || [];
+    const sugIdx = (flow.suggested && flow.suggested[platform]) || 0;
     body = React.createElement(React.Fragment, null,
-      React.createElement(SFHead, {
-        title: 'Publishing platform',
-        sub: 'Select the platform this content is being created for.'
-      }),
+      React.createElement(SFHead, { title: "What's this about?", sub: 'Tell the maker your message. Everything else is set up for you — change anything you like.' }),
       Inherit,
-      React.createElement(SFRecBanner, { rec, accent: a }),
-      React.createElement('div', {
-        style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10 }
-      }, flow.platforms.map(p =>
-        React.createElement(SFPickCard, {
-          key: p.type, on: platform === p.type, accent: a,
-          recBadge: p.rec, icon: p.icon, title: p.label, sub: p.desc,
-          onClick: () => setPlatform(p.type)
+      /* The one input that matters */
+      React.createElement(SFCard, { inset: true, padding: 18, radius: 'var(--radius-md)', style: { display: 'grid', gap: 16, marginBottom: 16 } },
+        React.createElement(SFBriefField, {
+          field: { label: 'What do you want to say?', note: '— one clear idea', placeholder: 'e.g. Sourdough Saturday is back — 72-hour ferment, limited batch.', help: 'This is the one input that shapes your result the most.' },
+          value: bMessage, onChange: setBMessage, multiline: true
+        }),
+        React.createElement(SFBriefField, {
+          field: { label: 'What should they do?', placeholder: 'e.g. Pre-order now — closes Friday.', help: 'The action you want people to take.' },
+          value: bCta, onChange: setBCta
         })
-      )),
+      ),
+      /* Inline platform pick */
+      React.createElement(SFPickRow, {
+        icon: 'Send', label: 'Posting to', value: curPlatform ? curPlatform.label : 'Platform', accent: a,
+        open: pickOpen === 'platform', onToggle: () => setPickOpen(pickOpen === 'platform' ? null : 'platform')
+      },
+        React.createElement(SFRecBanner, { rec, accent: a }),
+        React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(150px,1fr))', gap: 10 } },
+          flow.platforms.map(p => React.createElement(SFPickCard, {
+            key: p.type, on: platform === p.type, accent: a, recBadge: p.rec, icon: p.icon, title: p.label, sub: p.desc,
+            onClick: () => setPlatform(p.type)
+          }))
+        )
+      ),
+      /* Inline format pick */
+      React.createElement(SFPickRow, {
+        icon: 'Crop', label: 'Size', value: curFmt.id || 'Format', accent: a,
+        open: pickOpen === 'format', onToggle: () => setPickOpen(pickOpen === 'format' ? null : 'format')
+      },
+        React.createElement('div', { style: { display: 'flex', flexWrap: 'wrap', gap: 9 } },
+          fmts.map((fmt, i) => {
+            const on = i === fmtIdx, sug = i === sugIdx;
+            return React.createElement('span', {
+              key: fmt.id, onClick: () => setFmtIdx(i),
+              style: { cursor: 'pointer', fontSize: 13, padding: '7px 14px', borderRadius: 'var(--radius-pill)', display: 'inline-flex', alignItems: 'center', gap: 7, border: `1px solid ${on ? a : 'var(--clr-border)'}`, background: on ? `color-mix(in srgb, ${a} 14%, transparent)` : 'var(--clr-card-2)', color: on ? 'var(--clr-text)' : 'var(--clr-muted)' }
+            }, fmt.id, sug && React.createElement('span', { style: { fontSize: 8.5, fontWeight: 700, padding: '2px 6px', borderRadius: 'var(--radius-pill)', background: a, color: 'var(--clr-bg)' } }, 'RECOMMENDED'));
+          })
+        )
+      ),
+      /* Advanced — persona, strategy context, proof, and creative controls */
+      React.createElement(SFAdvanced, { open: advOpen, onToggle: () => setAdvOpen(!advOpen), accent: a },
+        React.createElement('div', null,
+          React.createElement(SFLabel, null, F.persona.label),
+          React.createElement(SFSelect, { value: bPersona, onChange: setBPersona, opts: SFD.BRIEF.personas })
+        ),
+        React.createElement(SFBriefField, { field: F.goal, value: bGoal, onChange: setBGoal }),
+        React.createElement(SFBriefField, { field: F.whyNow, value: bWhyNow, onChange: setBWhyNow }),
+        React.createElement(SFBriefField, { field: F.proof, value: bProof, onChange: setBProof }),
+        (flow.controls || []).map(c => React.createElement('div', { key: c.key }, renderControl(c)))
+      ),
       React.createElement(SFFoot, {
-        left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change format'),
-        right: React.createElement(SFButton, { accent: a, onClick: next }, nextLabel())
+        left:  React.createElement(SFButton, { variant: 'outline', onClick: leaveStudio }, lockedStudio ? '← Back' : '← Change type'),
+        right: React.createElement(SFButton, { accent: a, onClick: next }, 'Generate →')
       })
     );
   }
@@ -837,47 +919,6 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
     const BF      = SFD.BRIEF;
     const F       = BF.fields;
     const palette = BF.palette || [];
-    const curFmt  = (flow.formats && flow.formats[platform] ? flow.formats[platform][fmtIdx] : null) || {};
-
-    const ctrlField = (label, node) => React.createElement('div', null,
-      React.createElement(SFLabel, null, label), node
-    );
-    const roBox = (txt) => React.createElement('div', {
-      style: { display: 'flex', alignItems: 'center', gap: 8, background: 'var(--clr-card-2)', border: '1px solid var(--clr-border)', borderRadius: 'var(--radius-sm)', padding: '9px 11px', fontSize: 13, color: 'var(--clr-text)' }
-    }, txt, React.createElement('span', { style: { fontSize: 10, color: 'var(--clr-muted)', border: '1px solid var(--clr-border)', borderRadius: 4, padding: '1px 6px' } }, 'from format'));
-
-    const renderControl = (c) => {
-      const val = specVals[c.key];
-      if (c.type === 'select') {
-        return ctrlField(c.label, React.createElement(SFSelect, { value: val || c.default || c.opts[0], onChange: v => setSpecVal(c.key, v), opts: c.opts }));
-      }
-      if (c.type === 'toggle') {
-        const on = (val || c.default || 'On') !== 'Off';
-        return ctrlField(c.label, React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-          React.createElement(SFSwitch, { on, onClick: () => setSpecVal(c.key, on ? 'Off' : 'On') }),
-          React.createElement('span', { style: { fontSize: 12, color: 'var(--clr-muted)' } }, on ? 'On' : 'Off')
-        ));
-      }
-      if (c.type === 'textarea') {
-        return ctrlField(c.label, React.createElement(SFTextarea, { value: val || '', onChange: v => setSpecVal(c.key, v), placeholder: c.placeholder, rows: 3 }));
-      }
-      if (c.type === 'palette') {
-        return ctrlField(c.label, React.createElement('div', { style: { display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' } },
-          palette.map(col => {
-            const on = (val || palette[0]) === col;
-            return React.createElement('div', {
-              key: col, onClick: () => setSpecVal(c.key, col), title: col,
-              style: { width: 26, height: 26, borderRadius: 7, cursor: 'pointer', background: col, boxShadow: on ? `0 0 0 2px var(--clr-bg), 0 0 0 4px ${a}` : 'inset 0 0 0 1px rgba(0,0,0,0.15)' }
-            });
-          }),
-          React.createElement('span', { style: { fontSize: 10, color: 'var(--clr-muted)' } }, 'brand kit')
-        ));
-      }
-      if (c.type === 'format-id')     return ctrlField(c.label, roBox(curFmt.id || '—'));
-      if (c.type === 'format-dur')    return ctrlField(c.label, roBox(curFmt.dur || '—'));
-      if (c.type === 'format-aspect') return ctrlField(c.label, roBox((curFmt.aspect || '—') + (curFmt.dims ? ' · ' + curFmt.dims : '')));
-      return null;
-    };
 
     const pill = (txt) => React.createElement('span', {
       style: { fontSize: 11.5, padding: '4px 10px', borderRadius: 'var(--radius-pill)', background: 'var(--clr-card-2)', border: '1px solid var(--clr-border)', color: 'var(--clr-muted)' }
@@ -1125,7 +1166,21 @@ function StudioFlow({ studio: studioProp, intelDone, onExit, onPublish }) {
       studio:    studio,
       accent:    a,
       onClose:   () => setCampLayer(false),
-      onLaunch:  name => { setCampLayer(false); doPublish('campaign', name); }
+      onLaunch:  name => {
+        setCampLayer(false);
+        doPublish('campaign', name);
+        if (onCampaign) {
+          const g0 = SFD.GOALS && SFD.GOALS[0] ? SFD.GOALS[0] : { id: 'preorders', label: 'Drive pre-orders / sales', kpi: 'Pre-orders', target: 500 };
+          const cid = 'c_' + String(name || 'campaign').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+          onCampaign({
+            id: cid, name: name || 'New campaign', goalId: g0.id, goal: g0.label, status: 'running',
+            window: 'Now – open', series: 1, pieces: 1 + SFD.CAMP_SET.slice(0, 3).length,
+            kpiLabel: g0.kpi, kpiNow: 0, kpiGoal: g0.target,
+            pace: 80, target: 75, daysLeft: 14, reach: '—', pfAvg: variations[selected].fit, published: 0,
+            chips: ['Artisan Loyalist', curPlatform ? curPlatform.label : 'Instagram']
+          });
+        }
+      }
     });
   }
 
